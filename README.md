@@ -1,8 +1,8 @@
 # Manga_Shop
 Website bán truyện và ấn phẩm Manga.
-# Mục tiêu
+# Mục tiêu:
 Website này dùng để bán truyện và các ấn phẩm liên quan tới Manga.
-# Phạm vi
+# Phạm vi:
  - Giúp cho người dùng có thể xem, và tìm mua các loại truyện hoặc các ấn phẩm liên quan.
  - Cho cộng tác viên có thể quản lý được các đơn hàng và các thông tin, mã khuyến mãi.
  - Giúp admin có thể quản lý được toàn bộ các thông tin của người dùng và thông tin các đơn hàng.
