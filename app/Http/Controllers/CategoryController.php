@@ -12,7 +12,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        // $categories = Category::withCount('products')->get();
+        $categories = Category::with(['updatedBy', 'createdBy'])
+    ->withCount('products')
+    ->get();
+        return view('admin.categories.index', compact('categories'));
     }
 
     /**
@@ -20,7 +24,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.categories.create');
     }
 
     /**
@@ -28,7 +32,14 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+         $validated = $request->validate([
+            'name'   => 'required|string|max:255|unique:categories',
+            'detail' => 'nullable|string',
+        ]);
+
+        Category::create($validated);
+
+        return redirect()->route('categories.index')->with('success', 'Thêm danh mục thành công');
     }
 
     /**
@@ -36,7 +47,8 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        $category->load('products');
+        return view('admin.categories.show', compact('category'));
     }
 
     /**
@@ -44,7 +56,8 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        //
+        $category->load('products');
+        return view('admin.categories.edit', compact('category'));
     }
 
     /**
@@ -52,7 +65,14 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        $validated = $request->validate([
+            'name'   => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'detail' => 'nullable|string',
+        ]);
+
+        $category->update($validated);
+
+        return redirect()->route('categories.index')->with('success', 'Cập nhật danh mục thành công');
     }
 
     /**
@@ -60,6 +80,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+
+        return redirect()->route('categories.index')->with('success', 'Xóa danh mục thành công');
     }
 }
