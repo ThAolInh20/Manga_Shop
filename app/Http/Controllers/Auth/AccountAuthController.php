@@ -9,31 +9,60 @@ use Illuminate\Support\Facades\Auth;
 
 class AccountAuthController extends Controller
 {
-    public function showLoginForm()
-    {
-        
-        return view('login');
+    public function showUserLoginForm()
+{
+    return view('user.login');
+}
+
+public function showAdminLoginForm()
+{
+    return view('admin.login');
+}
+
+public function userLogin(Request $request)
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+        return redirect()->route('home');
     }
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
 
-        $user = Auth::attempt($credentials);
+    return back()->withErrors(['email' => 'Thông tin đăng nhập không đúng.']);
+}
 
-        if ($user) {
-            return redirect()->route('admin.dashboard'); // sau khi login thì vào dashboard
+public function adminLogin(Request $request)
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        // chỉ cho role == 1 (admin)
+        if (Auth::user()->role == 1|| Auth::user()->role == 0) {
+            return redirect()->route('admin.dashboard');
         }
-        
 
-        // Sai tài khoản hoặc mật khẩu
-        return back()->with([
-            'error' => 'Sai tài khoản hoặc mật khẩu.',
-        ]);
+        Auth::logout();
+        return back()->withErrors(['email' => 'Bạn không có quyền admin.']);
     }
+
+    return back()->withErrors(['email' => 'Thông tin đăng nhập không đúng.']);
+}
 
     public function logout()
     {
+        $role = Auth::user()->role;
         Auth::logout();
+        if($role == 1 || $role == 0){
+            return redirect()->route('admin.login')->with('status', 'Đăng xuất thành công.');
+        }
         return redirect()->route('login')->with('status', 'Đăng xuất thành công.');
     }
 }
