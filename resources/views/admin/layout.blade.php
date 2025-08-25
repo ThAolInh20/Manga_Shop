@@ -17,9 +17,36 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('accounts.index') }}">Quản lý tài khoản</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('categories.index') }}">Quản lý danh mục</a></li>
-                    
+                    @auth
+                        <!-- Nếu đã đăng nhập -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('accounts.index') }}">Quản lý tài khoản</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('categories.index') }}">Quản lý danh mục</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('products.index') }}">Quản lý sản phẩm</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                👤 {{ Auth::user()->name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <!-- Nếu chưa đăng nhập -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">Đăng nhập</a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
