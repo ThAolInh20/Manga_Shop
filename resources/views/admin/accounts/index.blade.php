@@ -22,7 +22,7 @@
                 <th>Role</th>
                 <th>Trạng thái</th>
                 <th>Ngày tạo</th>
-                <th width="150">Hành động</th>
+                <th width="170">Hành động</th>
             </tr>
         </thead>
         <tbody>

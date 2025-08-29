@@ -28,7 +28,18 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('products.index') }}">Quản lý sản phẩm</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('vouchers.index') }}">Quản lý mã giảm giá</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('suppliers.index') }}">Quản lý nhà cung cấp</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('product_suppliers.index') }}">Danh sách sản phẩm từ nhà cung cấp</a>
+                        </li>
                         <li class="nav-item dropdown">
+                        
+
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 👤 {{ Auth::user()->name }}
                             </a>
