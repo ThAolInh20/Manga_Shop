@@ -12,7 +12,8 @@ class VoucherController extends Controller
      */
     public function index()
     {
-        //
+        $vouchers = Voucher::latest()->paginate(10);
+        return view('admin.vouchers.index', compact('vouchers'));
     }
 
     /**
@@ -20,7 +21,7 @@ class VoucherController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.vouchers.create');
     }
 
     /**
@@ -28,7 +29,17 @@ class VoucherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+          $request->validate([
+            'code' => 'required|unique:vouchers,code',
+            'sale' => 'required|numeric|min:0|max:100',
+            'is_active' => 'required|boolean',
+            'date_end' => 'nullable|date',
+            'max_discount' => 'nullable|numeric|min:0'
+        ]);
+
+        Voucher::create($request->all());
+
+        return redirect()->route('vouchers.index')->with('success', 'Thêm voucher thành công!');
     }
 
     /**
@@ -36,7 +47,7 @@ class VoucherController extends Controller
      */
     public function show(Voucher $voucher)
     {
-        //
+        return view('admin.vouchers.show', compact('voucher'));
     }
 
     /**
@@ -44,7 +55,7 @@ class VoucherController extends Controller
      */
     public function edit(Voucher $voucher)
     {
-        //
+         return view('admin.vouchers.edit', compact('voucher'));
     }
 
     /**
@@ -52,7 +63,17 @@ class VoucherController extends Controller
      */
     public function update(Request $request, Voucher $voucher)
     {
-        //
+        $request->validate([
+            'code' => 'required|unique:vouchers,code,' . $voucher->id,
+            'sale' => 'required|numeric|min:0|max:100',
+            'is_active' => 'required|boolean',
+            'date_end' => 'nullable|date',
+            'max_discount' => 'nullable|numeric|min:0'
+        ]);
+
+        $voucher->update($request->all());
+
+        return redirect()->route('vouchers.index')->with('success', 'Cập nhật voucher thành công!');
     }
 
     /**
@@ -60,6 +81,7 @@ class VoucherController extends Controller
      */
     public function destroy(Voucher $voucher)
     {
-        //
+        $voucher->delete();
+        return redirect()->route('vouchers.index')->with('success', 'Xóa voucher thành công!');
     }
 }

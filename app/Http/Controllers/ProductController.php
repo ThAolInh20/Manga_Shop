@@ -23,32 +23,44 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'required|integer',
-            'price'       => 'required|numeric',
-            'images'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name'        => 'required|string|max:255',
+                'category_id' => 'required|integer|exists:categories,id',
+                'price'       => 'required|numeric|min:0',
+                'images'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            ]);
 
-        // Upload ảnh chính
-        if ($request->hasFile('images')) {
-            $validated['images'] = $request->file('images')->store('products', 'public');
-        }
-
-        // Upload nhiều ảnh phụ
-        if ($request->hasFile('images_sup')) {
-            $supImages = [];
-            foreach ($request->file('images_sup') as $file) {
-                $supImages[] = $file->store('products', 'public');
+            // Upload ảnh chính
+            if ($request->hasFile('images')) {
+                $validated['images'] = $request->file('images')->store('products', 'public');
             }
-            $validated['images_sup'] = json_encode($supImages);
+
+            // Upload nhiều ảnh phụ
+            if ($request->hasFile('images_sup')) {
+                $supImages = [];
+                foreach ($request->file('images_sup') as $file) {
+                    $supImages[] = $file->store('products', 'public');
+                }
+                $validated['images_sup'] = json_encode($supImages);
+            }
+
+            Product::create($validated);
+
+            return redirect()->route('products.index')
+                ->with('success', 'Thêm sản phẩm thành công');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Nếu validate lỗi, Laravel sẽ tự redirect kèm errors nên không cần xử lý thêm
+            throw $e;
+        } catch (\Exception $e) {
+            // Nếu có lỗi khác (DB, upload, ...)
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
         }
-
-        Product::create($validated);
-
-        return redirect()->route('products.index')->with('success', 'Thêm sản phẩm thành công');
     }
+
 
     public function edit(Product $product)
     {
@@ -59,11 +71,24 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'required|integer',
-            'price'       => 'required|numeric',
-            'images'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'category_id'   => 'required|exists:categories,id',
+            'name'          => 'required|string|max:255',
+            'age'           => 'nullable|integer',
+            'author'        => 'nullable|string|max:255',
+            'publisher'     => 'nullable|string|max:255',
+            'language'      => 'nullable|string|max:100',
+            'price'         => 'required|numeric',
+            'sale'          => 'nullable|numeric',
+            'quantity'      => 'required|integer',
+            'quantity_buy'  => 'nullable|integer',
+            'weight'        => 'nullable|string|max:50',
+            'size'          => 'nullable|string|max:50',
+            'status'        => 'nullable|string|max:50',
+            'is_active'     => 'boolean',
+            'categ'         => 'nullable|string|max:50',
+            'detail'        => 'nullable|string',
+            'images'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('images')) {

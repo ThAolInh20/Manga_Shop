@@ -20,6 +20,7 @@
                 <th>Danh mục</th>
                 <th>Ảnh</th>
                 <th>Giá</th>
+                <th>Số lượng</th>
                 <th width="150">Hành động</th>
             </tr>
         </thead>
@@ -35,6 +36,7 @@
                     @endif
                 </td>
                 <td>{{ number_format($p->price) }} đ</td>
+                <td>{{ $p->quantity }}</td>
                 <td>
                     <a href="{{ route('products.edit', $p->id) }}" class="btn btn-sm btn-warning">Sửa</a>
                     <form action="{{ route('products.destroy', $p->id) }}" method="POST" style="display:inline-block">
