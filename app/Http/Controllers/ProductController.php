@@ -9,11 +9,50 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->latest()->paginate(10);
+        $query = Product::query();
+
+        // Search theo tên hoặc tác giả
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                ->orWhere('author', 'like', "%$search%");
+            });
+        }
+
+        // Lọc theo khoảng giá
+        if ($request->filled('price_range')) {
+            [$min, $max] = explode('-', $request->price_range);
+            $query->whereBetween('price', [(int)$min, (int)$max]);
+        }
+
+        // Lọc theo khoảng số lượng
+        if ($request->filled('quantity_range')) {
+            [$min, $max] = explode('-', $request->quantity_range);
+            $query->whereBetween('quantity', [(int)$min, (int)$max]);
+        }
+
+        // Sắp xếp
+        $sort = $request->get('sort', 'id');
+        $order = $request->get('order', 'asc');
+        $query->orderBy($sort, $order);
+
+        // Phân trang
+        $perPage = $request->get('per_page', 10);
+        $products = $query->with('category')->paginate($perPage)->appends($request->all());
+
+        // Nếu là AJAX trả về table
+        if ($request->ajax()) {
+            return view('admin.products.index', compact('products'))->render();
+        }
+
+        // Lần đầu load view
         return view('admin.products.index', compact('products'));
     }
+
+
 
     public function create()
     {

@@ -1,11 +1,17 @@
-@extends('admin.layout')
+@extends('layouts.admin')
 
 @section('title', 'Chi tiết tài khoản')
 
 @section('content')
 <div class="container mt-4">
     <h2>Chi tiết tài khoản</h2>
-
+<div class="mb-3">
+    <label for="image" class="form-label">Ảnh đại diện</label>
+    <input type="file" class="form-control" id="image" name="image">
+    @if(isset($account) && $account->image)
+        <img src="{{ asset('storage/' . $account->image) }}" alt="avatar" class="mt-2 rounded-circle" width="80">
+    @endif
+</div>
     <div class="card p-3">
         <div class="mb-3">
             <strong>Họ tên:</strong> {{ $account->name }}
