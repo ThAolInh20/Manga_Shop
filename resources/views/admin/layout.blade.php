@@ -37,6 +37,8 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('product_suppliers.index') }}">Danh sách sản phẩm từ nhà cung cấp</a>
                         </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('orders.index') }}">Quản lý đơn hàng</a>
                         <li class="nav-item dropdown">
                         
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductSupplierController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\OrderController;
 
 // User login
 Route::get('login', [AccountAuthController::class, 'showUserLoginForm'])->name('login');
@@ -29,10 +30,13 @@ Route::middleware(['auth', 'role:0,1'])->group(function () {
         Route::resource('suppliers', SupplierController::class);
         Route::resource('product_suppliers', ProductSupplierController::class);
         Route::resource('vouchers', VoucherController::class);
-
+        Route::resource('orders', OrderController::class)->only([
+            'index', 'show', 'edit', 'update'
+        ]);
     });
     
 
 });
+
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
