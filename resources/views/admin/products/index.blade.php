@@ -114,6 +114,10 @@ function loadData(page = 1) {
     });
 }
 
+ $('#filter-form select, #filter-form input').on('change', function() {
+        loadData(1);
+    });
+
 // Khi click lọc
 $('#filter-btn').click(()=> loadData(1));
 

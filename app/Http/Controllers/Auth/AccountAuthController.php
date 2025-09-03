@@ -63,6 +63,6 @@ public function adminLogin(Request $request)
         if($role == 1 || $role == 0){
             return redirect()->route('admin.login')->with('status', 'Đăng xuất thành công.');
         }
-        return redirect()->route('login')->with('status', 'Đăng xuất thành công.');
+        return redirect()->route('home')->with('status', 'Đăng xuất thành công.');
     }
 }
