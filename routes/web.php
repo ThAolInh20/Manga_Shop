@@ -10,6 +10,8 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductSupplierController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WishlistController;
+use App\Models\Wishlist;    
 
 // User login
 Route::get('login', [AccountAuthController::class, 'showUserLoginForm'])->name('login');
@@ -37,6 +39,8 @@ Route::middleware(['auth', 'role:0,1'])->group(function () {
     
 
 });
-
+Route::prefix('api')->group(function () {
+    Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
+});
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

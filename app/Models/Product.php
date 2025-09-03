@@ -53,4 +53,10 @@ class Product extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    // Sản phẩm dc ai thích
+    public function likedByUsers()
+{
+    return $this->belongsToMany(Account::class, 'wishlists', 'product_id', 'account_id');
+}
 }

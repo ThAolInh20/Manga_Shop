@@ -45,6 +45,11 @@ class Account extends Authenticatable
     {
         return $this->hasMany(Wishlist::class);
     }
+    // Sản phẩm user đã thích
+    public function likedProducts()
+{
+    return $this->belongsToMany(Product::class, 'wishlists', 'account_id', 'product_id');
+}
 
     public function cart()
     {

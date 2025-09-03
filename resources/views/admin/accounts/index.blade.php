@@ -133,12 +133,7 @@ $(document).on('click', '.sort', function(e){
     loadData(1);
 });
 
-// Pagination
-$(document).on('click', '.pagination a', function(e){
-    e.preventDefault();
-    let page = $(this).attr('href').split('page=')[1];
-    loadData(page);
-});
+
 </script>
 
 {{-- CSS hide big arrows in pagination --}}
