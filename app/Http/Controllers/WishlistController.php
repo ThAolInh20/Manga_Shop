@@ -3,97 +3,96 @@
 namespace App\Http\Controllers;
 
 use App\Models\Wishlist;
-// use Illuminate\Container\Attributes\Auth;
-use Illuminate\Http\Request;
+use App\Models\Account;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class WishlistController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Danh sách wishlist của user (hoặc guest)
      */
     public function index()
     {
         if (Auth::check()) {
             $wishlists = Auth::user()->wishlist()->with('product')->paginate(10);
         } else {
-            // Guest: lấy wishlist từ session
             $wishlistIds = session()->get('wishlist', []);
             $wishlists = Product::whereIn('id', $wishlistIds)->paginate(10);
         }
 
-        return view('wishlist.index', compact('wishlists'));
+        return response()->json($wishlists);
     }
+
+    /**
+     * Gợi ý sản phẩm dựa theo wishlist hoặc top bán chạy
+     */
     public function suggestProducts()
     {
         $user = Auth::user();
         $suggested = collect();
 
-        if ($user) {
-            // Lấy danh sách sản phẩm mà user đã thích (wishlist)
-            $likedProducts = $user->wishlist()->with('product')->get()->pluck('product');
+        // if ($user) {
+        //     $likedProducts = $user->wishlist()->with('product')->get()->pluck('product');
 
-            if ($likedProducts->isNotEmpty()) {
-                $authors    = $likedProducts->pluck('author')->filter()->unique();
-                $categories = $likedProducts->pluck('categ')->filter()->unique();
-                $ages       = $likedProducts->pluck('age')->filter()->unique();
+        //     if ($likedProducts->isNotEmpty()) {
+        //         $authors    = $likedProducts->pluck('author')->filter()->unique();
+        //         $categories = $likedProducts->pluck('categ')->filter()->unique();
+        //         $ages       = $likedProducts->pluck('age')->filter()->unique();
 
-                // Query gợi ý
-                $suggested = Product::query()
-                    ->whereNotIn('id', $likedProducts->pluck('id')) // loại bỏ sách đã thích
-                    ->where(function ($q) use ($authors, $categories, $ages) {
-                        if ($authors->isNotEmpty()) {
-                            $q->orWhereIn('author', $authors);
-                        }
-                        if ($categories->isNotEmpty()) {
-                            $q->orWhereIn('categ', $categories);
-                        }
-                        if ($ages->isNotEmpty()) {
-                            $q->orWhereIn('age', $ages);
-                        }
-                    })
-                    ->take(20)
-                    ->get();
-            }
-        }
+        //         $suggested = Product::query()
+        //             ->whereNotIn('id', $likedProducts->pluck('id'))
+        //             ->where(function ($q) use ($authors, $categories, $ages) {
+        //                 if ($authors->isNotEmpty()) $q->orWhereIn('author', $authors);
+        //                 if ($categories->isNotEmpty()) $q->orWhereIn('categ', $categories);
+        //                 if ($ages->isNotEmpty()) $q->orWhereIn('age', $ages);
+        //             })
+        //             ->take(20)
+        //             ->get();
+        //     }
+        // }
 
-        // Fallback: nếu chưa đăng nhập hoặc chưa có gợi ý → bán chạy nhất
-        if ($suggested->isEmpty()) {
-            $suggested = Product::orderBy('quantity_buy', 'desc')
-                ->take(20)
-                ->get();
-        }
+       
+        $suggested = Product::orderBy('quantity_buy', 'desc')->take(20)->get();
+        
 
-        // 🚀 Trả về JSON cho Vue
+        // Thêm flag in_wishlist
+        $wishlistIds = $user
+            ? $user->wishlist()->pluck('product_id')->toArray()
+            : session()->get('wishlist', []);
+
+        $suggested->transform(function ($product) use ($wishlistIds) {
+            $product->in_wishlist = in_array($product->id, $wishlistIds);
+            return $product;
+        });
+
         return response()->json($suggested);
     }
 
-    
-
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Thêm sản phẩm vào wishlist
      */
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'product_id' => 'required|exists:products,id'            
         ]);
 
         $productId = $request->product_id;
-
+        // $userId = $request->user_id;
+        // $user = Auth::user();
+        // Log::info('User info: ', ['user' => $user]);
+        // $user = Account::where('id',3)->first();
+        //     Wishlist::create([
+        //         'account_id'    => $user->id,
+        //         'product_id' => $productId,
+        //     ]);
         if (Auth::check()) {
-            // User đã login
             $user = Auth::user();
-            $exists = Wishlist::where('user_id', $user->id)
+
+            $exists = Wishlist::where('account_id', $user->id)
                 ->where('product_id', $productId)
                 ->first();
 
@@ -102,11 +101,10 @@ class WishlistController extends Controller
             }
 
             Wishlist::create([
-                'user_id'    => $user->id,
+                'account_id'    => $user->id,
                 'product_id' => $productId,
             ]);
         } else {
-            // Guest: lưu trong session
             $wishlist = session()->get('wishlist', []);
             if (!in_array($productId, $wishlist)) {
                 $wishlist[] = $productId;
@@ -117,15 +115,13 @@ class WishlistController extends Controller
         return response()->json(['message' => 'Đã thêm vào wishlist']);
     }
 
-   
-
     /**
-     * Remove the specified resource from storage.
+     * Xóa sản phẩm khỏi wishlist
      */
-    public function destroy(Wishlist $wishlist, $id)
+    public function destroy($id)
     {
         if (Auth::check()) {
-            $wishlist = Wishlist::where('user_id', Auth::id())
+            $wishlist = Wishlist::where('account_id', Auth::id())
                 ->where('product_id', $id)
                 ->first();
 
@@ -133,12 +129,11 @@ class WishlistController extends Controller
                 $wishlist->delete();
             }
         } else {
-            // Guest: xoá khỏi session
             $wishlist = session()->get('wishlist', []);
             $wishlist = array_diff($wishlist, [$id]);
             session()->put('wishlist', $wishlist);
         }
 
-        return response()->json(['message' => 'Đã xoá khỏi wishlist']);
+        return response()->json(['message' => 'Đã xoá khỏi wishlist'] );
     }
 }

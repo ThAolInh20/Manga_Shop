@@ -19,18 +19,25 @@
       <li class="nav-item me-2"><a class="nav-link" href="#">Home</a></li>
       <li class="nav-item me-2"><a class="nav-link" href="#">Manga</a></li>
       <li class="nav-item me-2"><a class="nav-link" href="#">Ấn phẩm Manga</a></li>
-    <li class="nav-item">
-        <a class="btn btn-sm btn-primary position-relative" href="#">
-          <i class='bx bx-cart'></i>
+       <li class="nav-item">
+         <a class="nav-link p-0" href="#">
+          <i class="bx bx-cart fs-4"></i>
           <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle">2</span>
         </a>
       </li>
+     
       {{-- Nếu chưa login thì hiện nút Đăng nhập --}}
       @guest
-        <li class="nav-item me-md-3">
-          <a class="btn btn-outline-primary btn-sm" href="{{ route('login') }}">
-            <i class='bx bx-user'></i> Đăng nhập
+         <li class="nav-item dropdown me-md-3">
+          <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+            <i class="bx bx-user fs-4"></i>
           </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+             <li><a class="dropdown-item" href="{{ route('login') }}"><i class="bx bx-user me-2"></i> Đăng nhập</a></li>
+             <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ route('register') }}"><i class="bx bx-user-plus me-2"></i> Đăng ký</a></li>
+            
+          </ul>
         </li>
         
       @endguest
@@ -39,18 +46,17 @@
       @auth
         <li class="nav-item dropdown me-md-3">
           <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center" href="#" data-bs-toggle="dropdown">
-            <div class="avatar avatar-online">
-              <img src="{{ Auth::user()->image ?? asset('assets/img/avatars/1.png') }}" 
-                   alt="{{ Auth::user()->name }}" 
-                   class="w-px-40 h-auto rounded-circle" />
-            </div>
+            <i class="bx bx-user fs-4"></i>
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#"><i class="bx bx-user me-2"></i> Hồ sơ</a></li>
-            <li><a class="dropdown-item" href="#"><i class="bx bx-cog me-2"></i> Cài đặt</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bx bx-user me-2"></i> Hồ sơ cá nhân</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bx bx-shopping-bag me-2"></i> Đơn hàng của tôi</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bx bx-heart me-2"></i> Danh sách yêu thích</a></li>
             <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bx bx-lock me-2"></i> Đổi mật khẩu</a></li>
             <li>
-              <form method="POST" action="{{ route('logout') }}">
+
+              <form method="POST" action="{{ route('user.logout') }}">
                 @csrf
                 <button type="submit" class="dropdown-item"><i class="bx bx-log-out me-2"></i> Đăng xuất</button>
               </form>

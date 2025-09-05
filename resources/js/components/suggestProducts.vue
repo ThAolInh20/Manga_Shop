@@ -1,25 +1,46 @@
 <template>
   <div>
+    <h4 class="mb-3">📖 Gợi ý sản phẩm cho bạn</h4>
     <div class="product-grid">
       <div
         v-for="product in paginatedProducts"
         :key="product.id"
         class="card h-100"
       >
-        <div class="position-relative">
+        <div class="position-relative product-img-wrapper">
           <img
-             :src="product.images ? `/storage/${product.images}` : '/storage/products/default.png'"
-          
+            :src="product.images ? `/storage/${product.images}` : '/storage/products/default.png'"
             class="card-img-top product-img"
             alt="product"
           >
+          <!-- Badge HOT -->
           <span
             v-if="product.quantity_buy > 50"
             class="badge bg-danger position-absolute top-0 end-0 m-2"
           >
             HOT
           </span>
+          {{ product.id }}
+          {{ product.in_wishlist }}
+          <!-- Hover actions -->
+          <div class="product-actions">
+            <!-- Wishlist -->
+            <button class="btn btn-light btn-sm me-2" @click="toggleWishlist(product)">
+              <i :class="product.in_wishlist ? 'bi bi-heart-fill text-danger' : 'bi bi-heart'"></i>
+            </button>
+
+            <!-- Cart -->
+            <button class="btn btn-light btn-sm me-2" @click="addToCart(product)">
+              <i class="bi bi-cart"></i>
+            </button>
+
+            <!-- Detail -->
+            <button class="btn btn-light btn-sm" @click="viewDetail(product)">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
         </div>
+
         <div class="card-body">
           <h5 class="card-title">{{ product.name }}</h5>
           <p class="card-text text-muted">{{ product.author }}</p>
@@ -71,7 +92,7 @@ import { ref, computed, onMounted } from 'vue'
 
 const products = ref([])
 const page = ref(1)
-const perPage = 6 // số sản phẩm mỗi trang
+const perPage = 6
 
 const totalPages = computed(() => Math.ceil(products.value.length / perPage))
 const paginatedProducts = computed(() => {
@@ -87,22 +108,83 @@ function discountedPrice(p) {
   return p.price - (p.price * p.sale / 100)
 }
 
-onMounted(async () => {
+async function fetchProducts() {
   const res = await fetch('/api/suggest-products')
   products.value = await res.json()
-})
+}
+
+async function toggleWishlist(product) {
+  if (product.in_wishlist) {
+    // Xoá
+    await fetch(`http://127.0.0.1:8000/api/wishlist/${product.id}`, {
+      method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    product.in_wishlist = false
+  } else {
+    // Thêm
+    await fetch('http://127.0.0.1:8000/api/wishlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ product_id: product.id })
+    })
+    
+    
+    product.in_wishlist = true
+  }
+}
+
+
+function addToCart(product) {
+  alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+}
+
+function viewDetail(product) {
+  alert(`🔎 Xem chi tiết: ${product.name}`)
+}
+
+onMounted(fetchProducts)
 </script>
 
 <style scoped>
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
+}
+
+.product-img-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
 }
 
 .product-img {
   width: 100%;
-  height: 200px; 
+  height: 200px;
   object-fit: cover;
+  transition: transform 0.3s ease;
+  border-radius: 0.5rem;
+}
+
+.product-img-wrapper:hover .product-img {
+  transform: scale(1.05);
+}
+
+.product-actions {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-img-wrapper:hover .product-actions {
+  opacity: 1;
 }
 </style>
