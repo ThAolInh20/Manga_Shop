@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
 
 class AccountAuthController extends Controller
 {
@@ -56,13 +58,74 @@ public function adminLogin(Request $request)
     return back()->withErrors(['email' => 'Thông tin đăng nhập không đúng.']);
 }
 
-    public function logout()
+    public function logout(Request $request)
     {
         $role = Auth::user()->role;
         Auth::logout();
-        if($role == 1 || $role == 0){
+       $request->session()->invalidate();
+        $request->session()->regenerateToken();
             return redirect()->route('admin.login')->with('status', 'Đăng xuất thành công.');
-        }
+       
+    }
+    public function userLogout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect()->route('home')->with('status', 'Đăng xuất thành công.');
     }
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng.']);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return back()->with('status', 'Mật khẩu đã được cập nhật thành công.');
+    }
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('user.auth.profile', compact('user'));
+    }
+    public function register()
+    {
+        return view('user.auth.register');
+    }
+     protected function checkLogin(string $email, string $password): bool
+    {
+        return Auth::attempt(['email' => $email, 'password' => $password]);
+    }
+    public function storeRegister(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:accounts',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = new \App\Models\Account();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->role = 2; // role 2 là user thường
+        $user->save();
+
+        if ($this->checkLogin($request->email, $request->password)) {
+                $request->session()->regenerate();
+                return redirect()->route('home')->with('status', 'Đăng ký thành công và đã đăng nhập!');
+            }
+
+            // Nếu login tự động thất bại (hiếm khi xảy ra)
+            return redirect()->route('home')->with('status', 'Đăng ký thành công. Vui lòng đăng nhập.');
+            }
 }

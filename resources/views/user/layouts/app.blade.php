@@ -13,6 +13,9 @@
 
   <!-- Icons -->
   <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
 
   <!-- Core CSS (Sneat) -->
   <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" />
@@ -31,8 +34,9 @@
   @include('user.partials.navbar')
 
   <!-- Content -->
-  <div class="content-wrapper pt-4">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="content-wrapper pt-3" style="margin-top: 50px;">
+    <div class="container-xl flex-grow-1 container-p-y">
+      <div id="alerts-container"></div>
       @yield('content')
       <div id="vue-suggest-books"></div>
     </div>

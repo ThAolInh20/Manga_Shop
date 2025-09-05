@@ -14,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
         'auth' => \App\Http\Middleware\Authenticate::class,
         'role' => \App\Http\Middleware\CheckRole::class, // ✅ thêm alias cho middleware mới
-    ]);
+        ]);
+        $middleware->group('api', [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

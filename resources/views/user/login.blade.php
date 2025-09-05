@@ -1,4 +1,4 @@
-@extends('layouts.auth')
+@extends('user.layouts.app')
 
 @section('title', 'Đăng nhập Admin')
 
@@ -6,26 +6,15 @@
 <div class="container-xxl">
   <div class="authentication-wrapper authentication-basic container-p-y">
     <div class="authentication-inner">
-
-     
       <div class="col-md-6 col-lg-4 mx-auto">
         <div class="card">
           <div class="card-body">
-            <!-- Logo -->
-            <div class="app-brand justify-content-center mb-4">
-              <a href="{{ route('login') }}" class="app-brand-link gap-2">
-                <span class="app-brand-logo demo">
-                  <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40">
-                </span>
-                <span class="app-brand-text demo text-body fw-bolder">User</span>
-              </a>
-            </div>
 
-            <h4 class="mb-2">Chào mừng tới đạo hữu quay trở lại 👋</h4>
-            <p class="mb-4">Vui lòng đăng nhập để tiếp tục</p>
+            <h4 class="mb-2 text-center">Đăng nhập</h4>
 
             <form id="formAuthentication" class="mb-3" action="{{ route('login') }}" method="POST">
               @csrf
+              
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control @error('email') is-invalid @enderror"
@@ -53,15 +42,20 @@
                 <div class="alert alert-danger">{{ session('error') }}</div>
               @endif
 
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="" class="text-muted small">Quên mật khẩu?</a>
+                <a href="{{ route('register') }}" class="btn btn-outline-secondary btn-sm">Đăng ký</a>
+              </div>
+
               <div class="mb-3">
                 <button class="btn btn-primary d-grid w-100" type="submit">Đăng nhập</button>
               </div>
             </form>
+
           </div>
         </div>
       </div>
       <!-- End col -->
-
     </div>
   </div>
 </div>
