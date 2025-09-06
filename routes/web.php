@@ -22,27 +22,29 @@ Route::post('login', [AccountAuthController::class, 'userLogin']);
 Route::get('register', [AccountAuthController::class, 'register'])->name('register');
 Route::post('register', [AccountAuthController::class, 'storeRegister']);
 
-Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-    ->name('password.request');
+Route::get('change-password', [AccountAuthController::class, 'showChangePasswordForm'])->name('password.change');
+Route::post('change-password', [AccountAuthController::class, 'changePassword'])->name('password.update');
 
-Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-    ->name('password.email');
 
-Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-    ->name('password.reset');
+Route::get('forgot-password', [AccountAuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('forgot-password', [AccountAuthController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::post('reset-password', [NewPasswordController::class, 'store'])
-    ->name('password.update');
+Route::get('reset-password/{token}', [AccountAuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('reset-password', [AccountAuthController::class, 'resetPassword'])->name('password.store');
+
+
+
 
 Route::post('logout', [AccountAuthController::class, 'userLogout'])->name('user.logout');
 
-// Admin login
 
+// Admin login
+Route::get('admin/login', [AccountAuthController::class, 'showAdminLoginForm'])->name('admin.login');
+ Route::post('admin/login', [AccountAuthController::class, 'adminLogin']);
 Route::middleware(['auth', 'role:0,1'])->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::prefix('admin')->group(function () {
-        Route::get('login', [AccountAuthController::class, 'showAdminLoginForm'])->name('admin.login');
-        Route::post('login', [AccountAuthController::class, 'adminLogin']);
+        
         Route::resource('accounts', AccountController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
@@ -62,6 +64,9 @@ Route::prefix('api')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
+    Route::get('/boloc', [ProductController::class, 'filterField']);
+
 });
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+route::get('/products/{product}', [ProductController::class, 'showProductForUser'])->name('user.products.show');

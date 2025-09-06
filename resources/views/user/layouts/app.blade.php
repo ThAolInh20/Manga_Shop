@@ -27,18 +27,27 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Helpers -->
   <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
+
 </head>
 <body>
 
   <!-- Navbar -->
   @include('user.partials.navbar')
 
+
+
   <!-- Content -->
-  <div class="content-wrapper pt-3" style="margin-top: 50px;">
+  <div id="app"  class="content-wrapper pt-3" style="margin-top: 50px;">
     <div class="container-xl flex-grow-1 container-p-y">
-      <div id="alerts-container"></div>
-      @yield('content')
-      <div id="vue-suggest-books"></div>
+
+       @yield('content')
+     <filter-field row-name="categ" label="Theer loai"></filter-field>
+     <filter-field row-name="author"></filter-field>
+        <suggest-products></suggest-products>
+     
+     
+      
+      
     </div>
   </div>
 
@@ -48,11 +57,20 @@
   <!-- Core JS -->
   <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
   <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
-  <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
+  <!-- <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script> -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
   <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
 
   <!-- Main JS -->
   <script src="{{ asset('assets/js/main.js') }}"></script>
+    <!-- Lightbox2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" rel="stylesheet">
+
+<!-- Lightbox2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+
+
 </body>
 </html>

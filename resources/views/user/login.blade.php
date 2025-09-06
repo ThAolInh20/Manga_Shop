@@ -43,7 +43,7 @@
               @endif
 
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <a href="" class="text-muted small">Quên mật khẩu?</a>
+                <a href="{{ route('password.request') }}" class="text-muted small">Quên mật khẩu?</a>
                 <a href="{{ route('register') }}" class="btn btn-outline-secondary btn-sm">Đăng ký</a>
               </div>
 

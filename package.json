@@ -5,7 +5,8 @@
     "scripts": {
         "dev": "npm-run-all --parallel laravel vite",
         "vite": "vite",
-        "laravel": "php artisan serve"
+        "laravel": "php artisan serve",
+        "build": "vite build"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

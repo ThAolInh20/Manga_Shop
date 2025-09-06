@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Notifications\Notifiable;
 class Account extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'accounts';
 
@@ -27,6 +27,7 @@ class Account extends Authenticatable
     ];
     protected $hidden = [
         'password',
+        'remember_token',
         
     ];
 

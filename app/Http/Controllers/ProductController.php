@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class ProductController extends Controller
 {
@@ -108,50 +109,102 @@ class ProductController extends Controller
     }
 
     public function update(Request $request, Product $product)
-    {
-        $validated = $request->validate([
-            'category_id'   => 'required|exists:categories,id',
-            'name'          => 'required|string|max:255',
-            'age'           => 'nullable|integer',
-            'author'        => 'nullable|string|max:255',
-            'publisher'     => 'nullable|string|max:255',
-            'language'      => 'nullable|string|max:100',
-            'price'         => 'required|numeric',
-            'sale'          => 'nullable|numeric',
-            'quantity'      => 'required|integer',
-            'quantity_buy'  => 'nullable|integer',
-            'weight'        => 'nullable|string|max:50',
-            'size'          => 'nullable|string|max:50',
-            'status'        => 'nullable|string|max:50',
-            'is_active'     => 'boolean',
-            'categ'         => 'nullable|string|max:50',
-            'detail'        => 'nullable|string',
-            'images'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+{
+    $validated = $request->validate([
+        'category_id'   => 'required|exists:categories,id',
+        'name'          => 'required|string|max:255',
+        'age'           => 'nullable|integer',
+        'author'        => 'nullable|string|max:255',
+        'publisher'     => 'nullable|string|max:255',
+        'language'      => 'nullable|string|max:100',
+        'price'         => 'required|numeric',
+        'sale'          => 'nullable|numeric',
+        'quantity'      => 'required|integer',
+        'quantity_buy'  => 'nullable|integer',
+        'weight'        => 'nullable|string|max:50',
+        'size'          => 'nullable|string|max:50',
+        'status'        => 'nullable|string|max:50',
+        'is_active'     => 'boolean',
+        'categ'         => 'nullable|string|max:50',
+        'detail'        => 'nullable|string',
+        'images'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        'images_sup.*'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ], [
+        'category_id.required' => 'Vui lòng chọn danh mục.',
+        'category_id.exists'   => 'Danh mục không tồn tại.',
 
-        if ($request->hasFile('images')) {
-            if ($product->images) Storage::disk('public')->delete($product->images);
-            $validated['images'] = $request->file('images')->store('products', 'public');
+        'name.required' => 'Tên sản phẩm là bắt buộc.',
+        'name.max'      => 'Tên sản phẩm không được vượt quá 255 ký tự.',
+
+        'age.integer'   => 'Độ tuổi phải là số nguyên.',
+        'author.max'    => 'Tên tác giả không được vượt quá 255 ký tự.',
+        'publisher.max' => 'Tên nhà xuất bản không được vượt quá 255 ký tự.',
+        'language.max'  => 'Ngôn ngữ không được vượt quá 100 ký tự.',
+
+        'price.required' => 'Giá sản phẩm là bắt buộc.',
+        'price.numeric'  => 'Giá sản phẩm phải là số.',
+
+        'sale.numeric'   => 'Giá khuyến mãi phải là số.',
+
+        'quantity.required' => 'Số lượng là bắt buộc.',
+        'quantity.integer'  => 'Số lượng phải là số nguyên.',
+
+        'quantity_buy.integer' => 'Số lượng đã mua phải là số nguyên.',
+
+        'weight.max' => 'Trọng lượng không được vượt quá 50 ký tự.',
+        'size.max'   => 'Kích thước không được vượt quá 50 ký tự.',
+        'status.max' => 'Trạng thái không được vượt quá 50 ký tự.',
+
+        'categ.max'  => 'Loại sản phẩm không được vượt quá 50 ký tự.',
+
+        'images.image'   => 'Ảnh chính phải là tệp hình ảnh.',
+        'images.mimes'   => 'Ảnh chính phải có định dạng: jpg, jpeg, png, webp.',
+        'images.max'     => 'Ảnh chính không được lớn hơn 2MB.',
+
+        'images_sup.*.image' => 'Ảnh phụ phải là tệp hình ảnh.',
+        'images_sup.*.mimes' => 'Ảnh phụ phải có định dạng: jpg, jpeg, png, webp.',
+        'images_sup.*.max'   => 'Ảnh phụ không được lớn hơn 2MB.',
+    ]);
+
+    // Xử lý ảnh chính
+    if ($request->hasFile('images')) {
+        if ($product->images) {
+            Storage::disk('public')->delete($product->images);
         }
+        $validated['images'] = $request->file('images')->store('products', 'public');
+    }
 
-        if ($request->hasFile('images_sup')) {
-            if ($product->images_sup) {
-                foreach (json_decode($product->images_sup) as $oldFile) {
-                    Storage::disk('public')->delete($oldFile);
+    // Lấy danh sách ảnh phụ hiện tại
+    $supImages = $product->images_sup ? json_decode($product->images_sup, true) : [];
+
+    // Nếu có request xoá ảnh phụ
+    if ($request->has('remove_images_sup')) {
+        foreach ($request->remove_images_sup as $img) {
+            if (($key = array_search($img, $supImages)) !== false) {
+                unset($supImages[$key]);
+                if (Storage::disk('public')->exists($img)) {
+                    Storage::disk('public')->delete($img);
                 }
             }
-            $supImages = [];
-            foreach ($request->file('images_sup') as $file) {
-                $supImages[] = $file->store('products', 'public');
-            }
-            $validated['images_sup'] = json_encode($supImages);
         }
-
-        $product->update($validated);
-
-        return redirect()->route('products.index')->with('success', 'Cập nhật sản phẩm thành công');
     }
+
+    // Nếu có upload thêm ảnh phụ mới
+    if ($request->hasFile('images_sup')) {
+        foreach ($request->file('images_sup') as $file) {
+            $supImages[] = $file->store('products', 'public');
+        }
+    }
+
+    // Lưu lại danh sách ảnh phụ
+    $validated['images_sup'] = json_encode(array_values($supImages));
+
+    // Update sản phẩm
+    $product->update($validated);
+
+    return redirect()->route('products.index')->with('success', 'Cập nhật sản phẩm thành công');
+}
+
 
     public function destroy(Product $product)
     {
@@ -166,4 +219,25 @@ class ProductController extends Controller
 
         return redirect()->route('products.index')->with('success', 'Xoá sản phẩm thành công');
     }
+    public function showProductForUser(Product $product)
+    {
+        return view('user.products.show', compact('product'));
+    }
+    public function filterField(Request $request)
+    {
+        $field = $request->query('field');
+
+        // Kiểm tra field có tồn tại trong products
+        if (!Schema::hasColumn('products', $field)) {
+            return response()->json([], 400);
+        }
+
+        // Lấy giá trị duy nhất dùng Eloquent
+        $values = Product::query()
+            ->distinct()
+            ->pluck($field);
+
+        return response()->json($values);
+    }
+
 }
