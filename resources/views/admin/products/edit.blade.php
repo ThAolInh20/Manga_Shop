@@ -104,17 +104,25 @@
         </div>
 
         <div class="mb-3">
-            <label>Ảnh phụ</label><br>
-            @if($product->images_sup)
-                <div class="d-flex flex-wrap mb-2">
-                    @foreach(json_decode($product->images_sup, true) as $sup)
-                        <img src="{{ asset('storage/'.$sup) }}" width="80" class="me-2 mb-2">
-                    @endforeach
-                </div>
-            @endif
-            <input type="file" name="images_sup[]" class="form-control" multiple accept="image/*" onchange="previewSup(this)">
-            <div id="preview-sup" class="d-flex flex-wrap mt-2"></div>
+  <label>Ảnh phụ</label><br>
+  @if($product->images_sup)
+    <div class="d-flex flex-wrap mb-2">
+      @foreach(json_decode($product->images_sup, true) as $sup)
+        <div class="position-relative me-2 mb-2" style="width: 80px; height: 80px;">
+          <img src="{{ asset('storage/'.$sup) }}" 
+               class="rounded border" 
+               style="width: 80px; height: 80px; object-fit: cover;">
+          <!-- nút xoá -->
+          <button type="button" 
+                  class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0 px-1"
+                  onclick="removeSupImage(this, '{{ $sup }}')">×</button>
         </div>
+      @endforeach
+    </div>
+  @endif
+
+  <input type="file" name="images_sup[]" class="form-control" multiple accept="image/*" onchange="previewSup(this)">
+  <div id="preview-sup" class="d-flex flex-wrap mt-2"></div>
 
         <!-- Trạng thái -->
         <div class="mb-3">
@@ -167,6 +175,18 @@ function previewSup(input) {
         img.classList.add("me-2", "mb-2");
         preview.appendChild(img);
     });
+}
+function removeSupImage(button, filename) {
+    // Xoá khỏi giao diện
+    button.parentElement.remove();
+
+    // Nếu cần xoá luôn trong DB thì thêm 1 input hidden
+    let container = document.getElementById('preview-sup');
+    let input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'remove_images_sup[]';
+    input.value = filename;
+    container.appendChild(input);
 }
 </script>
 @endsection

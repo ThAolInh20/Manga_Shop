@@ -7,6 +7,8 @@ use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 
 class AccountAuthController extends Controller
@@ -30,7 +32,7 @@ public function userLogin(Request $request)
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
-        return redirect()->route('home');
+        return redirect()->route('home')->with('status', 'Đăng nhập thành công!');
     }
 
     return back()->withErrors(['email' => 'Thông tin đăng nhập không đúng.']);
@@ -74,11 +76,20 @@ public function adminLogin(Request $request)
         $request->session()->regenerateToken();
         return redirect()->route('home')->with('status', 'Đăng xuất thành công.');
     }
+    public function showChangePasswordForm()
+    {
+        return view('user.auth.changePassword');
+    }
     public function changePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
+            'new_password' => 'required|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'new_password.required' => 'Vui lòng nhập mật khẩu mới.',
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
         ]);
 
         $user = Auth::user();
@@ -86,11 +97,14 @@ public function adminLogin(Request $request)
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng.']);
         }
+        if (Hash::check($request->new_password, $user->password)) {
+            return back()->withErrors(['new_password' => 'Mật khẩu mới phải khác mật khẩu hiện tại.']);
+        }
 
         $user->password = Hash::make($request->new_password);
         $user->save();
 
-        return back()->with('status', 'Mật khẩu đã được cập nhật thành công.');
+        return redirect()->route('home')->with('status', 'Mật khẩu đã được cập nhật thành công.');
     }
     public function profile()
     {
@@ -101,6 +115,7 @@ public function adminLogin(Request $request)
     {
         return view('user.auth.register');
     }
+    
      protected function checkLogin(string $email, string $password): bool
     {
         return Auth::attempt(['email' => $email, 'password' => $password]);
@@ -128,4 +143,56 @@ public function adminLogin(Request $request)
             // Nếu login tự động thất bại (hiếm khi xảy ra)
             return redirect()->route('home')->with('status', 'Đăng ký thành công. Vui lòng đăng nhập.');
             }
+
+            // Hiển thị form quên mật khẩu
+    public function showForgotPasswordForm()
+    {
+        return view('user.auth.forgot-password');
+    }
+
+    // Gửi email reset
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    // Hiển thị form đặt lại mật khẩu
+    public function showResetPasswordForm($token)
+    {
+        return view('user.auth.reset-password', ['token' => $token, 'email' => request('email')]);
+    }
+
+    // Lưu mật khẩu mới
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token'    => 'required',
+            'email'    => 'required|email',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
+    }
+
 }
+

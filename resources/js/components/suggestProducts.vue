@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="card p-3 mb-4 mt-3 shadow-sm ">
     <h4 class="mb-3">📖 Gợi ý sản phẩm cho bạn</h4>
     <div class="product-grid">
       <div
@@ -12,6 +12,8 @@
             :src="product.images ? `/storage/${product.images}` : '/storage/products/default.png'"
             class="card-img-top product-img"
             alt="product"
+            @click="viewDetail(product)"
+            style="cursor: pointer"
           >
           <!-- Badge HOT -->
           <span
@@ -20,8 +22,7 @@
           >
             HOT
           </span>
-          {{ product.id }}
-          {{ product.in_wishlist }}
+         
           <!-- Hover actions -->
           <div class="product-actions">
             <!-- Wishlist -->
@@ -43,7 +44,7 @@
 
         <div class="card-body">
           <h5 class="card-title">{{ product.name }}</h5>
-          <p class="card-text text-muted">{{ product.author }}</p>
+          <p class="card-text text-muted">Tác giả: {{ product.author }}</p>
 
           <div v-if="product.sale">
             <p class="mb-1">
@@ -143,7 +144,7 @@ function addToCart(product) {
 }
 
 function viewDetail(product) {
-  alert(`🔎 Xem chi tiết: ${product.name}`)
+  window.location.href = `/products/${product.id}`
 }
 
 onMounted(fetchProducts)
@@ -152,7 +153,7 @@ onMounted(fetchProducts)
 <style scoped>
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
@@ -184,7 +185,7 @@ onMounted(fetchProducts)
   transition: opacity 0.3s ease;
 }
 
-.product-img-wrapper:hover .product-actions {
+.product-img-wrapper:hover .product-actions { 
   opacity: 1;
 }
 </style>
