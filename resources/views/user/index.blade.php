@@ -13,7 +13,8 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
-  </div>
+  
+</div>
 <div class="row">
   <div class="col-lg-12 mb-4">
     <div class="card">
@@ -24,7 +25,8 @@
       </div>
     </div>
   </div>
-  
+      
+
 </div>
 <script>
   setTimeout(() => {

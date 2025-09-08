@@ -31,7 +31,7 @@
             </button>
 
             <!-- Cart -->
-            <button class="btn btn-light btn-sm me-2" @click="addToCart(product)">
+            <button v-if="isLoggedIn" class="btn btn-light btn-sm me-2" @click="addToCart(product)">
               <i class="bi bi-cart"></i>
             </button>
 
@@ -102,11 +102,23 @@ const products = ref([])
 const page = ref(1)
 const perPage = 6
 
+const isLoggedIn=ref(false)
+
 const totalPages = computed(() => Math.ceil(products.value.length / perPage))
 const paginatedProducts = computed(() => {
   const start = (page.value - 1) * perPage
   return products.value.slice(start, start + perPage)
 })
+async function checkLogin() {
+  try {
+    const res = await fetch('/api/user')
+    const data = await res.json()
+    isLoggedIn.value = data.status === 'logged_in'
+  } catch (err) {
+    console.error(err)
+    isLoggedIn.value = false
+  }
+}
 
 function formatPrice(num) {
   return new Intl.NumberFormat('vi-VN').format(num)
@@ -147,8 +159,27 @@ async function toggleWishlist(product) {
 }
 
 
-function addToCart(product) {
-  alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+async function addToCart(product) {
+  try {
+    const res = await axios.post('/api/cart', {
+      product_id: product.id,
+      price: product.price,
+      sale: product.sale || 0
+    })
+
+    if (res.status === 201) {
+      alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+    } else {
+      alert(res.data.message)
+    }
+  } catch (err) {
+    if (err.response && err.response.status === 401) {
+      alert('⚠️ Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!')
+    } else {
+      console.error(err)
+      alert('❌ Có lỗi xảy ra khi thêm sản phẩm!')
+    }
+  }
 }
 
 function viewDetail(product) {
@@ -163,10 +194,12 @@ onMounted(() => {
   fetchProducts()
   // 🔥 Lắng nghe sự kiện từ Search
   eventBus.on('wishlist-updated', fetchProducts)
+  checkLogin()
 })
 
 onUnmounted(() => {
   eventBus.off('wishlist-updated', fetchProducts)
+  
 })
 </script>
 

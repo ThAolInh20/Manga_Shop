@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductSupplierController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Models\Category;
@@ -61,6 +62,7 @@ Route::middleware(['auth', 'role:0,1'])->group(function () {
 
 });
 Route::prefix('api')->group(function () {
+     Route::get('/user', [AccountAuthController::class, 'checkLogin']);
     Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
@@ -69,10 +71,14 @@ Route::prefix('api')->group(function () {
     route::get('/products', [ProductController::class, 'getAllProducts']);
     route::get('/categories', [CategoryController::class, 'listCategories']);
 
-
+    Route::post('/cart', [CartController::class, 'add']);
+    Route::put('/cart/{productId}', [CartController::class, 'update']);
+    Route::delete('/cart/{productId}', [CartController::class, 'remove']);
+    Route::get('/cart', [CartController::class, 'index']);
 });
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 route::get('/products/{product}', [ProductController::class, 'showProductForUser'])->name('user.products.show');
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
+route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
