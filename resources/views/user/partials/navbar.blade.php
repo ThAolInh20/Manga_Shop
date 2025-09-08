@@ -43,7 +43,7 @@
             <li><a class="dropdown-item" href="#"><i class="bx bx-user me-2"></i> Hồ sơ cá nhân</a></li>
             <li><a class="dropdown-item" href="#"><i class="bx bx-shopping-bag me-2"></i> Đơn hàng của tôi</a></li>
             @endauth
-            <li><a class="dropdown-item" href="#"><i class="bx bx-heart me-2"></i> Danh sách yêu thích</a></li>
+            <li><a class="dropdown-item" href="{{ route('user.wishlist.list') }}"><i class="bx bx-heart me-2"></i> Danh sách yêu thích</a></li>
             <li><hr class="dropdown-divider"></li>
             @auth
             <li><a class="dropdown-item" href="{{ route('password.change') }}"><i class="bx bx-lock me-2"></i> Đổi mật khẩu</a></li>

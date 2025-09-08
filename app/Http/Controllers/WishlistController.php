@@ -17,14 +17,24 @@ class WishlistController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            $wishlists = Auth::user()->wishlist()->with('product')->paginate(10);
-        } else {
-            $wishlistIds = session()->get('wishlist', []);
-            $wishlists = Product::whereIn('id', $wishlistIds)->paginate(10);
-        }
+        $wishlists = Auth::user()->wishlist()->with('product')->paginate(10);
 
-        return response()->json($wishlists);
+        // map để trả về cấu trúc giống guest
+        $wishlists->getCollection()->transform(function ($item) {
+            return $item->product; // trả về Product
+        });
+
+    } else {
+        $wishlistIds = session()->get('wishlist', []);
+        $wishlists = Product::whereIn('id', $wishlistIds)->paginate(10);
     }
+
+    return response()->json($wishlists);
+    }
+    public function showWishlist(){
+        return view('user.wishlist.list');
+    }
+
 
     /**
      * Gợi ý sản phẩm dựa theo wishlist hoặc top bán chạy

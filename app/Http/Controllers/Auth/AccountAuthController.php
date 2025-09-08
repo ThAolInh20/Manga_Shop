@@ -111,15 +111,19 @@ public function adminLogin(Request $request)
         $user = Auth::user();
         return view('user.auth.profile', compact('user'));
     }
+    public function checkLogin(){
+        if (Auth::check()) {
+            return response()->json(['status' => 'logged_in'], 200);
+        }
+
+        return response()->json(['status' => 'guest'], 200);
+    }
     public function register()
     {
         return view('user.auth.register');
     }
     
-     protected function checkLogin(string $email, string $password): bool
-    {
-        return Auth::attempt(['email' => $email, 'password' => $password]);
-    }
+    
     public function storeRegister(Request $request)
     {
         $request->validate([

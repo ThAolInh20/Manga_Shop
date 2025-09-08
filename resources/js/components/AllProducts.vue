@@ -1,6 +1,6 @@
 <template>
   <div class="row">
-    
+    <!-- <Alert v-if="alertMessage" :message="alertMessage" /> -->
     <!-- Sidebar filter -->
     <div class="col-3">
       <CategoriesList v-model="filters.category_id[0]" @change="onCategorySelected" />
@@ -94,9 +94,11 @@
                    <!-- <i :class="isInWishlist(product.id) ? 'bi bi-heart-fill text-danger' : 'bi bi-heart'"></i> -->
 
               </button>
-              <button class="btn btn-light btn-sm me-2" @click="addToCart(product)">
+              
+              <button v-if="isLoggedIn" class="btn btn-light btn-sm me-2" @click="addToCart(product)">
                 <i class="bi bi-cart"></i>
               </button>
+             
               <button class="btn btn-light btn-sm" @click="viewDetail(product)">
                 <i class="bi bi-search"></i>
               </button>
@@ -160,14 +162,15 @@ import { eventBus } from '../eventBus'
 const products = ref([])
 const page = ref(1)
 const lastPage = ref(1)
-const perPage = ref(6)
+const perPage = ref(12)
 const minPriceInput = ref('')
 const maxPriceInput = ref('')
 const sortBy = ref('name')
 const sortOrder = ref('asc')
 
 const searchKeyword = ref('')
-
+const alertMessage = ref('')
+const isLoggedIn = ref(false)
 
 const filters = ref({
   category_id: [],
@@ -177,6 +180,16 @@ const filters = ref({
     minPrice: null,
   maxPrice: null
 })
+async function checkLogin() {
+  try {
+    const res = await fetch('/api/user')
+    const data = await res.json()
+    isLoggedIn.value = data.status === 'logged_in'
+  } catch (err) {
+    console.error(err)
+    isLoggedIn.value = false
+  }
+}
 
 function onCategorySelected(categoryId) {
   filters.value.category_id = categoryId ? [categoryId] : [] // gán vào filter
@@ -245,7 +258,7 @@ const filteredProducts = computed(() => {
       const matchCateg1 = filters.value.categ.length === 0 || filters.value.categ.includes(p.categ)
       const matchAuthor = filters.value.author.length === 0 || filters.value.author.includes(p.author)
       const matchPublisher = filters.value.publisher.length === 0 || filters.value.publisher.includes(p.publisher)
-      return matchCateg && matchAuthor && matchPublisher
+      return matchCateg && matchAuthor && matchPublisher &&matchCateg1
     })
   }
 
@@ -318,8 +331,27 @@ async function toggleWishlist(product) {
 //   toggle(product)
 // }
 
-function addToCart(product) {
-  alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+async function addToCart(product) {
+  try {
+    const res = await axios.post('/api/cart', {
+      product_id: product.id,
+      price: product.price,
+      sale: product.sale || 0
+    })
+
+    if (res.status === 201) {
+      alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+    } else {
+      alert(res.data.message)
+    }
+  } catch (err) {
+    if (err.response && err.response.status === 401) {
+      alert('⚠️ Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!')
+    } else {
+      console.error(err)
+      alert('❌ Có lỗi xảy ra khi thêm sản phẩm!')
+    }
+  }
 }
 
 function viewDetail(product) {
@@ -337,6 +369,7 @@ onMounted(() => {
   searchKeyword.value = urlParams.get('search') || ''
   fetchProducts(1)
   eventBus.on('wishlist-updated', fetchProducts)
+  checkLogin()
 })
 
 onUnmounted(() => {

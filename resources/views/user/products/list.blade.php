@@ -5,6 +5,4 @@
 
 <all-products></all-products>
 
-
-
 @endsection
