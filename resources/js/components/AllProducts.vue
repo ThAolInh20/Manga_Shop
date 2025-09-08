@@ -1,0 +1,340 @@
+<template>
+  <div class="row">
+    <!-- Sidebar filter -->
+    <div class="col-3">
+      <h4 class="mb-3">🔍 Bộ lọc</h4>
+      <filter-field v-model="filters.categ" row-name="categ" label="Thể loại"></filter-field>
+      <filter-field v-model="filters.author" row-name="author" label="Tác giả"></filter-field>
+      <filter-field v-model="filters.publisher" row-name="publisher" label="Nhà xuất bản"></filter-field>
+    </div>
+    
+    <!-- Product list -->
+    <div class="col-9">
+      <h4 class="mb-3">📦 Danh sách sản phẩm</h4>
+      <div class="card p-3 mb-3">
+  <div class="row g-3 align-items-end">
+  <!-- Lọc theo giá -->
+  <div class="col-md-5">
+    <label class="form-label">💰 Khoảng giá</label>
+    <div class="d-flex ">
+            <input
+                type="text"
+                class="form-control me-2"
+                v-model="minPriceInput"
+                @input="formatMinPrice"
+                placeholder="Từ"
+                />
+
+                <input
+                type="text"
+                class="form-control"
+                v-model="maxPriceInput"
+                @input="formatMaxPrice"
+                placeholder="Đến"
+                />
+    </div>
+  </div>
+
+  <!-- Số lượng hiển thị -->
+  <div class="col-md-3">
+    <label class="form-label">📄 Số sản phẩm/trang</label>
+    <select class="form-select" v-model.number="perPage" @change="fetchProducts(1)">
+      <option :value="6">6</option>
+      <option :value="9">9</option>
+      <option :value="12">12</option>
+      <option :value="24">24</option>
+    </select>
+  </div>
+
+  <!-- Sắp xếp -->
+  <div class="col-md-3">
+    <label class="form-label">🔽 Sắp xếp theo</label>
+    <div class="input-group">
+      <select class="form-select" v-model="sortBy">
+        <option value="name">Tên</option>
+        <option value="price">Giá</option>
+        <option value="quantity_buy">Lượt mua</option>
+      </select>
+      <button class="btn btn-outline-secondary sort-btn" @click="toggleSortOrder">
+        <i :class="sortOrder === 'asc' ? 'bi bi-sort-down-alt' : 'bi bi-sort-down'"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+      <div class="product-grid">
+        <div v-for="product in filteredProducts" :key="product.id" class="card h-100">
+          <!-- Ảnh + actions -->
+          <div class="position-relative product-img-wrapper">
+            <img
+              :src="product.images ? `/storage/${product.images}` : '/storage/products/default.png'"
+              class="card-img-top product-img"
+              alt="product"
+              @click="viewDetail(product)"
+              style="cursor: pointer"
+            >
+
+            <!-- Badge HOT -->
+            <span
+              v-if="product.quantity_buy > 50"
+              class="badge bg-danger position-absolute top-0 end-0 m-2"
+            >
+              HOT
+            </span>
+
+            <!-- Hover actions -->
+            <div class="product-actions">
+              <button class="btn btn-light btn-sm me-2" @click="toggleWishlist(product)">
+                <i :class="product.in_wishlist ? 'bi bi-heart-fill text-danger' : 'bi bi-heart'"></i>
+                   <!-- <i :class="isInWishlist(product.id) ? 'bi bi-heart-fill text-danger' : 'bi bi-heart'"></i> -->
+
+              </button>
+              <button class="btn btn-light btn-sm me-2" @click="addToCart(product)">
+                <i class="bi bi-cart"></i>
+              </button>
+              <button class="btn btn-light btn-sm" @click="viewDetail(product)">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Thông tin -->
+          <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text text-muted">Tác giả: {{ product.author }}</p>
+
+            <div v-if="product.sale">
+              <p class="mb-1">
+                <span class="text-muted text-decoration-line-through me-2">
+                  {{ formatPrice(product.price) }} đ
+                </span>
+                <small class="text-success">-{{ product.sale }}%</small>
+              </p>
+              <p class="fw-bold text-danger">
+                {{ formatPrice(discountedPrice(product)) }} đ
+              </p>
+            </div>
+            <div v-else>
+              <p class="fw-bold text-dark">
+                {{ formatPrice(product.price) }} đ
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" :class="{disabled: page===1}">
+            <a href="#" class="page-link" @click.prevent="fetchProducts(page-1)">«</a>
+          </li>
+          <li v-for="n in lastPage" :key="n" class="page-item" :class="{active: page===n}">
+            <a href="#" class="page-link" @click.prevent="fetchProducts(n)">{{ n }}</a>
+          </li>
+          <li class="page-item" :class="{disabled: page===lastPage}">
+            <a href="#" class="page-link" @click.prevent="fetchProducts(page+1)">»</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted,onUnmounted } from 'vue'
+// import { useWishlist } from '../stores/wishlistStore'
+// const { toggle, isInWishlist } = useWishlist()
+import { eventBus } from '../eventBus'
+const products = ref([])
+const page = ref(1)
+const lastPage = ref(1)
+const perPage = ref(6)
+const minPriceInput = ref('')
+const maxPriceInput = ref('')
+const sortBy = ref('name')
+const sortOrder = ref('asc')
+
+
+const filters = ref({
+  categ: [],
+  author: [],
+  publisher: [],
+    minPrice: null,
+  maxPrice: null
+})
+
+function formatNumber(value) {
+  // Bỏ ký tự không phải số
+  let num = value.replace(/\D/g, '')
+  // Thêm dấu chấm
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+function formatMinPrice(e) {
+  // Chuyển input string dạng "1.000" thành number
+  const raw = e.target.value.replace(/\D/g, '')
+  minPriceInput.value = formatNumber(e.target.value)
+  filters.value.minPrice = raw ? Number(raw) : null
+}
+
+function formatMaxPrice(e) {
+  const raw = e.target.value.replace(/\D/g, '')
+  maxPriceInput.value = formatNumber(e.target.value)
+  filters.value.maxPrice = raw ? Number(raw) : null
+}
+async function fetchProducts(p = 1) {
+  if (p < 1 || (lastPage.value && p > lastPage.value)) return
+  const res = await fetch(`/api/products?page=${p}`)
+  const data = await res.json()
+  products.value = data.data
+  page.value = data.current_page
+  lastPage.value = data.last_page
+}
+
+const filteredProducts = computed(() => {
+  let list = products.value
+
+  // Lọc theo categ/author/publisher
+  if (filters.value.categ.length || filters.value.author.length || filters.value.publisher.length) {
+    list = list.filter(p => {
+      const matchCateg = filters.value.categ.length === 0 || filters.value.categ.includes(p.categ)
+      const matchAuthor = filters.value.author.length === 0 || filters.value.author.includes(p.author)
+      const matchPublisher = filters.value.publisher.length === 0 || filters.value.publisher.includes(p.publisher)
+      return matchCateg && matchAuthor && matchPublisher
+    })
+  }
+
+  // Lọc theo giá
+if (filters.value.minPrice !== null) {
+  list = list.filter(p => Number(p.price) >= filters.value.minPrice)
+}
+if (filters.value.maxPrice !== null) {
+  list = list.filter(p => Number(p.price) <= filters.value.maxPrice)
+}
+
+  // Sắp xếp
+  list = [...list].sort((a, b) => {
+    let valA = a[sortBy.value]
+    let valB = b[sortBy.value]
+
+    // Nếu là số (giá, lượt mua) → ép về number
+  if (sortBy.value === 'price' || sortBy.value === 'quantity_buy') {
+    valA = Number(valA)
+    valB = Number(valB)
+  } else if (typeof valA === 'string') {
+    // Nếu là chuỗi (tên, tác giả,...) → chuyển lowercase để so sánh
+    valA = valA.toLowerCase()
+    valB = valB.toLowerCase()
+  }
+
+    if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
+    if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
+    return 0
+  })
+
+  return list
+})
+function toggleSortOrder() {
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+}
+function formatPrice(num) {
+  return new Intl.NumberFormat('vi-VN').format(num)
+}
+
+function discountedPrice(p) {
+  return p.price - (p.price * p.sale / 100)
+}
+
+async function toggleWishlist(product) {
+  if (product.in_wishlist) {
+    // Xoá
+    await fetch(`http://127.0.0.1:8000/api/wishlist/${product.id}`, {
+      method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    product.in_wishlist = false
+  } else {
+    // Thêm
+    await fetch('http://127.0.0.1:8000/api/wishlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ product_id: product.id })
+    })
+    
+    
+    product.in_wishlist = true
+  }
+   eventBus.emit('wishlist-updated')
+}
+// function toggleWishlist(product) {
+//   toggle(product)
+// }
+
+function addToCart(product) {
+  alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+}
+
+function viewDetail(product) {
+  window.location.href = `/products/${product.id}`
+}
+
+onMounted(() => fetchProducts())
+onMounted(() => {
+  fetchProducts()
+  // 🔥 Lắng nghe sự kiện từ Search
+  eventBus.on('wishlist-updated', fetchProducts)
+})
+
+onUnmounted(() => {
+  eventBus.off('wishlist-updated', fetchProducts)
+})
+</script>
+
+<style scoped>
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.product-img-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.product-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-img-wrapper:hover .product-img {
+  transform: scale(1.05);
+}
+
+.product-actions {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-img-wrapper:hover .product-actions { 
+  opacity: 1;
+}
+.sort-btn {
+  z-index: 1; /* Hoặc auto */
+  position: relative; /* đảm bảo z-index có tác dụng */
+}
+
+</style>

@@ -7,17 +7,19 @@
     </a>
 
     <!-- Search -->
-    <form class="d-none d-md-flex ms-3">
-      <div class="input-group">
-        <input type="text" class="form-control" placeholder="Tìm sách, tác giả..." />
-        <button class="btn btn-outline-primary" type="submit"><i class='bx bx-search'></i></button>
-      </div>
-    </form>
+    <form class="d-none d-md-flex ms-3" action="{{ route('user.products.list') }}" method="GET">
+  <div class="input-group">
+    <input type="text" class="form-control" name="search" placeholder="Tìm sách, tác giả..." />
+    <button class="btn btn-outline-primary" type="submit">
+      <i class='bx bx-search'></i>
+    </button>
+  </div>
+</form>
 
     <!-- Right -->
     <ul class="navbar-nav flex-row align-items-center ms-auto">
       <li class="nav-item me-2"><a class="nav-link" href="{{ route('home') }}">Home</a></li>
-      <li class="nav-item me-2"><a class="nav-link" href="#">Manga</a></li>
+      <li class="nav-item me-2"><a class="nav-link" href="{{ route('user.products.list') }}">Manga</a></li>
       <li class="nav-item me-2"><a class="nav-link" href="#">Ấn phẩm Manga</a></li>
        <li class="nav-item">
          <a class="nav-link p-0" href="#">

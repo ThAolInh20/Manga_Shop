@@ -52,6 +52,7 @@ class ProductController extends Controller
         // Lần đầu load view
         return view('admin.products.index', compact('products'));
     }
+    
 
 
 
@@ -238,6 +239,36 @@ class ProductController extends Controller
             ->pluck($field);
 
         return response()->json($values);
+    }
+   public function getAllProducts()
+    {
+        $user = auth()->user();
+
+        // Lấy sản phẩm phân trang (12 sản phẩm mỗi trang)
+        $products = Product::paginate(12);
+
+        // Lấy wishlist IDs
+        $wishlistIds = $user
+            ? $user->wishlist()->pluck('product_id')->toArray()
+            : (session()->get('wishlist', []) ?? []);
+
+        // Thêm in_wishlist
+        $products->getCollection()->transform(function ($product) use ($wishlistIds) {
+            $product->in_wishlist = in_array($product->id, $wishlistIds);
+            return $product;
+        });
+
+        return response()->json($products);
+    }
+    public function indexForUser(Request $request)
+    {
+        
+            // Lấy từ khóa tìm kiếm từ query
+        $search = $request->input('search');
+
+        return view('user.products.list', [
+            'search' => $search, // truyền xuống Blade
+        ]);
     }
 
 }

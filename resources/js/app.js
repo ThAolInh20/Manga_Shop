@@ -5,13 +5,17 @@ import { createApp } from 'vue';
 import SuggestProducts from './components/suggestProducts.vue';
 import Message from './components/message.vue';
 import FilterField from './components/FilterField.vue';
+import AllProducts from './components/AllProducts.vue';
 
 const app = createApp({});
+// const pinia = createPinia()
 
 // Đăng ký component toàn cục
 app.component('Message', Message);
 app.component('FilterField', FilterField);
 app.component('SuggestProducts', SuggestProducts);
+app.component('AllProducts', AllProducts);
 
 // Mount Vue vào #app (trong Blade)
+// app.use(pinia);
 app.mount('#app');
