@@ -21,7 +21,7 @@ class Product extends Model
         'publisher',
         'quantity', 
         'price',
-        'sale',
+        'sale', 
         'detail',
         'categ',
         'status',

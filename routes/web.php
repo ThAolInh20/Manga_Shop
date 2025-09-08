@@ -13,6 +13,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Models\Category;
 use App\Models\Wishlist;    
 
 // User login
@@ -66,6 +67,8 @@ Route::prefix('api')->group(function () {
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
     Route::get('/boloc', [ProductController::class, 'filterField']);
     route::get('/products', [ProductController::class, 'getAllProducts']);
+    route::get('/categories', [CategoryController::class, 'listCategories']);
+
 
 });
 

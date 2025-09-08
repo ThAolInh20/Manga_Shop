@@ -62,6 +62,12 @@
               {{ formatPrice(product.price) }} đ
             </p>
           </div>
+          <div class="progress-wrapper mb-2">
+  <div class="progress-fill" :style="{ width: soldPercent(product) + '%' }"></div>
+  <div class="progress-text">
+    {{ product.quantity_buy }}/{{ product.quantity+product.quantity_buy }} đã bán
+  </div>
+</div>
         </div>
       </div>
     </div>
@@ -148,7 +154,10 @@ function addToCart(product) {
 function viewDetail(product) {
   window.location.href = `/products/${product.id}`
 }
-
+const soldPercent = (product) => {
+  if (!product.quantity || product.quantity === 0) return 0
+  return Math.min(Math.round((product.quantity_buy / (product.quantity+product.quantity_buy)) * 100), 100)
+}
 onMounted(fetchProducts)
 onMounted(() => {
   fetchProducts()
@@ -198,5 +207,58 @@ onUnmounted(() => {
 
 .product-img-wrapper:hover .product-actions { 
   opacity: 1;
+}
+.progress-wrapper {
+  background-color: #d6dadf;
+  border-radius: 12px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #5da4d7, #9fd9f4);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;         /* Luôn ở giữa thanh */
+  transform: translateX(-50%);
+  width: 100%;        /* Chiếm toàn bộ thanh để chữ luôn ở center */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e9edf1;        /* Màu chữ nổi bật */
+  font-weight: 600;
+  font-size: 0.875rem;
+  
+  pointer-events: none;
+  white-space: nowrap;
+}
+/* Tên sản phẩm luôn chiếm 2 dòng */
+.card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* tối đa 2 dòng */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* Bắt buộc luôn chiếm 2 dòng */
+  line-height: 1.2rem;   /* bạn điều chỉnh theo font-size */
+  height: calc(1.2rem * 2); /* 2 dòng */
+  min-height: calc(1.2rem * 2);
+  max-height: calc(1.2rem * 2);
+}
+
+/* Tác giả, giá, sale - 1 dòng */
+.card-text,
+.card-body p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

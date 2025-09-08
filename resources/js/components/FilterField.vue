@@ -8,6 +8,7 @@
         :id="rowName + '-' + index"
         :value="opt"
         v-model="selected"
+        
       >
       <label class="form-check-label" :for="rowName + '-' + index">
         {{ opt }}

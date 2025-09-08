@@ -6,6 +6,7 @@ import SuggestProducts from './components/suggestProducts.vue';
 import Message from './components/message.vue';
 import FilterField from './components/FilterField.vue';
 import AllProducts from './components/AllProducts.vue';
+import CategoriesList from './components/CategoriesList.vue';
 
 const app = createApp({});
 // const pinia = createPinia()
@@ -15,6 +16,7 @@ app.component('Message', Message);
 app.component('FilterField', FilterField);
 app.component('SuggestProducts', SuggestProducts);
 app.component('AllProducts', AllProducts);
+app.component('CategoriesList',CategoriesList);
 
 // Mount Vue vào #app (trong Blade)
 // app.use(pinia);
