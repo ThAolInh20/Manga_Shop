@@ -18,9 +18,9 @@
   <div class="col-lg-12 mb-4">
     <div class="card">
       <div class="card-body">
-        <h4 class="card-title">📚 Chào mừng đến với MangaBook</h4>
+        <h4 class="card-title">📚 Chào mừng đến với MangaSho</h4>
         <p>Khám phá hàng ngàn đầu sách từ văn học, kinh tế, công nghệ đến manga.</p>
-        <a href="" class="btn btn-primary">Xem sách ngay</a>
+        <a href="{{ route('user.products.list') }}" class="btn btn-primary">Xem sản phẩm</a>
       </div>
     </div>
   </div>

@@ -238,31 +238,76 @@ class ProductController extends Controller
             ->distinct()
             ->pluck($field);
 
+      
         return response()->json($values);
     }
-   public function getAllProducts()
-    {
-        $user = auth()->user();
+   public function getAllProducts(Request $request)
+{
+    $user = auth()->user();
+    $query = Product::query();
 
-        // Lấy sản phẩm phân trang (12 sản phẩm mỗi trang)
-        $products = Product::paginate(12);
-
-        // Lấy wishlist IDs
-        $wishlistIds = $user
-            ? $user->wishlist()->pluck('product_id')->toArray()
-            : (session()->get('wishlist', []) ?? []);
-
-        // Thêm in_wishlist
-        $products->getCollection()->transform(function ($product) use ($wishlistIds) {
-            $product->in_wishlist = in_array($product->id, $wishlistIds);
-            return $product;
+    // 🔍 Tìm kiếm theo tên sản phẩm hoặc tác giả
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', "%{$request->search}%")
+              ->orWhere('author', 'like', "%{$request->search}%");
         });
-
-        return response()->json($products);
     }
+    else if($request->category_id){
+        $query=$query->where('category_id',$request->category_id);
+    }
+    
+
+    // 💰 Lọc giá
+    if ($request->minPrice) {
+        $query->where('price', '>=', $request->minPrice);
+    }
+    if ($request->maxPrice) {
+        $query->where('price', '<=', $request->maxPrice);
+    }
+
+    // 🏷 Lọc theo category / author / publisher nếu có
+    if ($request->categ) {
+        $categs = explode(',', $request->categ);
+        $query->whereIn('categ', $categs);
+    }
+    if($request->category_id){
+        $category_id = explode(',', $request->category_id);
+        $query->whereIn('category_id', $category_id);
+    }
+    if ($request->author) {
+        $authors = explode(',', $request->author);
+        $query->whereIn('author', $authors);
+    }
+    if ($request->publisher) {
+        $publishers = explode(',', $request->publisher);
+        $query->whereIn('publisher', $publishers);
+    }
+
+    // 🔽 Sắp xếp
+    $sortBy = $request->sortBy ?? 'name';
+    $sortOrder = $request->sortOrder ?? 'asc';
+    $query->orderBy($sortBy, $sortOrder);
+
+    // 📄 Phân trang
+    $perPage = $request->perPage ?? 12;
+    $products = $query->paginate($perPage);
+
+    
+    $wishlistIds = $user
+        ? $user->wishlist()->pluck('product_id')->toArray()
+        : (session()->get('wishlist', []) ?? []);
+
+    $products->getCollection()->transform(function ($product) use ($wishlistIds) {
+        $product->in_wishlist = in_array($product->id, $wishlistIds);
+        return $product;
+    });
+
+    return response()->json($products);
+}
+
     public function indexForUser(Request $request)
     {
-        
             // Lấy từ khóa tìm kiếm từ query
         $search = $request->input('search');
 

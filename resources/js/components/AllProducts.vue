@@ -1,21 +1,25 @@
 <template>
   <div class="row">
+    
     <!-- Sidebar filter -->
     <div class="col-3">
-      <h4 class="mb-3">🔍 Bộ lọc</h4>
-      <filter-field v-model="filters.categ" row-name="categ" label="Thể loại"></filter-field>
-      <filter-field v-model="filters.author" row-name="author" label="Tác giả"></filter-field>
-      <filter-field v-model="filters.publisher" row-name="publisher" label="Nhà xuất bản"></filter-field>
+      <CategoriesList v-model="filters.category_id[0]" @change="onCategorySelected" />
+      <h4 class="mb-3">Bộ lọc</h4>
+      <!-- <filter-field v-model="filters.category_id" row-name="category_id" label="Thể loại" @change="onFilterChange"></filter-field> -->
+      <filter-field v-model="filters.categ" row-name="categ" label="Thể loại" @change="onFilterChange"></filter-field>
+      
+      <filter-field v-model="filters.author" row-name="author" label="Tác giả" @change="onFilterChange"></filter-field>
+      <filter-field v-model="filters.publisher" row-name="publisher" label="Nhà xuất bản" @change="onFilterChange"></filter-field>
     </div>
     
     <!-- Product list -->
     <div class="col-9">
-      <h4 class="mb-3">📦 Danh sách sản phẩm</h4>
+      <h4 class="mb-3">Danh sách sản phẩm</h4>
       <div class="card p-3 mb-3">
   <div class="row g-3 align-items-end">
   <!-- Lọc theo giá -->
   <div class="col-md-5">
-    <label class="form-label">💰 Khoảng giá</label>
+    <label class="form-label">Khoảng giá:</label>
     <div class="d-flex ">
             <input
                 type="text"
@@ -36,7 +40,7 @@
   </div>
 
   <!-- Số lượng hiển thị -->
-  <div class="col-md-3">
+  <!-- <div class="col-md-3">
     <label class="form-label">📄 Số sản phẩm/trang</label>
     <select class="form-select" v-model.number="perPage" @change="fetchProducts(1)">
       <option :value="6">6</option>
@@ -44,11 +48,11 @@
       <option :value="12">12</option>
       <option :value="24">24</option>
     </select>
-  </div>
+  </div> -->
 
   <!-- Sắp xếp -->
   <div class="col-md-3">
-    <label class="form-label">🔽 Sắp xếp theo</label>
+    <label class="form-label">Sắp xếp theo:</label>
     <div class="input-group">
       <select class="form-select" v-model="sortBy">
         <option value="name">Tên</option>
@@ -63,7 +67,6 @@
 </div>
 
 </div>
-
       <div class="product-grid">
         <div v-for="product in filteredProducts" :key="product.id" class="card h-100">
           <!-- Ảnh + actions -->
@@ -121,6 +124,12 @@
                 {{ formatPrice(product.price) }} đ
               </p>
             </div>
+              <div class="progress-wrapper mb-2">
+  <div class="progress-fill" :style="{ width: soldPercent(product) + '%' }"></div>
+  <div class="progress-text">
+    {{ product.quantity_buy }}/{{ product.quantity+product.quantity_buy }} đã bán
+  </div>
+</div>
           </div>
         </div>
       </div>
@@ -157,14 +166,27 @@ const maxPriceInput = ref('')
 const sortBy = ref('name')
 const sortOrder = ref('asc')
 
+const searchKeyword = ref('')
+
 
 const filters = ref({
-  categ: [],
+  category_id: [],
+  categ:[],
   author: [],
   publisher: [],
     minPrice: null,
   maxPrice: null
 })
+
+function onCategorySelected(categoryId) {
+  filters.value.category_id = categoryId ? [categoryId] : [] // gán vào filter
+  page.value = 1
+  fetchProducts(1)
+}
+function onFilterChange() {
+  page.value = 1
+  fetchProducts(1)
+}
 
 function formatNumber(value) {
   // Bỏ ký tự không phải số
@@ -186,20 +208,41 @@ function formatMaxPrice(e) {
 }
 async function fetchProducts(p = 1) {
   if (p < 1 || (lastPage.value && p > lastPage.value)) return
-  const res = await fetch(`/api/products?page=${p}`)
-  const data = await res.json()
-  products.value = data.data
-  page.value = data.current_page
-  lastPage.value = data.last_page
+
+  const params = new URLSearchParams({
+    page: p,
+    perPage: perPage.value,
+    sortBy: sortBy.value,
+    sortOrder: sortOrder.value,
+    search: searchKeyword.value // 🔥 quan trọng
+  })
+
+  if (filters.value.minPrice) params.append('minPrice', filters.value.minPrice)
+  if (filters.value.maxPrice) params.append('maxPrice', filters.value.maxPrice)
+   if (filters.value.category_id.length) params.append('category_id', filters.value.category_id.join(','))
+   if (filters.value.categ.length) params.append('categ', filters.value.categ.join(','))
+  if (filters.value.author.length) params.append('author', filters.value.author.join(','))
+  if (filters.value.publisher.length) params.append('publisher', filters.value.publisher.join(','))
+  try{
+    const res = await fetch(`/api/products?${params.toString()}`)
+    const data = await res.json()
+    products.value = data.data
+    page.value = data.current_page
+    lastPage.value = data.last_page
+  }catch (err) {
+    console.error(err)
+  }
+  
 }
 
 const filteredProducts = computed(() => {
   let list = products.value
 
   // Lọc theo categ/author/publisher
-  if (filters.value.categ.length || filters.value.author.length || filters.value.publisher.length) {
+  if (filters.value.category_id.length ||filters.value.categ.length || filters.value.author.length || filters.value.publisher.length) {
     list = list.filter(p => {
-      const matchCateg = filters.value.categ.length === 0 || filters.value.categ.includes(p.categ)
+      const matchCateg = filters.value.category_id.length === 0 || filters.value.category_id.includes(p.category_id)
+      const matchCateg1 = filters.value.categ.length === 0 || filters.value.categ.includes(p.categ)
       const matchAuthor = filters.value.author.length === 0 || filters.value.author.includes(p.author)
       const matchPublisher = filters.value.publisher.length === 0 || filters.value.publisher.includes(p.publisher)
       return matchCateg && matchAuthor && matchPublisher
@@ -282,16 +325,23 @@ function addToCart(product) {
 function viewDetail(product) {
   window.location.href = `/products/${product.id}`
 }
+const soldPercent = (product) => {
+  if (!product.quantity || product.quantity === 0) return 0
+  return Math.min(Math.round((product.quantity_buy / (product.quantity+product.quantity_buy)) * 100), 100)
+}
 
-onMounted(() => fetchProducts())
 onMounted(() => {
-  fetchProducts()
-  // 🔥 Lắng nghe sự kiện từ Search
+  const urlParams = new URLSearchParams(window.location.search)
+ 
+
+  searchKeyword.value = urlParams.get('search') || ''
+  fetchProducts(1)
   eventBus.on('wishlist-updated', fetchProducts)
 })
 
 onUnmounted(() => {
   eventBus.off('wishlist-updated', fetchProducts)
+  
 })
 </script>
 
@@ -336,5 +386,59 @@ onUnmounted(() => {
   z-index: 1; /* Hoặc auto */
   position: relative; /* đảm bảo z-index có tác dụng */
 }
+.progress-wrapper {
+  background-color: #d6dadf;
+  border-radius: 12px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #5da4d7, #9fd9f4);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 0;
+  left: 50%;         /* Luôn ở giữa thanh */
+  transform: translateX(-50%);
+  width: 100%;        /* Chiếm toàn bộ thanh để chữ luôn ở center */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e9edf1;        /* Màu chữ nổi bật */
+  font-weight: 600;
+  font-size: 0.875rem;
+  
+  pointer-events: none;
+  white-space: nowrap;
+}
+/* Tên sản phẩm luôn chiếm 2 dòng */
+.card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* tối đa 2 dòng */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* Bắt buộc luôn chiếm 2 dòng */
+  line-height: 1.2rem;   /* bạn điều chỉnh theo font-size */
+  height: calc(1.2rem * 2); /* 2 dòng */
+  min-height: calc(1.2rem * 2);
+  max-height: calc(1.2rem * 2);
+}
+
+/* Tác giả, giá, sale - 1 dòng */
+.card-text,
+.card-body p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 </style>

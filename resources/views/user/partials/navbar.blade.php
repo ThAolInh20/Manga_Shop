@@ -9,8 +9,9 @@
     <!-- Search -->
     <form class="d-none d-md-flex ms-3" action="{{ route('user.products.list') }}" method="GET">
   <div class="input-group">
-    <input type="text" class="form-control" name="search" placeholder="Tìm sách, tác giả..." />
-    <button class="btn btn-outline-primary" type="submit">
+<input type="text" class="form-control" name="search" 
+       value="{{ request('search') }}" 
+       placeholder="Tìm sách, tác giả..." />    <button class="btn btn-outline-primary" type="submit">
       <i class='bx bx-search'></i>
     </button>
   </div>
@@ -19,8 +20,8 @@
     <!-- Right -->
     <ul class="navbar-nav flex-row align-items-center ms-auto">
       <li class="nav-item me-2"><a class="nav-link" href="{{ route('home') }}">Home</a></li>
-      <li class="nav-item me-2"><a class="nav-link" href="{{ route('user.products.list') }}">Manga</a></li>
-      <li class="nav-item me-2"><a class="nav-link" href="#">Ấn phẩm Manga</a></li>
+      <li class="nav-item me-2"><a class="nav-link" href="{{ route('user.products.list') }}">Danh sách sản phẩm</a></li>
+      <li class="nav-item me-2"><a class="nav-link" href="#">Liên hệ</a></li>
        <li class="nav-item">
          <a class="nav-link p-0" href="#">
           <i class="bx bx-cart fs-4"></i>

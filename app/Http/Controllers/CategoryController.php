@@ -18,6 +18,12 @@ class CategoryController extends Controller
     ->get();
         return view('admin.categories.index', compact('categories'));
     }
+    public function listCategories(){
+        $categories = Category::has('products')->get();
+
+        // Trả về JSON
+        return response()->json($categories);
+    }
 
     /**
      * Show the form for creating a new resource.

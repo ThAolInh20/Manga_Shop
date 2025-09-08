@@ -3,11 +3,8 @@
 
 @section('content')
 
-@if($search)
-        <all-products-search :search="'{{ $search }}'"></all-products-search>
-    @else
-        <all-products></all-products>
-    @endif
+<all-products></all-products>
+
 
 
 @endsection
