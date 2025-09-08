@@ -65,8 +65,11 @@ Route::prefix('api')->group(function () {
     Route::post('/wishlist', [WishlistController::class, 'store'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
     Route::get('/boloc', [ProductController::class, 'filterField']);
+    route::get('/products', [ProductController::class, 'getAllProducts']);
 
 });
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
 route::get('/products/{product}', [ProductController::class, 'showProductForUser'])->name('user.products.show');
+route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');

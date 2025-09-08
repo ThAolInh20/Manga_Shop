@@ -40,10 +40,10 @@
   <div id="app"  class="content-wrapper pt-3" style="margin-top: 50px;">
     <div class="container-xl flex-grow-1 container-p-y">
 
-       @yield('content')
-     <filter-field row-name="categ" label="Theer loai"></filter-field>
-     <filter-field row-name="author"></filter-field>
-        <suggest-products></suggest-products>
+    @yield('content')
+    <suggest-products></suggest-products>
+    
+        
      
      
       

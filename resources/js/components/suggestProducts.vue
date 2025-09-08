@@ -89,7 +89,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted,onUnmounted } from 'vue'
+import { eventBus } from '../eventBus'
 
 const products = ref([])
 const page = ref(1)
@@ -136,6 +137,7 @@ async function toggleWishlist(product) {
     
     product.in_wishlist = true
   }
+  eventBus.emit('wishlist-updated')
 }
 
 
@@ -148,6 +150,15 @@ function viewDetail(product) {
 }
 
 onMounted(fetchProducts)
+onMounted(() => {
+  fetchProducts()
+  // 🔥 Lắng nghe sự kiện từ Search
+  eventBus.on('wishlist-updated', fetchProducts)
+})
+
+onUnmounted(() => {
+  eventBus.off('wishlist-updated', fetchProducts)
+})
 </script>
 
 <style scoped>
