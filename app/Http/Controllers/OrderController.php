@@ -6,6 +6,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Account;
 use App\Models\Product;
+use App\Models\ProductOrder;
 
 class OrderController extends Controller
 {
@@ -23,7 +24,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        //
+        return view('user.orders.create');
     }
 
     /**
@@ -79,4 +80,4 @@ class OrderController extends Controller
     {
         //
     }
-}
+    

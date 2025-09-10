@@ -71,7 +71,7 @@
 
       <!-- Giá khuyến mãi -->
       <div class="mt-3">
-        @if ($product->sale)
+        @if ($product->sale>0)
           <p class="mb-1">
             <span class="text-muted text-decoration-line-through me-2">
               {{ number_format($product->price, 0, ',', '.') }} đ

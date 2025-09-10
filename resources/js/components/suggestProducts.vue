@@ -169,8 +169,11 @@ async function addToCart(product) {
 
     if (res.status === 201) {
       alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+      eventBus.emit('cart-add')
     } else {
+      
       alert(res.data.message)
+      eventBus.emit('cart-add')
     }
   } catch (err) {
     if (err.response && err.response.status === 401) {
