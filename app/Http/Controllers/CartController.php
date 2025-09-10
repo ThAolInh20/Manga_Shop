@@ -31,15 +31,20 @@ class CartController extends Controller
         $exists = Cart::where('account_id', $userId)
                       ->where('product_id', $productId)
                       ->first();
-
         if ($exists) {
-            return response()->json(['message' => 'Sản phẩm đã có trong giỏ hàng'], 200);
+            $exists->quantity += 1; // tăng số lượng
+            $exists->save();
+
+            return response()->json([
+                'message' => 'Đã tăng số lượng sản phẩm trong giỏ hàng',
+                'cart' => $exists
+            ], 200);
         }
 
         Cart::create([
             'account_id' => $userId,
             'product_id' => $productId,
-            'quantity'=> 0,
+            'quantity'=> 1,
             'price'=>$price
         ]);
 
@@ -48,7 +53,7 @@ class CartController extends Controller
 public function update(Request $request, $productId)
 {
     $request->validate([
-        'quantity' => 'required|integer|min:1'
+        'quantity' => 'required|integer|min:0'
     ]);
 
     if (!Auth::check()) {
@@ -103,7 +108,7 @@ public function update(Request $request, $productId)
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $cartItems = Cart::with('product')->where('account_id', Auth::id())->get();
+        $cartItems = Cart::with('product')->where('account_id', Auth::id())->orderBy('created_at')->get();
 
         return response()->json($cartItems);
     }

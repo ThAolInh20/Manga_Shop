@@ -104,8 +104,27 @@ async function checkLogin() {
   }
 }
 // Thêm sản phẩm vào giỏ hàng
-function addToCart(product) {
-  alert(`Đã thêm ${product.name} vào giỏ hàng!`)
+async function addToCart(product) {
+ try {
+    const res = await axios.post('/api/cart', {
+      product_id: product.id,
+      price: product.price,
+      sale: product.sale || 0
+    })
+
+    if (res.status === 201) {
+      alert(`Đã thêm ${product.name} vào giỏ hàng!`)
+    } else {
+      alert(res.data.message)
+    }
+  } catch (err) {
+    if (err.response && err.response.status === 401) {
+      alert('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!')
+    } else {
+      console.error(err)
+      alert('Có lỗi xảy ra khi thêm sản phẩm!')
+    }
+  }
 }
 
 // Xóa sản phẩm khỏi wishlist
@@ -116,6 +135,7 @@ async function removeFromWishlist(productId) {
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     // reload
+    alert('Đã xóa sản phẩm khỏi danh sách yêu thích!')
     fetchWishlists(wishlists.value.current_page)
   } catch (err) {
     console.error(err)

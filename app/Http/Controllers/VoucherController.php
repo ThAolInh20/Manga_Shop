@@ -15,6 +15,16 @@ class VoucherController extends Controller
         $vouchers = Voucher::latest()->paginate(10);
         return view('admin.vouchers.index', compact('vouchers'));
     }
+    public function listActiveVouchers()
+    {
+        $vouchers = Voucher::where('is_active', true)
+                            ->where(function ($query) {
+                                $query->whereNull('date_end')
+                                      ->orWhere('date_end', '>', now());
+                            })
+                            ->get();
+        return response()->json($vouchers);
+    }
 
     /**
      * Show the form for creating a new resource.

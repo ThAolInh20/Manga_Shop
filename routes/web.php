@@ -43,6 +43,7 @@ Route::post('logout', [AccountAuthController::class, 'userLogout'])->name('user.
 // Admin login
 Route::get('admin/login', [AccountAuthController::class, 'showAdminLoginForm'])->name('admin.login');
  Route::post('admin/login', [AccountAuthController::class, 'adminLogin']);
+
 Route::middleware(['auth', 'role:0,1'])->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::prefix('admin')->group(function () {
@@ -75,6 +76,12 @@ Route::prefix('api')->group(function () {
     Route::put('/cart/{productId}', [CartController::class, 'update']);
     Route::delete('/cart/{productId}', [CartController::class, 'remove']);
     Route::get('/cart', [CartController::class, 'list']);
+    route::get('/vouchers/active', [VoucherController::class, 'listActiveVouchers']);
+});
+
+Route::middleware(['auth', 'role:2'])->group(function () {
+    
+
 });
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -83,3 +90,4 @@ route::get('/products/{product}', [ProductController::class, 'showProductForUser
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
 route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
 route::get('/cart', [CartController::class, 'index'])->name('user.cart.list');
+
