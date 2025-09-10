@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
+    public function index(){
+        return view('user.cart.list');
+    }
     // Thêm sản phẩm vào giỏ hàng
     public function add(Request $request)
     {
@@ -36,7 +39,7 @@ class CartController extends Controller
         Cart::create([
             'account_id' => $userId,
             'product_id' => $productId,
-            'quantity'=> 1,
+            'quantity'=> 0,
             'price'=>$price
         ]);
 
@@ -93,8 +96,8 @@ public function update(Request $request, $productId)
         return response()->json(['message' => 'Đã xóa sản phẩm khỏi giỏ hàng']);
     }
 
-    // Lấy danh sách giỏ hàng của user
-    public function index()
+    // // Lấy danh sách giỏ hàng của user
+    public function list()
     {
         if (!Auth::check()) {
             return response()->json(['error' => 'Unauthorized'], 401);

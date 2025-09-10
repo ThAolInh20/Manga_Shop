@@ -74,7 +74,7 @@ Route::prefix('api')->group(function () {
     Route::post('/cart', [CartController::class, 'add']);
     Route::put('/cart/{productId}', [CartController::class, 'update']);
     Route::delete('/cart/{productId}', [CartController::class, 'remove']);
-    Route::get('/cart', [CartController::class, 'index']);
+    Route::get('/cart', [CartController::class, 'list']);
 });
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -82,3 +82,4 @@ route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 route::get('/products/{product}', [ProductController::class, 'showProductForUser'])->name('user.products.show');
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
 route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
+route::get('/cart', [CartController::class, 'index'])->name('user.cart.list');

@@ -22,12 +22,16 @@
       <li class="nav-item me-2"><a class="nav-link" href="{{ route('home') }}">Home</a></li>
       <li class="nav-item me-2"><a class="nav-link" href="{{ route('user.products.list') }}">Danh sách sản phẩm</a></li>
       <li class="nav-item me-2"><a class="nav-link" href="#">Liên hệ</a></li>
-       <li class="nav-item">
-         <a class="nav-link p-0" href="#">
-          <i class="bx bx-cart fs-4"></i>
-        
-        </a>
-      </li>
+      <li class="nav-item position-relative">
+  <a class="nav-link p-0" href="{{ route('user.cart.list') }}" title="Giỏ hàng">
+    <i class="bx bx-cart fs-4"></i>
+    @if($cartCount > 0)
+      <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ $cartCount }}
+      </span>
+    @endif
+  </a>
+</li>
         <li class="nav-item dropdown me-md-3">
           <a class="nav-link dropdown-toggle hide-arrow d-flex align-items-center" href="#" data-bs-toggle="dropdown">
             <i class="bx bx-user fs-4"></i>
