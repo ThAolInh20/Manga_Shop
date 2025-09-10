@@ -130,7 +130,7 @@
       <span>{{ formatPrice(finalTotal) }} đ</span>
     </div>
 
-    <button class="btn btn-primary w-100 mt-3">
+    <button class="btn btn-primary w-100 mt-3" @click="checkout">
       Thanh toán
     </button>
   </div>
@@ -245,12 +245,12 @@ const removeFromCart = async (productId) => {
     cart.value = cart.value.filter((i) => i.product_id !== productId)
   } catch (err) {
     console.error(err)
-    alert("❌ Lỗi khi xóa sản phẩm!")
+    alert("Lỗi khi xóa sản phẩm!")
   }
 }
 const checkout = async () => {
   if (selectedItems.value.length === 0) {
-    alert("❌ Vui lòng chọn sản phẩm để thanh toán!")
+    alert("Vui lòng chọn sản phẩm để thanh toán!")
     return
   }
 
@@ -263,15 +263,15 @@ const checkout = async () => {
       price: item.price
     }))
 
-  // Nếu có voucher, gửi kèm code
+  
   const payload = {
     products: orderData,
-    voucher_code: appliedVoucher.value ? appliedVoucher.value.code : null,
-    total: finalTotal.value
+    total_price: finalTotal.value
   }
 
   try {
-    const res = await axios.post("/api/order", payload)
+    // const res = await axios.post("/api/order", payload)
+    const res = await axios.post("/api/order",payload)
     alert("✅ Tạo đơn hàng thành công!")
     // Sau khi tạo đơn xong có thể xóa các sản phẩm đã đặt khỏi giỏ
     fetchCart()
@@ -280,8 +280,8 @@ const checkout = async () => {
     appliedVoucher.value = null
     discount.value = 0
   } catch (err) {
-    console.error(err)
-    alert("❌ Lỗi khi tạo đơn hàng!")
+    console.error('Loixoi:'+err)
+    alert("Lỗi khi tạo đơn hàng!")
   }
 }
 

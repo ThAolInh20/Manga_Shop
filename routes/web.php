@@ -77,6 +77,10 @@ Route::prefix('api')->group(function () {
     Route::delete('/cart/{productId}', [CartController::class, 'remove']);
     Route::get('/cart', [CartController::class, 'list']);
     route::get('/vouchers/active', [VoucherController::class, 'listActiveVouchers']);
+    route::post('/order', [OrderController::class, 'add']);
+    route::get('/user/orders', [OrderController::class, 'listUserOrders']);
+    Route::post('/order/{orderId}/cancel', [OrderController::class, 'cancelOrder']);
+
 });
 
 Route::middleware(['auth', 'role:2'])->group(function () {
@@ -90,4 +94,5 @@ route::get('/products/{product}', [ProductController::class, 'showProductForUser
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
 route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
 route::get('/cart', [CartController::class, 'index'])->name('user.cart.list');
+route::get('/user/orders', [OrderController::class, 'userOrdersPage'])->name('user.order.list');
 

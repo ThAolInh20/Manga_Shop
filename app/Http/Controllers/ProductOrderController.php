@@ -7,17 +7,15 @@ use Illuminate\Http\Request;
 
 class ProductOrderController extends Controller
 {
-    public function add($jsonData)
+    public function add($product, $order_id)
     {
-        $data = json_decode($jsonData, true);
-        foreach ($data as $item) {
-            ProductOrder::create([
-                'product_id' => $item['product_id'],
-                'order_id' => $item['order_id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price']
-            ]);
-        }
-        return response()->json(['message' => 'Product orders added successfully'], 201);
+         ProductOrder::create([
+        'product_id' => $product['product_id'], // $product là mảng
+        'order_id' => $order_id,
+        'quantity' => $product['quantity'],
+        'price' => $product['price']
+    ]);
+        // return response()->json(['message' => 'Product orders added successfully'], 201);
     }
+    
 }
