@@ -107,7 +107,7 @@ class WishlistController extends Controller
                 ->first();
 
             if ($exists) {
-                return response()->json(['message' => 'Sản phẩm đã có trong wishlist']);
+                return response()->json(['message' => 'Sản phẩm đã có trong wishlist'],200);
             }
 
             Wishlist::create([
@@ -122,7 +122,7 @@ class WishlistController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Đã thêm vào wishlist']);
+        return response()->json(['message' => 'Đã thêm vào wishlist'],201);
     }
 
     /**
@@ -144,6 +144,6 @@ class WishlistController extends Controller
             session()->put('wishlist', $wishlist);
         }
 
-        return response()->json(['message' => 'Đã xoá khỏi wishlist'] );
+        return response()->json(['message' => 'Đã xoá khỏi wishlist'],201 );
     }
 }

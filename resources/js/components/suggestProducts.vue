@@ -46,7 +46,7 @@
           <h5 class="card-title">{{ product.name }}</h5>
           <p class="card-text text-muted">Tác giả: {{ product.author }}</p>
 
-          <div v-if="product.sale">
+          <div v-if="product.sale>0">
             <p class="mb-1">
               <span class="text-muted text-decoration-line-through me-2">
                 {{ formatPrice(product.price) }} đ

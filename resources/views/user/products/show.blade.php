@@ -33,10 +33,10 @@
 
       <!-- Nút giỏ hàng -->
       <div class="d-flex gap-2 mb-3">
-        <a href="#" class="btn btn-primary w-50">
-          <i class="bi bi-cart"></i> Thêm vào giỏ
-        </a>
-        <a href="#" class="btn btn-outline-secondary w-50">
+        <button type="button" class="btn btn-primary w-50" onclick="addToCart('{{ $product->id }}, {{ $product->price }}, {{ $product->sale ?? 0 }}, {{ $product->name }}')">
+    <i class="bi bi-cart"></i> Thêm vào giỏ
+  </button>
+        <a href="{{ route('user.cart.list') }}" class="btn btn-outline-secondary w-50">
           <i class="bi bi-bag-check"></i> Xem giỏ hàng
         </a>
       </div>
@@ -112,6 +112,35 @@
     </div>
   </div>
 </div>
+
+<script>
+async function addToCart(productId, price, sale) {
+  try {
+    const res = await axios.post('/api/cart', {
+      product_id: productId,
+      price: price,
+      sale: sale
+    }, {
+      headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      }
+    });
+
+    if (res.status === 201) {
+      alert(`Đã thêm sản phẩm vào giỏ hàng!`);
+    } else {
+      alert(res.data.message);
+    }
+  } catch (err) {
+    if (err.response && err.response.status === 401) {
+      alert('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!');
+    } else {
+      console.error(err);
+      alert('Có lỗi xảy ra khi thêm sản phẩm!');
+    }
+  }
+}
+</script>
 <style>
 .lb-close, .lb-prev, .lb-next {
   display: block !important;

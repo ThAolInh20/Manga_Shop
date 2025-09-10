@@ -110,12 +110,12 @@
             <h5 class="card-title">{{ product.name }}</h5>
             <p class="card-text text-muted">Tác giả: {{ product.author }}</p>
 
-            <div v-if="product.sale">
+            <div v-if="product.sale>0">
               <p class="mb-1">
                 <span class="text-muted text-decoration-line-through me-2">
                   {{ formatPrice(product.price) }} đ
                 </span>
-                <small class="text-success">-{{ product.sale }}%</small>
+                <small class="text-success" >-{{ product.sale }}%</small>
               </p>
               <p class="fw-bold text-danger">
                 {{ formatPrice(discountedPrice(product)) }} đ
@@ -340,16 +340,16 @@ async function addToCart(product) {
     })
 
     if (res.status === 201) {
-      alert(`🛒 Đã thêm ${product.name} vào giỏ hàng!`)
+      alert(`Đã thêm ${product.name} vào giỏ hàng!`)
     } else {
       alert(res.data.message)
     }
   } catch (err) {
     if (err.response && err.response.status === 401) {
-      alert('⚠️ Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!')
+      alert('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!')
     } else {
       console.error(err)
-      alert('❌ Có lỗi xảy ra khi thêm sản phẩm!')
+      alert('Có lỗi xảy ra khi thêm sản phẩm!')
     }
   }
 }
