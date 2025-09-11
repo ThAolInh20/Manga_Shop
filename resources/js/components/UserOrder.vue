@@ -65,6 +65,23 @@
             >
               Hủy đơn
             </button>
+             <!-- Nút xác nhận đã nhận hàng -->
+  <button 
+    class="btn btn-success btn-sm"
+    v-if="order.order_status === 2"
+    @click="updateOrderStatus(order.id, 3)" 
+  >
+    Đã nhận được hàng
+  </button>
+
+  <!-- Nút đổi trả -->
+  <button 
+    class="btn btn-warning btn-sm"
+    v-if="order.order_status === 3"
+    @click="updateOrderStatus(order.id, 4)" 
+  >
+    Đổi trả
+  </button>
           </div>
         </div>
       </div>
@@ -81,12 +98,13 @@ const loading = ref(false)
 const filterStatus = ref(null)
 
 const statuses = [
-    {value: 0, text:"Chờ thanh toán"},
+  {value: 0, text:"Chờ thanh toán"},
   { value: 1, text: "Đang xử lý" },
   { value: 2, text: "Đang giao" },
   { value: 3, text: "Hoàn tất" },
-  { value:4, text: "Đã hủy" },
-  { value:5, text: "Đổi trả" },
+  { value: 4, text: "Đổi trả" },
+  { value: 5, text: "Đã hủy" },
+  
 ]
 
 const fetchOrders = async () => {
@@ -118,6 +136,18 @@ const cancelOrder = async (orderId) => {
   } catch (err) {
     console.error(err)
     alert("❌ Lỗi khi hủy đơn!")
+  }
+}
+const updateOrderStatus = async (orderId, statusWant) => {
+  try {
+    const res = await axios.post(`/api/order/${orderId}/status`, {
+      status_want: statusWant
+    })
+    alert(res.data.message)
+    fetchOrders() // load lại danh sách đơn hàng
+  } catch (err) {
+    console.error(err)
+    alert(err.response?.data?.message || "❌ Lỗi khi cập nhật trạng thái!")
   }
 }
 

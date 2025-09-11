@@ -58,6 +58,8 @@ Route::middleware(['auth', 'role:0,1'])->group(function () {
             'index', 'show', 'edit', 'update'
         ]);
         Route::post('logout', [AccountAuthController::class, 'logout'])->name('admin.logout');
+        Route::post('/orders/{orderId}/cancel', [OrderController::class, 'cancelAdminOrder']);
+        Route::post('/orders/{orderId}/status', [OrderController::class, 'updateAdminStatus']);
     });
     
 
@@ -80,6 +82,8 @@ Route::prefix('api')->group(function () {
     route::post('/order', [OrderController::class, 'add']);
     route::get('/user/orders', [OrderController::class, 'listUserOrders']);
     Route::post('/order/{orderId}/cancel', [OrderController::class, 'cancelOrder']);
+    Route::post('/order/{orderId}/status', [OrderController::class, 'updateStatus']);
+
 
 });
 

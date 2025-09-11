@@ -18,11 +18,56 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $orders = Order::with('account', 'products')->latest()->paginate(10);
-        return view('admin.orders.index', compact('orders'));
+    public function index(Request $request)
+{
+    $query = Order::with('account', 'products');
+
+    // --- Bộ lọc ---
+    if ($request->filled('customer_name')) {
+        $query->whereHas('account', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->customer_name . '%');
+        });
     }
+
+    if ($request->filled('status')) {
+        $query->where('order_status', $request->status);
+    }
+
+    if ($request->order_date) {
+    try {
+        $date = \Carbon\Carbon::parse($request->order_date)->toDateString();
+        $query->whereDate('created_at', '=', $date);
+    } catch (\Exception $e) {
+        // Nếu ngày không hợp lệ thì bỏ qua
+    }
+}
+
+ 
+
+    // --- Sắp xếp ---
+    $sortField = $request->get('sort_field', 'id'); 
+    $sortOrder = $request->get('sort_order', 'desc');
+
+    // Cho phép sắp xếp theo: id, total_price, order_status, created_at, customer_name
+    if ($sortField === 'customer_name') {
+        $query->join('accounts', 'orders.account_id', '=', 'accounts.id')
+              ->select('orders.*', 'accounts.name as customer_name')
+              ->orderBy('accounts.name', $sortOrder);
+    } else {
+        $query->orderBy($sortField, $sortOrder);
+    }
+
+    $orders = $query->paginate(10);
+
+    // Nếu AJAX thì chỉ trả bảng (render partial view)
+    if ($request->ajax()) {
+        return view('admin.orders.table', compact('orders'))->render();
+    }
+
+    // Nếu load full page
+    return view('admin.orders.index', compact('orders'));
+}
+
     public function userOrdersPage()
     {
         return view('user.order.list');
@@ -42,7 +87,7 @@ class OrderController extends Controller
 
         // Tính số sản phẩm trong mỗi đơn
         $orders->map(function($order) {
-            $order->product_count = $order->products->count();
+            $order->product_count = $order->productOrders()->sum('quantity');
             return $order;
         });
 
@@ -50,7 +95,7 @@ class OrderController extends Controller
             'orders' => $orders
         ]);
        
-    }
+    }    
      // API hủy đơn hàng
     public function cancelOrder($orderId)
     {
@@ -75,7 +120,8 @@ class OrderController extends Controller
         }
 
         // 3. Cập nhật trạng thái hủy
-        $order->order_status = 4; // 4 = đã hủy
+        $order->order_status = 5; // 5 = đã hủy
+        // $order->updated_by = $user->id;
         $order->save();
 
         return response()->json([
@@ -84,6 +130,56 @@ class OrderController extends Controller
             'order_status' => $order->order_status
         ]);
     }
+    public function updateStatus(Request $request, $orderId)
+{
+    $request->validate([
+        'status_want' => 'required|integer|min:0|max:4'
+    ]);
+
+    $user = Auth::user();
+    $statusWant = $request->status_want;
+
+    // 1. Lấy đơn hàng
+    $order = Order::where('id', $orderId)
+        ->where('account_id', $user->id)
+        ->first();
+
+    if (!$order) {
+        return response()->json([
+            'message' => 'Đơn hàng không tồn tại hoặc không thuộc bạn'
+        ], 404);
+    }
+
+    $currentStatus = $order->order_status;
+
+    // 2. Kiểm tra điều kiện cập nhật
+    if ($statusWant === $currentStatus) {
+        return response()->json([
+            'message' => 'Trạng thái mới trùng với trạng thái hiện tại'
+        ], 400);
+    }
+
+    // Chỉ cho phép chuyển từ current → current+1 (theo tuần tự)
+    if ($statusWant !== $currentStatus + 1) {
+        return response()->json([
+            'message' => "Không thể chuyển từ trạng thái {$currentStatus} sang {$statusWant}. 
+                          Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
+        ], 400);
+    }
+
+    // 3. Cập nhật trạng thái
+    $order->order_status = $statusWant;
+    // $order->updated_by = $user->id;
+
+    $order->save();
+
+    return response()->json([
+        'message' => 'Cập nhật trạng thái thành công',
+        'order_id' => $order->id,
+        'order_status' => $order->order_status
+    ]);
+}
+   
 
     /**
      * Show the form for creating a new resource.
@@ -179,8 +275,9 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load('account', 'products');
-        return view('orders.show', compact('order'));
+        $order = Order::with(['account', 'productOrders.product'])->findOrFail($order->id);
+
+        return view('admin.orders.show', compact('order'));
     }
 
     /**
@@ -219,4 +316,88 @@ class OrderController extends Controller
     {
         //
     }
+     // API hủy đơn hàng
+    public function cancelAdminOrder($orderId)
+    {
+       
+
+        // 1. Lấy đơn hàng và kiểm tra thuộc user
+        $order = Order::where('id', $orderId)
+      
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Đơn hàng không tồn tại'
+            ], 404);
+        }
+
+        // 2. Kiểm tra trạng thái: chỉ cho hủy khi order_status = 0 hoặc 1
+        if (!in_array($order->order_status, [0, 1])) {
+            return response()->json([
+                'message' => 'Đơn hàng không thể hủy vì đã xử lý hoặc đang giao'
+            ], 400);
+        }
+
+        // 3. Cập nhật trạng thái hủy
+        $order->order_status = 5; // 5 = đã hủy
+        // $order->updated_by = $user->id;
+        $order->save();
+
+        return response()->json([
+            'message' => 'Hủy đơn hàng thành công',
+            'order_id' => $order->id,
+            'order_status' => $order->order_status
+        ]);
+    }
+    public function updateAdminStatus(Request $request, $orderId)
+{
+    $request->validate([
+        'status_want' => 'required|integer|min:0|max:4'
+    ]);
+
+   
+    $statusWant = $request->status_want;
+
+    // 1. Lấy đơn hàng
+    $order = Order::where('id', $orderId)
+
+        ->first();
+
+    if (!$order) {
+        return response()->json([
+            'message' => 'Đơn hàng không tồn tại hoặc không thuộc bạn'
+        ], 404);
+    }
+
+    $currentStatus = $order->order_status;
+
+    // 2. Kiểm tra điều kiện cập nhật
+    if ($statusWant === $currentStatus) {
+        return response()->json([
+            'message' => 'Trạng thái mới trùng với trạng thái hiện tại'
+        ], 400);
+    }
+
+    // Chỉ cho phép chuyển từ current → current+1 (theo tuần tự)
+    if ($statusWant !== $currentStatus + 1) {
+        return response()->json([
+            'message' => "Không thể chuyển từ trạng thái {$currentStatus} sang {$statusWant}. 
+                          Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
+        ], 400);
+    }
+
+    // 3. Cập nhật trạng thái
+    $order->order_status = $statusWant;
+    // $order->updated_by = $user->id;
+
+    $order->save();
+
+    return response()->json([
+        'message' => 'Cập nhật trạng thái thành công',
+        'order_id' => $order->id,
+        'order_status' => $order->order_status
+    ]);
+}
+   
 }
