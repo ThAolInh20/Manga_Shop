@@ -130,6 +130,14 @@ public function adminLogin(Request $request)
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:accounts',
             'password' => 'required|string|min:6|confirmed',
+        ],[
+            'pasword.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'email.unique' => 'Email đã được sử dụng.',
+            'name.required' => 'Vui lòng nhập tên.',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Email không hợp lệ.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
         ]);
 
         $user = new \App\Models\Account();
@@ -141,7 +149,7 @@ public function adminLogin(Request $request)
 
         if ($this->checkLogin($request->email, $request->password)) {
                 $request->session()->regenerate();
-                return redirect()->route('home')->with('status', 'Đăng ký thành công và đã đăng nhập!');
+                return redirect()->route('login')->with('status', 'Đăng ký thành công!');
             }
 
             // Nếu login tự động thất bại (hiếm khi xảy ra)

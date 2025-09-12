@@ -83,6 +83,7 @@ Route::prefix('api')->group(function () {
     route::get('/user/orders', [OrderController::class, 'listUserOrders']);
     Route::post('/order/{orderId}/cancel', [OrderController::class, 'cancelOrder']);
     Route::post('/order/{orderId}/status', [OrderController::class, 'updateStatus']);
+    route::get('/order/{orderId}', [OrderController::class, 'userShow2']);
 
 
 });
@@ -99,4 +100,7 @@ route::get('/products', [ProductController::class, 'indexForUser'])->name('user.
 route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
 route::get('/cart', [CartController::class, 'index'])->name('user.cart.list');
 route::get('/user/orders', [OrderController::class, 'userOrdersPage'])->name('user.order.list');
+route::get('/order/{orderId}', [OrderController::class, 'userShow'])->name('user.order.show');
+route::get('/order/update/{orderId}', [OrderController::class, 'userOrderUpdateForm'])->name('user.order.update');
+Route::put('/order/update/{orderId}', [OrderController::class, 'updateUserOrder'])->name('user.order.update.post');
 

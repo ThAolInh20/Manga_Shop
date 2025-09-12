@@ -3,6 +3,19 @@
 @section('title', 'Đăng nhập Admin')
 
 @section('content')
+@section('content')
+ <!-- Alerts nổi lên dưới navbar -->
+  <div id="alerts-container" 
+       class="position-fixed top-0 end-0 mt-5 me-3"
+       style="z-index: 2000; max-width: 400px;">
+    @if (session('status'))
+      <div class="alert alert-success alert-dismissible fade show shadow" role="alert">
+        {{ session('status') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    @endif
+  
+</div>
 <div class="container-xxl">
   <div class="authentication-wrapper authentication-basic container-p-y">
     <div class="authentication-inner">
@@ -43,7 +56,7 @@
               @endif
 
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <a href="{{ route('password.request') }}" class="text-muted small">Quên mật khẩu?</a>
+                <!-- <a href="{{ route('password.request') }}" class="text-muted small">Quên mật khẩu?</a> -->
                 <a href="{{ route('register') }}" class="btn btn-outline-secondary btn-sm">Đăng ký</a>
               </div>
 

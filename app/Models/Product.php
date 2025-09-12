@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Scopes\ActiveScope;
 class Product extends Model
 {
     use HasFactory;
@@ -56,7 +56,11 @@ class Product extends Model
 
     // Sản phẩm dc ai thích
     public function likedByUsers()
-{
-    return $this->belongsToMany(Account::class, 'wishlists', 'product_id', 'account_id');
-}
+    {
+        return $this->belongsToMany(Account::class, 'wishlists', 'product_id', 'account_id');
+    }
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope(new ActiveScope);
+    // }
 }

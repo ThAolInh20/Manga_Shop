@@ -14,7 +14,7 @@ class Order extends Model
     protected $fillable = [
         'account_id', 'order_date', 'deliver_date', 
         'order_status', 'shipping_fee', 'shipping_address', 
-        'total_price', 'payment_status','name_recipient'
+        'total_price', 'payment_status','name_recipient','phone_recipient'
     ];
 
     public function account()

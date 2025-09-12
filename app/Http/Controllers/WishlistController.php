@@ -18,6 +18,7 @@ class WishlistController extends Controller
     {
         if (Auth::check()) {
         $wishlists = Auth::user()->wishlist()->with('product')->paginate(10);
+      
 
         // map để trả về cấu trúc giống guest
         $wishlists->getCollection()->transform(function ($item) {

@@ -11,6 +11,7 @@ import WishlishProduct from './components/WishlishProduct.vue';
 import Alert from './components/Alert.vue';
 import Cart from './components/Cart.vue';
 import UserOrder from './components/UserOrder.vue';
+import OrderDetail from './components/OrderDetail.vue';
 
 const app = createApp({});
 // const pinia = createPinia()
@@ -25,6 +26,7 @@ app.component('WishlistProduct',WishlishProduct);
 app.component('Alert',Alert);
 app.component('Cart',Cart);
 app.component('UserOrder',UserOrder);
+app.component('OrderDetail',OrderDetail);
 
 
 // Mount Vue vào #app (trong Blade)
