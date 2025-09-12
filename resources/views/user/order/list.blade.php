@@ -1,5 +1,5 @@
 @extends('user.layouts.app')
-@section('title', 'Danh sách sản phẩm')
+@section('title', 'Danh sách đơn hàng')
 
 @section('content')
 

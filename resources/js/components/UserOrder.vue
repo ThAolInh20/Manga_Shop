@@ -36,6 +36,7 @@
     <div v-else>
       <div v-for="order in orders" :key="order.id" class="card mb-4 shadow-sm">
         <!-- Header đơn hàng -->
+         <a :href="`/order/${order.id}`" class="card-header d-flex justify-content-between text-decoration-none text-dark">
         <div class="card-header d-flex justify-content-between flex-wrap align-items-center">
           <div>
             <strong>Mã đơn hàng:</strong> #{{ order.id }} <br>
@@ -46,7 +47,7 @@
             <strong>Giờ đặt:</strong> {{ formatTime(order.created_at) }}
           </div>
         </div>
-
+        </a>
         <hr class="my-1">
 
         <!-- Body: thông tin sản phẩm và tổng -->
@@ -58,6 +59,15 @@
             <strong>Tổng tiền:</strong> {{ formatPrice(order.total_price) }} đ
           </div>
           <div>
+             <!-- Nút thanh toán (chỉ khi chờ thanh toán) -->
+    <a 
+      v-if="order.order_status === 0" 
+      :href="`/order/update/${order.id}`" 
+      class="btn btn-primary btn-sm me-2"
+    >
+      Thanh toán
+    </a>
+          
             <button 
               class="btn btn-danger btn-sm"
               :disabled="order.order_status !== 0 && order.order_status !== 1"
@@ -75,13 +85,13 @@
   </button>
 
   <!-- Nút đổi trả -->
-  <button 
+  <!-- <button 
     class="btn btn-warning btn-sm"
     v-if="order.order_status === 3"
     @click="updateOrderStatus(order.id, 4)" 
   >
     Đổi trả
-  </button>
+  </button> -->
           </div>
         </div>
       </div>

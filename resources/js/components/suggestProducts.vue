@@ -136,14 +136,17 @@ async function fetchProducts() {
 async function toggleWishlist(product) {
   if (product.in_wishlist) {
     // Xoá
-    await fetch(`http://127.0.0.1:8000/api/wishlist/${product.id}`, {
+    await fetch(`/api/wishlist/${product.id}`, {
       method: 'DELETE',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+       headers: {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  }
     })
     product.in_wishlist = false
   } else {
     // Thêm
-    await fetch('http://127.0.0.1:8000/api/wishlist', {
+    await fetch('/api/wishlist', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

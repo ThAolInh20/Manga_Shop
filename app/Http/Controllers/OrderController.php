@@ -118,6 +118,14 @@ class OrderController extends Controller
                 'message' => 'Đơn hàng không thể hủy vì đã xử lý hoặc đang giao'
             ], 400);
         }
+        foreach ($order->items as $item) {
+                $product = Product::find($item->product_id);
+
+                if ($product) {
+                    $product->quantity += $item->quantity;
+                    $product->save();
+                }
+            }
 
         // 3. Cập nhật trạng thái hủy
         $order->order_status = 5; // 5 = đã hủy
@@ -149,6 +157,7 @@ class OrderController extends Controller
             'message' => 'Đơn hàng không tồn tại hoặc không thuộc bạn'
         ], 404);
     }
+    
 
     $currentStatus = $order->order_status;
 
@@ -231,7 +240,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'account_id' => Auth::user()->id, // giả sử bạn có auth
                 'status' => 0,
-                'total_price' => $request->total_price       
+                'total_price' => $request->total_price   
             ]);
 
             $productOrderController = new ProductOrderController();
@@ -269,6 +278,54 @@ class OrderController extends Controller
     {
         //
     }
+    public function userOrderUpdateForm($id)
+    {
+        $user = Auth::user();
+         $order = Order::with(['productOrders.product'])
+        ->where('account_id', $user->id)
+        ->find($id);
+
+        return view('user.order.update',compact('order'));
+    }
+public function updateUserOrder(Request $request, $orderId)
+{
+    $user = Auth::user();
+    $order = Order::where('id', $orderId)
+                  ->where('account_id', $user->id)
+                  ->first();
+
+    if (!$order) {
+        return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+    }
+
+    // chỉ cho phép sửa khi chưa giao
+    if (!in_array($order->order_status, [0, 1])) {
+        return response()->json(['message' => 'Đơn hàng đã xử lý, không thể chỉnh sửa'], 400);
+    }
+
+    $data = $request->validate([
+        'name_recipient'   => 'required|string|max:100',
+        'phone_recipient'  => 'required|string|max:20',
+        'shipping_address' => 'required|string|max:255',
+        // 'voucher_code'     => 'required|string|max:50',
+    ],[
+        'name_recipient.required' => 'Tên người nhận không được để trống',
+        'phone_recipient.required' => 'Số điện thoại người nhận không được để trống',
+        'shipping_address.required' => 'Địa chỉ giao hàng không được để trống',
+        // 'voucher_code.required' => 'Mã voucher không được để trống',
+    ]);
+    if($order->order_status == 0){
+        $order->order_status = 1;
+    }
+    //check giao dịch
+
+    $order->update($data);
+
+    return response()->json([
+        'message' => 'Cập nhật đơn hàng thành công',
+        'order'   => $order
+    ]);
+}
 
     /**
      * Display the specified resource.
@@ -279,6 +336,30 @@ class OrderController extends Controller
 
         return view('admin.orders.show', compact('order'));
     }
+    public function userShow($id)
+    {
+        return view('user.order.show', ['id' => $id]);
+    }
+    public function userShow2($orderId)
+{
+    $user = Auth::user();
+
+    // Lấy đơn hàng thuộc về user đang đăng nhập
+    $order = Order::with(['productOrders.product'])
+        ->where('account_id', $user->id)
+        ->find($orderId);
+
+    if (!$order) {
+        return response()->json([
+            'message' => 'Không tìm thấy đơn hàng'
+        ], 404);
+    }
+
+    return response()->json([
+        'order' => $order
+    ]);
+}
+
 
     /**
      * Show the form for editing the specified resource.
@@ -338,7 +419,15 @@ class OrderController extends Controller
                 'message' => 'Đơn hàng không thể hủy vì đã xử lý hoặc đang giao'
             ], 400);
         }
+        // Hoàn trả tồn kho
+        foreach ($order->items as $item) {
+                $product = Product::find($item->product_id);
 
+                if ($product) {
+                    $product->quantity += $item->quantity;
+                    $product->save();
+                }
+            }
         // 3. Cập nhật trạng thái hủy
         $order->order_status = 5; // 5 = đã hủy
         // $order->updated_by = $user->id;
@@ -369,7 +458,9 @@ class OrderController extends Controller
             'message' => 'Đơn hàng không tồn tại hoặc không thuộc bạn'
         ], 404);
     }
+    if($statusWant ==1){
 
+    }
     $currentStatus = $order->order_status;
 
     // 2. Kiểm tra điều kiện cập nhật
@@ -386,7 +477,28 @@ class OrderController extends Controller
                           Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
         ], 400);
     }
+    if ($statusWant == 1) {
+        foreach ($order->items as $item) {
+            $product = Product::find($item->product_id);
 
+            if (!$product) {
+                return response()->json([
+                    'message' => "Sản phẩm ID {$item->product_id} không tồn tại"
+                ], 400);
+            }
+
+            // Kiểm tra tồn kho
+            if ($product->quantity < $item->quantity) {
+                return response()->json([
+                    'message' => "Sản phẩm {$product->name} không đủ hàng trong kho"
+                ], 400);
+            }
+
+            // Trừ số lượng tồn
+            $product->quantity -= $item->quantity;
+            $product->save();
+        }
+    }
     // 3. Cập nhật trạng thái
     $order->order_status = $statusWant;
     // $order->updated_by = $user->id;

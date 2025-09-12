@@ -244,7 +244,7 @@ class ProductController extends Controller
    public function getAllProducts(Request $request)
 {
     $user = auth()->user();
-    $query = Product::query();
+    $query = Product::query() ->where('is_active', 1);;
 
     // 🔍 Tìm kiếm theo tên sản phẩm hoặc tác giả
     if ($request->search) {

@@ -273,7 +273,11 @@ const checkout = async () => {
     // const res = await axios.post("/api/order", payload)
     const res = await axios.post("/api/order",payload)
     alert("✅ Tạo đơn hàng thành công!")
+    const order_id = res.data.order_id
+     
+    window.location.href = `/order/update/${order_id}`
     // Sau khi tạo đơn xong có thể xóa các sản phẩm đã đặt khỏi giỏ
+    
     fetchCart()
     selectedItems.value = []
     voucherCode.value = ""
