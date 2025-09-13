@@ -260,14 +260,18 @@ const checkout = async () => {
     .map(item => ({
       product_id: item.product_id,
       quantity: item.quantity,
-      price: item.price
+      price: item.price,
     }))
+    // console.log(orderData)
 
   
   const payload = {
     products: orderData,
-    total_price: finalTotal.value
+    subtotal_price: totalSelected.value,
+    total_price: finalTotal.value,
+    voucher: appliedVoucher.value ? appliedVoucher.value.code : null
   }
+  console.log(payload)
 
   try {
     // const res = await axios.post("/api/order", payload)
@@ -275,7 +279,7 @@ const checkout = async () => {
     alert("✅ Tạo đơn hàng thành công!")
     const order_id = res.data.order_id
      
-    window.location.href = `/order/update/${order_id}`
+    // window.location.href = `/order/update/${order_id}`
     // Sau khi tạo đơn xong có thể xóa các sản phẩm đã đặt khỏi giỏ
     
     fetchCart()

@@ -10,6 +10,7 @@ use App\Models\ProductOrder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ProductOrderController;
+use App\Models\Voucher;
 use Illuminate\Support\Facades\Log;
 
 
@@ -118,14 +119,17 @@ class OrderController extends Controller
                 'message' => 'Đơn hàng không thể hủy vì đã xử lý hoặc đang giao'
             ], 400);
         }
-        foreach ($order->items as $item) {
-                $product = Product::find($item->product_id);
+        // foreach ($order->products as $product) {
+        //         $quantity = $product->pivot->quantity; // lấy từ bảng trung gian
 
-                if ($product) {
-                    $product->quantity += $item->quantity;
-                    $product->save();
-                }
-            }
+        //         if ($product) {
+        //             if($order->order_status == 1){
+        //                 $product->cancel($quantity);
+        //             }
+                    
+        //             $product->save();
+        //         }
+        //     }
 
         // 3. Cập nhật trạng thái hủy
         $order->order_status = 5; // 5 = đã hủy
@@ -232,7 +236,9 @@ class OrderController extends Controller
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.price' => 'required|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
+            'voucher' => 'nullable|string|max:50'
         ]);
+        $voucher_id = Voucher::where('code', $request->voucher)->value('id');
 
         DB::beginTransaction();
         try {
@@ -240,7 +246,9 @@ class OrderController extends Controller
             $order = Order::create([
                 'account_id' => Auth::user()->id, // giả sử bạn có auth
                 'status' => 0,
-                'total_price' => $request->total_price   
+                'total_price' => $request->total_price,
+                'subtotal_price' => $request->subtotal_price,
+                'voucher_id' => $voucher_id ?? null
             ]);
 
             $productOrderController = new ProductOrderController();
@@ -309,12 +317,43 @@ public function updateUserOrder(Request $request, $orderId)
         'phone_recipient'  => 'required|string|max:20',
         'shipping_address' => 'required|string|max:255',
         // 'voucher_code'     => 'required|string|max:50',
+        // 'total_price'     => 'nullable|numeric|min:0',
     ],[
         'name_recipient.required' => 'Tên người nhận không được để trống',
         'phone_recipient.required' => 'Số điện thoại người nhận không được để trống',
         'shipping_address.required' => 'Địa chỉ giao hàng không được để trống',
         // 'voucher_code.required' => 'Mã voucher không được để trống',
     ]);
+$orderItems = $order->productOrders();
+
+// Tổng phụ (subtotal)
+$subtotal = $order->subtotal_price;
+
+// Giảm giá (voucher nếu có)
+$sale = 0;
+$maxDiscount = 0;
+if ($request->voucher_code) {
+    $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->first();
+    if ($voucher) {
+        $sale = $voucher->discount;       // % giảm
+        $maxDiscount = $voucher->max_discount ?? 0; // số tiền giảm tối đa (nếu có)
+    }
+}
+$discount = ($subtotal * $sale / 100);
+if ($maxDiscount > 0 && $discount > $maxDiscount) {
+    $discount = $maxDiscount; // không vượt quá giảm tối đa
+}
+
+// Phí ship (ví dụ theo địa chỉ)
+$shipping_fee = \Illuminate\Support\Str::contains($request->shipping_address, 'Hà Nội') ? 50000 : 100000;
+
+// Tổng cuối cùng
+$total_price = $subtotal - $discount + $shipping_fee;
+
+// Gán vào $data để update
+$data['total_price'] = $total_price;
+$data['subtotal_price'] = $subtotal;
+$data['shipping_fee'] = $shipping_fee;
     if($order->order_status == 0){
         $order->order_status = 1;
     }
@@ -330,8 +369,8 @@ public function updateUserOrder(Request $request, $orderId)
      */
     public function show(Order $order)
     {
-        $order = Order::with(['account', 'productOrders.product'])->findOrFail($order->id);
-
+        $order = Order::with(['account', 'productOrders.product','voucher'])->findOrFail($order->id);
+        // $order->load('voucher');
         return view('admin.orders.show', compact('order'));
     }
     public function userShow($id)
@@ -346,6 +385,7 @@ public function updateUserOrder(Request $request, $orderId)
     $order = Order::with(['productOrders.product'])
         ->where('account_id', $user->id)
         ->find($orderId);
+        $order->load('voucher');
 
     if (!$order) {
         return response()->json([
@@ -418,14 +458,17 @@ public function updateUserOrder(Request $request, $orderId)
             ], 400);
         }
         // Hoàn trả tồn kho
-        foreach ($order->items as $item) {
-                $product = Product::find($item->product_id);
+        // foreach ($order->products as $product) {
+        //         $quantity = $product->pivot->quantity; // lấy từ bảng trung gian
 
-                if ($product) {
-                    $product->quantity += $item->quantity;
-                    $product->save();
-                }
-            }
+        //         if ($product) {
+        //             if($order->order_status == 1){
+        //                 $product->cancel($quantity);
+        //             }
+                    
+        //             $product->save();
+        //         }
+        //     }
         // 3. Cập nhật trạng thái hủy
         $order->order_status = 5; // 5 = đã hủy
         // $order->updated_by = $user->id;
@@ -473,23 +516,24 @@ public function updateUserOrder(Request $request, $orderId)
                           Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
         ], 400);
     }
-    if ($statusWant == 1) {
+    Log::info('Update admin status', [
+        'order_id' => $orderId,
+        'current_status' => $currentStatus,
+        'status_want' => $statusWant
+    ]);
+    if ($statusWant == 2) {
         foreach ($order->products as $product) {
             $quantity = $product->pivot->quantity; // lấy từ bảng trung gian
             $price    = $product->pivot->price;
            
-Log::info('Check product', [
-                'product_id' => $product->id,
-                'quantity_ordered' => $quantity,
-                'quantity_in_stock' => $product->quantity
-            ]);
+
     if ($product->quantity < $quantity) {
         return response()->json([
             'message' => "Sản phẩm {$product->name} không đủ hàng trong kho"
         ], 400);
     }
 
-        $product->quantity -= $quantity;
+        $product->buy($quantity);
         $product->save();
         }
     }

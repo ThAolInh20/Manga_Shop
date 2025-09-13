@@ -92,8 +92,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     ${orderStatuses[statusCode].text}
                 </span>`;
 
-            let btnHtml = `<a href="/admin/orders/${row.dataset.id}" class="btn btn-warning btn-sm me-1">Xem</a>`;
-            if (statusCode === 0) {
+            let btnHtml = `<a href="/admin/orders/${row.dataset.id}" class="btn btn-info btn-sm me-1">Xem</a>`;
+            if (statusCode === 1) {
                 btnHtml += `<button class="btn btn-danger btn-sm cancel_order" data-id="${row.dataset.id}">Hủy</button>`;
             }
             if (statusCode === 1) {
@@ -101,6 +101,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (statusCode === 2) {
                 btnHtml += `<button class="btn btn-success btn-sm update-status" data-id="${row.dataset.id}" data-next="3">Hoàn tất</button>`;
+            }
+            if (statusCode === 3) {
+                btnHtml += `<button class="btn btn-warning btn-sm update-status" data-id="${row.dataset.id}" data-next="4">Đổi trả</button>`;
             }
             row.querySelector(".action-cell").innerHTML = btnHtml;
         });

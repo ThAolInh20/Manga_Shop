@@ -19,6 +19,14 @@
                     <td>{{ $order->account->name ?? 'N/A' }}</td>
                 </tr>
                 <tr>
+                    <th>Mã giảm giá</th>
+                    <td>{{ $order->voucher->code ?? 'Không có' }} (Giảm {{ $order->voucher->sale}}% tối đa {{number_format($order->voucher->max_discount, 0, ',', '.')  }}) </td>
+                </tr>
+                <tr>
+                    <th>Phí ship</th>
+                    <td>{{ number_format($order->shipping_fee, 0, ',', '.') }} đ</td>
+                </tr>
+                <tr>
                     <th>Tổng tiền</th>
                     <td>{{ number_format($order->total_price, 0, ',', '.') }} đ</td>
                 </tr>
@@ -41,7 +49,7 @@
                 </tr>
                 <tr>
                     <th>Thanh toán</th>
-                    <td>{{ $order->payment_status == 1 ? '✅ Đã thanh toán' : '❌ Chưa thanh toán' }}</td>
+                    <td>{{ $order->payment_status == 1 ? 'Đã thanh toán online' : 'Thanh toán khi nhận hàng' }}</td>
                 </tr>
                 <tr>
                     <th>Ngày đặt</th>
@@ -49,7 +57,7 @@
                 </tr>
                 <tr>
                     <th>Địa chỉ giao</th>
-                    <td>{{ $order->address ?? 'Chưa có' }}</td>
+                    <td>{{ $order->shipping_address ?? 'Chưa có' }}</td>
                 </tr>
             </table>
         </div>
@@ -60,9 +68,10 @@
         <thead>
             <tr>
                 <th>#</th>
+                <th>id</th>
                 <th>Sản phẩm</th>
                 <th>Giá</th>
-                <th>Số lượng</th>
+                <th>Số lượng mua</th>
                 <th>Thành tiền</th>
             </tr>
         </thead>
@@ -70,6 +79,7 @@
             @foreach($order->productOrders as $index => $productOrder)
             <tr>
                 <td>{{ $index + 1 }}</td>
+                <td>{{ $productOrder->product_id }}</td>
                 <td>{{ $productOrder->product->name ?? 'Sản phẩm đã xoá' }}</td>
                 <td>{{ number_format($productOrder->price, 0, ',', '.') }} đ</td>
                 <td>{{ $productOrder->quantity }}</td>

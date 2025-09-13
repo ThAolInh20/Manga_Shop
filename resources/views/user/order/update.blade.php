@@ -31,42 +31,56 @@
                     <input type="text" name="phone_recipient" class="form-control" 
                         value="{{ old('phone_recipient', $order->phone_recipient) }}" required>
                 </div>
-               <!-- --------------  -->
-              <div class="mb-3">
-    <label class="form-label">Tỉnh / Thành phố</label>
-    <select id="province" class="form-select select2" required>
-        <option value="">-- Chọn tỉnh --</option>
-    </select>
-</div>
 
-<div class="mb-3">
-    <label class="form-label">Quận / Huyện</label>
-    <select id="district" class="form-select select2" required disabled>
-        <option value="">-- Chọn huyện --</option>
-    </select>
-</div>
+                <!-- Địa chỉ -->
+                <div class="mb-3">
+                    <label class="form-label">Tỉnh / Thành phố</label>
+                    <select id="province" class="form-select select2" required>
+                        <option value="">-- Chọn tỉnh --</option>
+                    </select>
+                </div>
 
-<div class="mb-3">
-    <label class="form-label">Xã / Phường</label>
-    <select id="ward" class="form-select select2" required disabled>
-        <option value="">-- Chọn xã --</option>
-    </select>
-</div>
+                <div class="mb-3">
+                    <label class="form-label">Quận / Huyện</label>
+                    <select id="district" class="form-select select2" required disabled>
+                        <option value="">-- Chọn huyện --</option>
+                    </select>
+                </div>
 
-<div class="mb-3">
-    <label class="form-label">Số nhà, đường</label>
-    <input type="text" id="street" class="form-control" placeholder="Ví dụ: 123 Lê Lợi" />
-</div>
-<div class="mb-3">
-    <label class="form-label">Địa chỉ nhận</label>
-    <textarea 
-        name="shipping_address" 
-        id="shipping_address" 
-        class="form-control" 
-        rows="3" 
-        required
-    >{{ old('shipping_address', $order->shipping_address) }}</textarea>
-</div>
+                <div class="mb-3">
+                    <label class="form-label">Xã / Phường</label>
+                    <select id="ward" class="form-select select2" required disabled>
+                        <option value="">-- Chọn xã --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số nhà, đường</label>
+                    <input type="text" id="street" class="form-control" placeholder="Ví dụ: 123 Lê Lợi" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ nhận</label>
+                    <textarea 
+                        name="shipping_address" 
+                        id="shipping_address" 
+                        class="form-control" 
+                        rows="3" 
+                        required
+                    >{{ old('shipping_address', $order->shipping_address) }}</textarea>
+                </div>
+
+                <!-- Phí ship -->
+                <div class="mb-3">
+                    <label class="form-label">Phí ship</label>
+                    @php
+                        $shipping_fee = \Illuminate\Support\Str::contains($order->shipping_address, 'Hà Nội') ? 50000 : 100000;
+                    @endphp
+                    <input type="text" class="form-control" 
+                           value="{{ number_format($shipping_fee, 0, ',', '.') }} đ" readonly>
+                </div>
+            </div>
+        </div>
 
         <!-- Phương thức thanh toán -->
         <div class="card shadow-sm mb-4">
@@ -79,12 +93,77 @@
             </div>
         </div>
 
-        <!-- Voucher (nếu có) -->
+        <!-- Voucher -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light fw-bold">Mã giảm giá</div>
             <div class="card-body">
                 <input type="text" name="voucher_code" class="form-control"
-                    value="{{ old('voucher_code', $order->voucher_code) }}" placeholder="Nhập mã voucher nếu có">
+                    value="{{ old('voucher_code', $order->voucher?->code ?? '') }}" 
+                    placeholder="Nhập mã voucher nếu có">
+                @if($order->voucher)
+                    <small class="text-success">
+                        Áp dụng mã: <b>{{ $order->voucher->code }}</b> 
+                        (giảm {{ $order->voucher->sale }}% tối đa {{ number_format($order->voucher->max_discount, 0, ',', '.') }} đ)
+                    </small>
+                @endif
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light fw-bold">Sản phẩm trong đơn</div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($order->products as $product)
+                            <tr>
+                                <td>{{ $product->name }}</td>
+                                <td>{{ $product->pivot->quantity }}</td>
+                                <td>{{ number_format($product->pivot->price, 0, ',', '.') }} đ</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tổng kết đơn hàng -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light fw-bold">Tổng cộng</div>
+            <div class="card-body">
+                @php
+                    $subtotal = $order->subtotal_price;
+                    $voucher = $order->voucher;
+                    $sale = $voucher?->sale ?? 0;
+                    $maxDiscount = $voucher?->max_discount ?? null;
+
+                    $discount = ($subtotal * $sale / 100);
+                    if ($maxDiscount && $discount > $maxDiscount) {
+                        $discount = $maxDiscount;
+                    }
+
+                    $shipping_fee = \Illuminate\Support\Str::contains($order->shipping_address, 'Hà Nội') ? 50000 : 100000;
+                    $total = $subtotal - $discount + $shipping_fee;
+                @endphp
+
+                <p>Tạm tính: <b>{{ number_format($subtotal, 0, ',', '.') }} đ</b></p>
+
+                @if($voucher)
+                    <p>Giảm giá: <b>{{ number_format($discount, 0, ',', '.') }} đ</b></p>
+                @endif
+
+                <p>Phí ship: <b>{{ number_format($shipping_fee, 0, ',', '.') }} đ</b></p>
+                <hr>
+                <h5>Tổng tiền: <span class="text-danger">{{ number_format($total, 0, ',', '.') }} đ</span></h5>
+
+                <input type="hidden" name="total_price" value="{{ $total }}">
             </div>
         </div>
 
@@ -98,6 +177,7 @@
         <div class="alert alert-warning">Không tìm thấy đơn hàng</div>
     @endif
 </div>
+
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
     const provinceEl = $("#province")
@@ -106,50 +186,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     const streetEl = $("#street")
     const addressEl = $("#shipping_address")
 
-    // init Select2 cho 3 select
-    $(".select2").select2({
-        width: "100%",
-        placeholder: "Chọn...",
-        allowClear: true
-    })
+    $(".select2").select2({ width: "100%", placeholder: "Chọn...", allowClear: true })
 
     // Load danh sách tỉnh
     const provinces = await fetch("https://provinces.open-api.vn/api/p/").then(r => r.json())
-    provinces.forEach(p => {
-        provinceEl.append(new Option(p.name, p.code))
-    })
+    provinces.forEach(p => provinceEl.append(new Option(p.name, p.code)))
 
-    // Khi chọn tỉnh
     provinceEl.on("change", async function () {
         districtEl.empty().append(new Option("-- Chọn huyện --", ""))
         wardEl.empty().append(new Option("-- Chọn xã --", ""))
         districtEl.prop("disabled", true)
         wardEl.prop("disabled", true)
         updateAddress()
-
         if (!this.value) return
         const data = await fetch(`https://provinces.open-api.vn/api/p/${this.value}?depth=2`).then(r => r.json())
-        data.districts.forEach(d => {
-            districtEl.append(new Option(d.name, d.code))
-        })
+        data.districts.forEach(d => districtEl.append(new Option(d.name, d.code)))
         districtEl.prop("disabled", false)
     })
 
-    // Khi chọn huyện
     districtEl.on("change", async function () {
         wardEl.empty().append(new Option("-- Chọn xã --", ""))
         wardEl.prop("disabled", true)
         updateAddress()
-
         if (!this.value) return
         const data = await fetch(`https://provinces.open-api.vn/api/d/${this.value}?depth=2`).then(r => r.json())
-        data.wards.forEach(w => {
-            wardEl.append(new Option(w.name, w.code))
-        })
+        data.wards.forEach(w => wardEl.append(new Option(w.name, w.code)))
         wardEl.prop("disabled", false)
     })
 
-    // Khi chọn xã hoặc nhập số nhà
     wardEl.on("change", updateAddress)
     streetEl.on("input", updateAddress)
 
@@ -158,11 +222,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const districtName = districtEl.find("option:selected").text()
         const wardName = wardEl.find("option:selected").text()
         const street = streetEl.val()
-
         addressEl.val([street, wardName, districtName, provinceName].filter(Boolean).join(", "))
     }
 })
 </script>
-
-
 @endsection
