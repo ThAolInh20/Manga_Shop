@@ -76,7 +76,7 @@ class OrderController extends Controller
     public function listUserOrders(Request $request)
     {
         $user = Auth::user();
-        $query = Order::where('account_id', $user->id);
+        $query = Order::where('account_id', $user->id)->orderBy('created_at', 'desc');;
 
         // Nếu có filter trạng thái từ query string
         if ($request->has('status')) {
@@ -295,12 +295,13 @@ public function updateUserOrder(Request $request, $orderId)
                   ->first();
 
     if (!$order) {
-        return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+        return redirect()->back()->with('error', 'Không tìm thấy đơn hàng');
     }
 
     // chỉ cho phép sửa khi chưa giao
     if (!in_array($order->order_status, [0, 1])) {
-        return response()->json(['message' => 'Đơn hàng đã xử lý, không thể chỉnh sửa'], 400);
+                return redirect()->back()->with('error', 'Đơn hàng đã xử lý, không thể chỉnh sửa');
+
     }
 
     $data = $request->validate([
@@ -321,10 +322,7 @@ public function updateUserOrder(Request $request, $orderId)
 
     $order->update($data);
 
-    return response()->json([
-        'message' => 'Cập nhật đơn hàng thành công',
-        'order'   => $order
-    ]);
+    return redirect()->route('user.order.show', ['orderId' => $order->id])->with('success', 'Cập nhật đơn hàng thành công');
 }
 
     /**
@@ -458,9 +456,7 @@ public function updateUserOrder(Request $request, $orderId)
             'message' => 'Đơn hàng không tồn tại hoặc không thuộc bạn'
         ], 404);
     }
-    if($statusWant ==1){
-
-    }
+   
     $currentStatus = $order->order_status;
 
     // 2. Kiểm tra điều kiện cập nhật
@@ -478,25 +474,23 @@ public function updateUserOrder(Request $request, $orderId)
         ], 400);
     }
     if ($statusWant == 1) {
-        foreach ($order->items as $item) {
-            $product = Product::find($item->product_id);
+        foreach ($order->products as $product) {
+            $quantity = $product->pivot->quantity; // lấy từ bảng trung gian
+            $price    = $product->pivot->price;
+           
+Log::info('Check product', [
+                'product_id' => $product->id,
+                'quantity_ordered' => $quantity,
+                'quantity_in_stock' => $product->quantity
+            ]);
+    if ($product->quantity < $quantity) {
+        return response()->json([
+            'message' => "Sản phẩm {$product->name} không đủ hàng trong kho"
+        ], 400);
+    }
 
-            if (!$product) {
-                return response()->json([
-                    'message' => "Sản phẩm ID {$item->product_id} không tồn tại"
-                ], 400);
-            }
-
-            // Kiểm tra tồn kho
-            if ($product->quantity < $item->quantity) {
-                return response()->json([
-                    'message' => "Sản phẩm {$product->name} không đủ hàng trong kho"
-                ], 400);
-            }
-
-            // Trừ số lượng tồn
-            $product->quantity -= $item->quantity;
-            $product->save();
+        $product->quantity -= $quantity;
+        $product->save();
         }
     }
     // 3. Cập nhật trạng thái

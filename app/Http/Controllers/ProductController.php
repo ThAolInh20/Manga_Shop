@@ -167,13 +167,21 @@ class ProductController extends Controller
         'images_sup.*.max'   => 'Ảnh phụ không được lớn hơn 2MB.',
     ]);
 
+
     // Xử lý ảnh chính
+    if ($request->has('remove_image_main')) {
+        if ($product->images && Storage::disk('public')->exists($product->images)) {
+            Storage::disk('public')->delete($product->images);
+        }
+        $validated['images'] = null; // set DB = null
+    }
     if ($request->hasFile('images')) {
         if ($product->images) {
             Storage::disk('public')->delete($product->images);
         }
         $validated['images'] = $request->file('images')->store('products', 'public');
     }
+    
 
     // Lấy danh sách ảnh phụ hiện tại
     $supImages = $product->images_sup ? json_decode($product->images_sup, true) : [];

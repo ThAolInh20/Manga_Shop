@@ -57,6 +57,16 @@
     <label class="form-label">Số nhà, đường</label>
     <input type="text" id="street" class="form-control" placeholder="Ví dụ: 123 Lê Lợi" />
 </div>
+<div class="mb-3">
+    <label class="form-label">Địa chỉ nhận</label>
+    <textarea 
+        name="shipping_address" 
+        id="shipping_address" 
+        class="form-control" 
+        rows="3" 
+        required
+    >{{ old('shipping_address', $order->shipping_address) }}</textarea>
+</div>
 
         <!-- Phương thức thanh toán -->
         <div class="card shadow-sm mb-4">

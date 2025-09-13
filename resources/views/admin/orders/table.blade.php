@@ -23,4 +23,6 @@
     </tbody>
 </table>
 
-{{ $orders->links() }}
+ <div id="pagination-links">
+            {{ $orders->links('pagination::bootstrap-5') }}
+        </div>
