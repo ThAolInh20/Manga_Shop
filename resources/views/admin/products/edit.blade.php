@@ -123,7 +123,7 @@
 
   <input type="file" name="images_sup[]" class="form-control" multiple accept="image/*" onchange="previewSup(this)">
   <div id="preview-sup" class="d-flex flex-wrap mt-2"></div>
-
+</div>
         <!-- Trạng thái -->
         <div class="mb-3">
             <label>Trạng thái</label>
@@ -156,6 +156,7 @@
         </div>
 
         <button type="submit" class="btn btn-success">Cập nhật</button>
+        
         <a href="{{ route('products.index') }}" class="btn btn-secondary">Hủy</a>
     </form>
 </div>
