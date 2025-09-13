@@ -31,6 +31,25 @@ class Product extends Model
         'size',
         'quantity_buy',
     ];
+    public function buy($quantity){
+        if($this->quantity >= $quantity){
+            $this->quantity -= $quantity;
+            $this->quantity_buy += $quantity;
+            $this->save();
+            return true;
+        }
+        return false;
+    }
+    public function cancel($quantity){
+        $this->quantity += $quantity;
+        if($this->quantity_buy >= $quantity){
+            $this->quantity_buy -= $quantity;
+        }else{
+            $this->quantity_buy = 0;
+        }
+        $this->save();
+        return true;
+    }
 
     public function category()
     {

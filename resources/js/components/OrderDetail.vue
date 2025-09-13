@@ -45,7 +45,7 @@
               <p>
                 {{ order.payment_status === 1 ? "Thanh toán online" : "Trả tiền mặt" }}
               </p>
-              <!-- <p><strong>Voucher:</strong> {{ order.voucher_code || "Không có" }}</p> -->
+              <p><strong>Voucher:</strong> {{ order.voucher.code|| "Không có" }} giảm {{order.voucher.sale  }}% tối đa {{ formatPrice(order.voucher.max_discount) }}đ</p>
             </div>
           </div>
         </div>
@@ -56,6 +56,7 @@
             <div class="card-body text-end">
               <p class="mb-1"><strong>Tạm tính:</strong> {{ formatPrice(order.total_price) }} đ</p>
               <p class="mb-1"><strong>Phí ship:</strong> {{ formatPrice(order.shipping_fee || 0) }} đ</p>
+              <!-- <p class="mb-1"><strong>Giảm giá:</strong> {{ order.voucher.sale}} %</p> -->
               <hr>
               <h6 class="text-danger fw-bold">
                 Tổng: {{ formatPrice(Number(order.total_price || 0) + Number(order.shipping_fee || 0)) }} đ
