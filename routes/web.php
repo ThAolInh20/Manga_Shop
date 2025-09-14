@@ -16,6 +16,9 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Models\Category;
 use App\Models\Wishlist;    
+use App\Http\Controllers\ShippingController;
+use Illuminate\Support\Facades\Http;
+
 
 // User login
 Route::get('login', [AccountAuthController::class, 'showUserLoginForm'])->name('login');
@@ -67,9 +70,11 @@ Route::middleware(['auth', 'role:0,1'])->group(function () {
 Route::prefix('api')->group(function () {
      Route::get('/user', [AccountAuthController::class, 'checkLogin']);
     Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
+
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
+    
     Route::get('/boloc', [ProductController::class, 'filterField']);
     route::get('/products', [ProductController::class, 'getAllProducts']);
     route::get('/categories', [CategoryController::class, 'listCategories']);
@@ -78,12 +83,30 @@ Route::prefix('api')->group(function () {
     Route::put('/cart/{productId}', [CartController::class, 'update']);
     Route::delete('/cart/{productId}', [CartController::class, 'remove']);
     Route::get('/cart', [CartController::class, 'list']);
+
     route::get('/vouchers/active', [VoucherController::class, 'listActiveVouchers']);
+
     route::post('/order', [OrderController::class, 'add']);
     route::get('/user/orders', [OrderController::class, 'listUserOrders']);
     Route::post('/order/{orderId}/cancel', [OrderController::class, 'cancelOrder']);
     Route::post('/order/{orderId}/status', [OrderController::class, 'updateStatus']);
     route::get('/order/{orderId}', [OrderController::class, 'userShow2']);
+
+    Route::get('/shippings', [ShippingController::class, 'index']);
+    Route::post('/shippings', [ShippingController::class, 'store']);
+    Route::put('/shippings/{id}', [ShippingController::class, 'update']);
+
+    Route::get('/provinces', function () {
+        $response = Http::get("https://provinces.open-api.vn/api/?depth=1");
+        return $response->json();
+    });
+    Route::get('/provinces/{code}', function ($code) {
+         return Http::get("https://provinces.open-api.vn/api/p/{$code}?depth=2")->json();
+    });
+
+    Route::get('/districts/{code}', function ($code) {
+        return Http::get("https://provinces.open-api.vn/api/d/{$code}?depth=2")->json();
+    });
 
 
 });

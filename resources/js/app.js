@@ -12,6 +12,7 @@ import Alert from './components/Alert.vue';
 import Cart from './components/Cart.vue';
 import UserOrder from './components/UserOrder.vue';
 import OrderDetail from './components/OrderDetail.vue';
+import ShippingAddress from './components/ShippingAddress.vue';
 
 const app = createApp({});
 // const pinia = createPinia()
@@ -27,6 +28,7 @@ app.component('Alert',Alert);
 app.component('Cart',Cart);
 app.component('UserOrder',UserOrder);
 app.component('OrderDetail',OrderDetail);
+app.component('ShippingAddress',ShippingAddress);
 
 
 // Mount Vue vào #app (trong Blade)

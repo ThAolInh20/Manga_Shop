@@ -324,35 +324,15 @@ public function updateUserOrder(Request $request, $orderId)
         'shipping_address.required' => 'Địa chỉ giao hàng không được để trống',
         // 'voucher_code.required' => 'Mã voucher không được để trống',
     ]);
-$orderItems = $order->productOrders();
-
-// Tổng phụ (subtotal)
-$subtotal = $order->subtotal_price;
-
-// Giảm giá (voucher nếu có)
-$sale = 0;
-$maxDiscount = 0;
-if ($request->voucher_code) {
-    $voucher = \App\Models\Voucher::where('code', $request->voucher_code)->first();
-    if ($voucher) {
-        $sale = $voucher->discount;       // % giảm
-        $maxDiscount = $voucher->max_discount ?? 0; // số tiền giảm tối đa (nếu có)
-    }
-}
-$discount = ($subtotal * $sale / 100);
-if ($maxDiscount > 0 && $discount > $maxDiscount) {
-    $discount = $maxDiscount; // không vượt quá giảm tối đa
-}
 
 // Phí ship (ví dụ theo địa chỉ)
 $shipping_fee = \Illuminate\Support\Str::contains($request->shipping_address, 'Hà Nội') ? 50000 : 100000;
 
 // Tổng cuối cùng
-$total_price = $subtotal - $discount + $shipping_fee;
+
 
 // Gán vào $data để update
-$data['total_price'] = $total_price;
-$data['subtotal_price'] = $subtotal;
+
 $data['shipping_fee'] = $shipping_fee;
     if($order->order_status == 0){
         $order->order_status = 1;
