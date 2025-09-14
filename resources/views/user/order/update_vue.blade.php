@@ -3,6 +3,6 @@
 
 @section('content')
 
-<shipping-address :account_id="{{ Auth::user()->id }}"></shipping-address>
+<order-detail order-id="{{ $id }}"></order-detail>
 
 @endsection

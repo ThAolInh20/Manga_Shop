@@ -55,4 +55,8 @@ class Order extends Model
     {
         return $this->belongsTo(Voucher::class);
     }
+    public function shipping()
+    {
+        return $this->belongsTo(Shipping::class);
+    }
 }
