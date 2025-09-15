@@ -28,6 +28,7 @@
       
 
 </div>
+ <suggest-products></suggest-products>  
 <script>
   setTimeout(() => {
     const alertEl = document.querySelector('#alerts-container .alert');

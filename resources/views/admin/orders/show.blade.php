@@ -20,7 +20,9 @@
                 </tr>
                 <tr>
                     <th>Mã giảm giá</th>
+                    @if($order->voucher)
                     <td>{{ $order->voucher->code ?? 'Không có' }} (Giảm {{ $order->voucher->sale}}% tối đa {{number_format($order->voucher->max_discount, 0, ',', '.')  }}) </td>
+                    @endif
                 </tr>
                 <tr>
                     <th>Phí ship</th>
@@ -28,7 +30,7 @@
                 </tr>
                 <tr>
                     <th>Tổng tiền</th>
-                    <td>{{ number_format($order->total_price, 0, ',', '.') }} đ</td>
+                    <td>{{ number_format($order->subtotal_price, 0, ',', '.') }} đ</td>
                 </tr>
                 <tr>
                     <th>Trạng thái</th>

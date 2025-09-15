@@ -11,10 +11,12 @@ class Order extends Model
 
     protected $table = 'orders';
 
+    public $timestamps = true;
+
     protected $fillable = [
-        'account_id', 'order_date', 'deliver_date', 
-        'order_status', 'shipping_fee', 'shipping_address', 
-        'total_price', 'payment_status','name_recipient','phone_recipient', 'voucher_id','subtotal_price'
+        'account_id', 'order_date', 'deliver_date', 'order_status', 
+        // 'shipping_fee', 'shipping_address', 'phone_recipient','name_recipient',
+        'total_price', 'payment_status', 'voucher_id','subtotal_price','shipping_id'
     ];
 //     public function calculateTotalPrice()
 // {
@@ -35,7 +37,16 @@ class Order extends Model
 //     // công thức
 //     return $subtotal - $discount + $this->shipping_fee;
 // }
-
+    protected static function booted()
+        {
+            static::saving(function ($order) {
+                $subtotal = $order->subtotal_price ?? 0;
+                $discount = $order->voucher? ($subtotal * $order->voucher->sale / 100): 0;
+                $shippingFee = $order->shipping ?$order->shipping->shipping_fee: 0;
+                // total = subtotal - discount + shipping
+                $order->total_price = max($subtotal - $discount + $shippingFee, 0);
+            });
+        }
 
     public function account()
     {

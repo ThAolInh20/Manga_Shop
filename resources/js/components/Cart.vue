@@ -113,6 +113,19 @@
         Áp dụng
       </button>
     </div>
+    <div class="mb-3" v-if="shippingAddresses.length > 0">
+  <label class="form-label fw-bold">Địa chỉ giao hàng:</label>
+  <select v-model="selectedShipping" class="form-select">
+    <option 
+      v-for="addr in shippingAddresses" 
+      :key="addr.id" 
+      :value="addr"
+    >
+      {{ addr.name_recipient }} - Địa chỉ: {{ addr.shipping_address }} - {{ formatPrice(addr.shipping_fee) }} đ
+    </option>
+  </select>
+ 
+</div>
 
     <hr />
 
@@ -125,6 +138,10 @@
       <span>Giảm giá:</span>
       <span>- {{ formatPrice(discount) }} đ</span>
     </div>
+    <div class="d-flex justify-content-between text-primary">
+    <span>Phí ship:</span>
+    <span>{{ formatPrice(selectedShipping?.shipping_fee || 0) }} đ</span>
+  </div>
     <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
       <span>Thành tiền:</span>
       <span>{{ formatPrice(finalTotal) }} đ</span>
@@ -155,6 +172,9 @@ const voucherCode = ref("")
 const appliedVoucher = ref(null)
 const discount = ref(0)
 
+const shippingAddresses = ref([])  // Danh sách địa chỉ
+const selectedShipping = ref(null) // Địa chỉ đã chọn
+
 const fetchCart = async () => {
   try {
     const res = await axios.get("/api/cart")
@@ -163,6 +183,18 @@ const fetchCart = async () => {
     if (err.response?.status === 401) {
       alert("⚠️ Bạn cần đăng nhập để xem giỏ hàng!")
     }
+  }
+}
+const fetchShippingAddresses = async () => {
+  try {
+    const res = await axios.get("/api/shippings")
+    shippingAddresses.value = res.data
+    // Mặc định chọn địa chỉ đầu tiên nếu có
+    if (shippingAddresses.value.length > 0) {
+      selectedShipping.value = shippingAddresses.value[0]
+    }
+  } catch (err) {
+    console.error("Lỗi khi lấy địa chỉ giao hàng:", err)
   }
 }
 const fetchVouchers = async () => {
@@ -191,8 +223,15 @@ discount.value = Math.min(percentDiscount, voucher.max_discount, totalSelected.v
   alert(`✅ Áp dụng mã ${voucher.code} thành công!`)
 }
 
-const finalTotal = computed(() =>
-  Math.max(totalSelected.value - discount.value, 0)
+const finalTotal = computed(() =>{
+  const subtotal = Number(totalSelected.value || 0)
+  const discountVal = Number(discount.value || 0)
+  const shippingFee = Number(selectedShipping.value?.shipping_fee || 0)
+  
+  return Math.max(subtotal - discountVal + shippingFee, 0)
+}
+
+  
 )
 const total = computed(() =>
   cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -203,6 +242,7 @@ const totalSelected = computed(() =>
     .filter(item => selectedItems.value.includes(item.product_id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0)
 )
+
 const toggleSelectAll = () => {
   if (selectAll.value) {
     selectedItems.value = cart.value.map(item => item.product_id)
@@ -263,13 +303,12 @@ const checkout = async () => {
       price: item.price,
     }))
     // console.log(orderData)
-
-  
   const payload = {
     products: orderData,
     subtotal_price: totalSelected.value,
     total_price: finalTotal.value,
-    voucher: appliedVoucher.value ? appliedVoucher.value.code : null
+    voucher: appliedVoucher.value ? appliedVoucher.value.code : null,
+    shipping_id: selectedShipping.value?.id || null
   }
   console.log(payload)
 
@@ -279,7 +318,7 @@ const checkout = async () => {
     alert("✅ Tạo đơn hàng thành công!")
     const order_id = res.data.order_id
      
-    // window.location.href = `/order/update/${order_id}`
+    window.location.href = `/order/checkout/${order_id}`
     // Sau khi tạo đơn xong có thể xóa các sản phẩm đã đặt khỏi giỏ
     
     fetchCart()
@@ -301,7 +340,8 @@ const formatPrice = (price) => {
 
 onMounted(() => {
   fetchCart()
-   fetchVouchers()
+  fetchVouchers()
+  fetchShippingAddresses()
   eventBus.on('cart-add', fetchCart)
 })
 </script>

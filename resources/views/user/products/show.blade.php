@@ -112,7 +112,7 @@
     </div>
   </div>
 </div>
-
+ <suggest-products></suggest-products>  
 <script>
 async function addToCart(productId, price, sale) {
   try {

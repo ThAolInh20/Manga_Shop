@@ -79,4 +79,5 @@
     </div>
   </div>
 </div>
+ <suggest-products></suggest-products>  
 @endsection
