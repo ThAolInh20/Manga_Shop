@@ -7,11 +7,14 @@ use Illuminate\Http\Request;
 use App\Models\Account;
 use App\Models\Product;
 use App\Models\ProductOrder;
+use App\Models\Shipping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ProductOrderController;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 
 class OrderController extends Controller
@@ -142,6 +145,45 @@ class OrderController extends Controller
             'order_status' => $order->order_status
         ]);
     }
+    public function recallOrder($orderId)
+    {
+        $user = Auth::user();
+
+        // 1. Lấy đơn hàng và kiểm tra thuộc user
+        $order = Order::where('id', $orderId)
+            ->where('account_id', $user->id)
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Đơn hàng không tồn tại hoặc không thuộc bạn'
+            ], 404);
+        }
+
+        // 2. Kiểm tra trạng thái: chỉ cho hủy khi order_status = 0 hoặc 1
+        
+        // foreach ($order->products as $product) {
+        //         $quantity = $product->pivot->quantity; // lấy từ bảng trung gian
+
+        //         if ($product) {
+        //             if($order->order_status == 1){
+        //                 $product->cancel($quantity);
+        //             }
+                    
+        //             $product->save();
+        //         }
+        //     }
+
+        // 3. Cập nhật trạng thái hủy
+        if($order->order_status == 5){
+            $order->order_status = 0; 
+                    // $order->updated_by = $user->id;
+            $order->save();
+            return response()->json(['message'=>'Thành công']);
+        }
+        return response()->json(['message'=>'Thất bại']);
+        
+    }
     public function updateStatus(Request $request, $orderId)
 {
     $request->validate([
@@ -236,9 +278,16 @@ class OrderController extends Controller
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.price' => 'required|numeric|min:0',
             'total_price' => 'required|numeric|min:0',
-            'voucher' => 'nullable|string|max:50'
+            'voucher' => 'nullable|string|max:50',
+            'shipping_id' => 'nullable|integer|exists:shippings,id'
         ]);
-        $voucher_id = Voucher::where('code', $request->voucher)->value('id');
+
+        $user = Auth::user();
+
+        $voucher_id = $request->voucher ? Voucher::where('code', $request->voucher)->value('id') : null;
+        
+        
+
 
         DB::beginTransaction();
         try {
@@ -246,9 +295,10 @@ class OrderController extends Controller
             $order = Order::create([
                 'account_id' => Auth::user()->id, // giả sử bạn có auth
                 'status' => 0,
-                'total_price' => $request->total_price,
+                // 'total_price' => $request->total_price,
                 'subtotal_price' => $request->subtotal_price,
-                'voucher_id' => $voucher_id ?? null
+                'voucher_id' => $voucher_id ?? null,
+                'shipping_id' => $request->shipping_id ?? null,
             ]);
 
             $productOrderController = new ProductOrderController();
@@ -257,7 +307,6 @@ class OrderController extends Controller
             foreach ($request->products as $product) {
                 $productOrderController->add($product, $order->id);
             }
-
 
             DB::commit();
 
@@ -288,12 +337,19 @@ class OrderController extends Controller
     }
     public function userOrderUpdateForm($id)
     {
-        $user = Auth::user();
-         $order = Order::with(['productOrders.product'])
-        ->where('account_id', $user->id)
-        ->find($id);
-
-        return view('user.order.update',compact('order'));
+        $user  = Auth::user();
+        $order = Order::where('id', $id)
+                  ->where('account_id', $user->id)
+                  ->first();
+        if(!$order){
+            return redirect()->route('user.order.list')
+                             ->with('error', 'Không tìm thấy đơn hàng');
+        }
+        if($order->order_status != 0){
+            return redirect()->route('user.order.show', $id)
+                             ->with('error', 'Đơn hàng đã xử lý, không thể chỉnh sửa');
+        }
+        return view('user.order.checkout', ['id' => $id,'account_id' => $user->id]);
     }
 public function updateUserOrder(Request $request, $orderId)
 {
@@ -362,10 +418,10 @@ $data['shipping_fee'] = $shipping_fee;
     $user = Auth::user();
 
     // Lấy đơn hàng thuộc về user đang đăng nhập
-    $order = Order::with(['productOrders.product'])
+    $order = Order::with(['productOrders.product','voucher', 'shipping'])
         ->where('account_id', $user->id)
         ->find($orderId);
-        $order->load('voucher');
+        
 
     if (!$order) {
         return response()->json([
@@ -527,6 +583,209 @@ $data['shipping_fee'] = $shipping_fee;
         'message' => 'Cập nhật trạng thái thành công',
         'order_id' => $order->id,
         'order_status' => $order->order_status
+    ]);
+}
+// app/Http/Controllers/OrderController.php
+public function showOrder($order_id)
+{
+    $user = Auth::user();
+
+    $order = Order::with(['shipping', 'productOrders.product', 'voucher'])
+                  ->where('id', $order_id)
+                  ->where('account_id', $user->id)
+                  ->first();
+
+    if (!$order) {
+        return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+    }
+
+    return response()->json([
+
+        'id' => $order->id,
+        'shipping' => $order->shipping,
+        'products' => $order->products,
+        'voucher' => $order->voucher,
+        'payment_status' => $order->payment_status,
+    ]);
+}
+ // Tạo QR thanh toán MoMo Dev
+    public function momoDevPay(Request $request)
+    {
+       
+
+        // Giả lập URL thanh toán (sandbox/dev)
+         $data = $request->validate([
+            'order_id' => 'required|integer',
+            'amount'   => 'required|numeric|min:1000',
+        ]);
+
+        // Thông tin tài khoản nhận
+        $bankCode    = "970422"; // MB Bank BIN code
+        $accountNo   = "0849838298"; // số tài khoản của bạn
+        $accountName = "NGUYEN PHUONG NAM"; // tên chủ TK (viết hoa không dấu)
+
+        $orderId = $data['order_id'];
+        $amount  = (int) $data['amount'];
+        // $amount  = (int) ();
+        $addInfo = "Thanh toan don $orderId"; // nội dung CK
+
+        // API VietQR miễn phí từ VietQR.io
+        $qrUrl = "https://img.vietqr.io/image/{$bankCode}-{$accountNo}-compact2.png?amount={$amount}&addInfo=" . urlencode($addInfo) . "&accountName=" . urlencode($accountName);
+
+        return response()->json([
+            'qr_url'   => $qrUrl,
+            'order_id' => $orderId,
+            'amount'   => $amount,
+            'add_info' => $addInfo,
+        ]);
+
+       
+    }
+    public function momoDevCreate(Request $request)
+    {
+        $data = $request->validate([
+            'order_id' => 'required|integer',
+            'amount' => 'required|numeric|min:1000',
+            'order_info' => 'required|string',
+        ]);
+
+        $endpoint = 'https://test-payment.momo.vn/v2/gateway/api/create';
+        $partnerCode = 'MOMOBKUN20180529';
+        $accessKey = 'klm05TvNBzhg7h7j';
+        $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
+        $orderInfo = "Thanh toán qua ATM MoMo";
+
+        $orderId = $data['order_id'] . '-' . Str::random(6);
+        $requestId = Str::uuid();
+        $amount = $data['amount'];
+        $orderInfo = $data['order_info'];
+        $returnUrl = env('APP_URL') . "/order/".$orderId;
+        $notifyUrl = env('APP_URL') . "/order/".$orderId;
+        // $ipnUrl = "http://localhost:8080/order/";
+
+
+        // Chuỗi để tạo chữ ký
+        $rawHash = "accessKey=$accessKey&amount=$amount&extraData=&ipnUrl=$notifyUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$returnUrl&requestId=$requestId&requestType=captureWallet";
+        $signature = hash_hmac('sha256', $rawHash, $secretKey);
+
+        $response = Http::post($endpoint, [
+            'partnerCode' => $partnerCode,
+            'accessKey'   => $accessKey,
+            'requestId'   => $requestId,
+            'amount'      => $amount,
+            'orderId'     => $orderId,
+            'orderInfo'   => $orderInfo,
+            'returnUrl'   => $returnUrl,
+            'notifyUrl'   => $notifyUrl,
+            'extraData'   => '',
+            'requestType' => 'captureWallet',
+            'signature'   => $signature,
+        ]);
+
+        $res = $response->json();
+        Log::info('MoMo response:', $res);
+        return response()->json([
+            'payUrl'   => $res['payUrl'] ?? null,
+            'qrCodeUrl'=> $res['qrCodeUrl'] ?? null,
+            'raw'      => $res,
+        ]);
+    }
+
+    // Xác nhận thanh toán
+    public function momoDevConfirm(Request $request)
+    {
+        $data = $request->validate([
+            'order_id' => 'required|integer',
+        ]);
+
+        $order = Order::find($data['order_id']);
+        if (!$order) {
+            return response()->json(['message'=>'Đơn hàng không tồn tại'], 404);
+        }
+         // Nếu đang là trạng thái chưa thanh toán
+        if ($order->payment_status == 0) {
+            // Dev mode: giả lập đã thanh toán thành công
+            $order->payment_status = 1; // 1 = đã thanh toán
+            $order->payment_method = 'MoMo Sandbox';
+            $order->save();
+        }
+
+        
+
+        return response()->json(['message'=>'Thanh toán MoMo Dev thành công', 'order'=>$order]);
+    }
+    public function applyVoucher(Request $request, $orderId)
+    {
+        $request->validate([
+            'voucher_code' => 'required|string'
+        ]);
+
+        $order = Order::findOrFail($orderId);
+        Log::info($orderId);
+
+        $voucher = Voucher::where('code', $request->voucher_code)
+            ->where('is_active', 1) // chỉ lấy voucher còn hiệu lực
+            ->first();
+
+        if (!$voucher) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Voucher không hợp lệ hoặc đã hết hạn.'
+            ]);
+        }
+
+        // Cập nhật voucher vào order (chưa tính tiền)
+        $order->voucher_id = $voucher->id;
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'voucher' => [
+                'id'          => $voucher->id,
+                'code'        => $voucher->code,
+                'sale'        => $voucher->sale,         // % giảm
+                'max_discount'=> $voucher->max_discount  // tối đa
+            ]
+        ]);
+    }
+    public function codConfirm(Request $request){
+        $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+        ]);
+
+        // Lấy đơn hàng
+        $order = Order::findOrFail($request->order_id);
+
+        // Kiểm tra trạng thái hiện tại
+        if ($order->order_status != 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đơn hàng đã được xử lý hoặc không hợp lệ.'
+            ], 400);
+        }
+
+        // Cập nhật trạng thái sang "Đang xử lý"
+        $order->order_status = 1;
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đơn hàng đã xác nhận COD.',
+            'order' => $order
+        ]);
+    }
+    public function updateShipping(Request $request, Order $order)
+{
+    $request->validate([
+        'shipping_id' => 'required|exists:shippings,id',
+    ]);
+
+    $order->shipping_id = $request->shipping_id;
+    $order->save();
+
+    return response()->json([
+        'success' => true,
+        'shipping_id' => $order->shipping_id
     ]);
 }
    

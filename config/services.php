@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'payos' => [
+        'client_id' => env('PAYOS_CLIENT_ID'),
+        'api_key'   => env('PAYOS_API_KEY'),
+        'checksum'  => env('PAYOS_CHECKSUM_KEY'),
+    ],
 
 ];

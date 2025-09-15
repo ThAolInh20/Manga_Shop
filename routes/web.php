@@ -18,6 +18,7 @@ use App\Models\Category;
 use App\Models\Wishlist;    
 use App\Http\Controllers\ShippingController;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\PayOSController;
 
 
 // User login
@@ -90,7 +91,17 @@ Route::prefix('api')->group(function () {
     route::get('/user/orders', [OrderController::class, 'listUserOrders']);
     Route::post('/order/{orderId}/cancel', [OrderController::class, 'cancelOrder']);
     Route::post('/order/{orderId}/status', [OrderController::class, 'updateStatus']);
+    Route::post('/order/{orderId}/recall', [OrderController::class, 'recallOrder']);
     route::get('/order/{orderId}', [OrderController::class, 'userShow2']);
+    Route::post('/order/momo-dev', [OrderController::class, 'momoDevPay']);
+    Route::post('/order/momo-dev/confirm', [OrderController::class, 'momoDevConfirm']);
+    Route::post('/order/{order}/apply-voucher', [OrderController::class, 'applyVoucher'])->name('order.apply-voucher');
+
+    Route::post('/order/payos/create', [PayOSController::class, 'create']);
+    Route::post('/order/payos/webhook', [PayOSController::class, 'webhook']);
+    // route::get('/order/{orderId}', [OrderController::class, 'showOrder']);
+    Route::post('/order/cod-confirm', [OrderController::class, 'codConfirm']);
+    Route::put('/order/{order}/update-shipping', [OrderController::class, 'updateShipping']);
 
     Route::get('/shippings', [ShippingController::class, 'index']);
     Route::post('/shippings', [ShippingController::class, 'store']);
@@ -122,8 +133,14 @@ route::get('/products/{product}', [ProductController::class, 'showProductForUser
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
 route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
 route::get('/cart', [CartController::class, 'index'])->name('user.cart.list');
-route::get('/user/orders', [OrderController::class, 'userOrdersPage'])->name('user.order.list');
+route::get('/order', [OrderController::class, 'userOrdersPage'])->name('user.order.list');
 route::get('/order/{orderId}', [OrderController::class, 'userShow'])->name('user.order.show');
-route::get('/order/update/{orderId}', [OrderController::class, 'userOrderUpdateForm'])->name('user.order.update');
-Route::put('/order/update/{orderId}', [OrderController::class, 'updateUserOrder'])->name('user.order.update.post');
+route::get('/order/checkout/{orderId}', [OrderController::class, 'userOrderUpdateForm'])->name('user.order.checkout');
+Route::put('/order/checkout/{orderId}', [OrderController::class, 'updateUserOrder'])->name('user.order.update.post');
+
+
+Route::get('/order/{order}/payos-return', [PayOSController::class, 'return'])->name('payos.return');
+route::get('/order/{order}/payos-cancel', [PayOSController::class, 'cancel'])->name('payos.cancel');
+
+
 

@@ -71,6 +71,24 @@ class ProductController extends Controller
                 'price'       => 'required|numeric|min:0',
                 'images'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
                 'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            ],[
+                'name.required' => 'Tên sản phẩm là bắt buộc.',
+                'name.max'      => 'Tên sản phẩm không được vượt quá 255 ký tự.',
+
+                'category_id.required' => 'Vui lòng chọn danh mục.',
+                'category_id.exists'   => 'Danh mục không tồn tại.',
+
+                'price.required' => 'Giá sản phẩm là bắt buộc.',
+                'price.numeric'  => 'Giá sản phẩm phải là số.',
+                'price.min'      => 'Giá sản phẩm phải lớn hơn hoặc bằng 0.',
+
+                'images.image'   => 'Ảnh chính phải là tệp hình ảnh.',
+                'images.mimes'   => 'Ảnh chính phải có định dạng: jpg, jpeg, png, webp.',
+                'images.max'     => 'Ảnh chính không được lớn hơn 2MB.',
+
+                'images_sup.*.image' => 'Ảnh phụ phải là tệp hình ảnh.',
+                'images_sup.*.mimes' => 'Ảnh phụ phải có định dạng: jpg, jpeg, png, webp.',
+                'images_sup.*.max'   => 'Ảnh phụ không được lớn hơn 2MB.',
             ]);
 
             // Upload ảnh chính
@@ -128,7 +146,7 @@ class ProductController extends Controller
         'is_active'     => 'boolean',
         'categ'         => 'nullable|string|max:50',
         'detail'        => 'nullable|string',
-        'images'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        'images'        => 'nullable|image|mimes:jpg,jpeg,png,webp',
         'images_sup.*'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ], [
         'category_id.required' => 'Vui lòng chọn danh mục.',

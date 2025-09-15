@@ -43,7 +43,7 @@
     <div class="container-xl flex-grow-1 container-p-y">
 
     @yield('content')
-    <suggest-products></suggest-products>  
+   
       
     </div>
   </div>

@@ -13,8 +13,13 @@ import Cart from './components/Cart.vue';
 import UserOrder from './components/UserOrder.vue';
 import OrderDetail from './components/OrderDetail.vue';
 import ShippingAddress from './components/ShippingAddress.vue';
+import OrderCheckout from './components/OrderCheckout.vue';
+import MomoPayment from './components/MomoPayment.vue';
+import PayOSPayment from './components/PayOSPayment.vue';
+import ListVoucher from './components/ListVoucher.vue';
 
 const app = createApp({});
+
 // const pinia = createPinia()
 
 // Đăng ký component toàn cục
@@ -29,6 +34,10 @@ app.component('Cart',Cart);
 app.component('UserOrder',UserOrder);
 app.component('OrderDetail',OrderDetail);
 app.component('ShippingAddress',ShippingAddress);
+app.component('OrderCheckout',OrderCheckout);
+app.component('MomoPayment',MomoPayment);
+app.component('PayOSPayment',PayOSPayment);
+app.component('ListVoucher',ListVoucher)
 
 
 // Mount Vue vào #app (trong Blade)

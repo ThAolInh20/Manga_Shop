@@ -127,8 +127,9 @@ class AccountController extends Controller
         }
 
         $account->update($validated);
+        $mm = 'Cập nhật tài khoản'. $account->name.' thành công';
 
-        return redirect()->route('accounts.index')->with('success', 'Cập nhật tài khoản thành công');
+        return redirect()->route('accounts.index')->with('success', $mm);
     }
 
     /**

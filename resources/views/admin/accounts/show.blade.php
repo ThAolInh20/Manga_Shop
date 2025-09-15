@@ -23,11 +23,14 @@
 
         <div class="mb-3">
             <strong>Quyền:</strong> 
-            @if($account->role == 1)
+            @if($account->role == 0)
                 <span class="badge bg-primary">Admin</span>
+            @elseif($account->role == 1)
+                <span class="badge bg-secondary">Cộng tác viên</span>
             @else
-                <span class="badge bg-secondary">User</span>
+                <span class="badge bg-secondary">Khách hàng</span>
             @endif
+
         </div>
 
         <div class="mb-3">

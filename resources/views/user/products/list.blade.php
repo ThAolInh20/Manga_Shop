@@ -4,5 +4,5 @@
 @section('content')
 
 <all-products></all-products>
-
+ <suggest-products></suggest-products>  
 @endsection

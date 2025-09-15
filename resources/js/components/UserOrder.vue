@@ -36,7 +36,7 @@
     <div v-else>
       <div v-for="order in orders" :key="order.id" class="card mb-4 shadow-sm">
         <!-- Header đơn hàng -->
-         <a :href="`/order/${order.id}`" class="card-header d-flex justify-content-between text-decoration-none text-dark">
+         <a :href="`/order/${order.id}`"  class="card-header d-flex justify-content-between text-decoration-none text-dark">
         <div class="card-header d-flex justify-content-between flex-wrap align-items-center">
           <div>
             <strong>Mã đơn hàng:</strong> #{{ order.id }} <br>
@@ -62,21 +62,28 @@
              <!-- Nút thanh toán (chỉ khi chờ thanh toán) -->
     <a 
       v-if="order.order_status === 0" 
-      :href="`/order/update/${order.id}`" 
+      :href="`/order/checkout/${order.id}`" 
       class="btn btn-primary btn-sm me-2"
     >
       Thanh toán
     </a>
           
-            <button 
-              class="btn btn-danger btn-sm"
-              :disabled="order.order_status !== 0 && order.order_status !== 1"
-              @click="cancelOrder(order.id)"
-            >
-              Hủy đơn
-            </button>
-             <!-- Nút xác nhận đã nhận hàng -->
-  <button 
+          <button 
+                  class="btn btn-danger btn-sm"
+                  v-if="order.order_status==0"
+                  @click="cancelOrder(order.id)"
+                >
+                  Hủy đơn
+                </button>
+                <button 
+                  class="btn btn-danger btn-sm"
+                  v-if="order.order_status == 5"
+                  @click="recallOrder(order.id)"
+                >
+                  Mua lại
+                </button>
+                <!-- Nút xác nhận đã nhận hàng -->
+      <button 
     class="btn btn-success btn-sm"
     v-if="order.order_status === 2"
     @click="updateOrderStatus(order.id, 3)" 
@@ -158,6 +165,24 @@ const updateOrderStatus = async (orderId, statusWant) => {
   } catch (err) {
     console.error(err)
     alert(err.response?.data?.message || "❌ Lỗi khi cập nhật trạng thái!")
+  }
+}
+const recallOrder = async (orderId) => {
+  if (!confirm("Bạn có chắc muốn mua lại đơn hàng này?")) return
+  try {
+    await axios.post(`/api/order/${orderId}/recall`)
+    
+    fetchOrders()
+    
+    const payOnline = confirm("Bạn có muốn thanh toán online ngay bây giờ không?")
+    if (payOnline) {
+      // Giả sử bạn có route để redirect đến trang checkout
+      window.location.href = `/order/checkout/${orderId}`
+    }
+  } catch (err) {
+    console.error(err)
+    alert(err.response?.data?.message || "Đã có lỗi xảy ra!")
+    
   }
 }
 

@@ -21,7 +21,7 @@
               @change="emitSelectedAddress"
             >
             <label class="form-check-label" :for="'addr-' + addr.id">
-              {{ addr.name_recipient }} - {{ addr.phone_recipient }} - {{ addr.shipping_address }}
+              {{ addr.name_recipient }} - {{ addr.phone_recipient }} - Địa chỉ: {{ addr.shipping_address }}
             </label>
           </div>
           <button type="button" class="btn btn-sm btn-warning" @click="openEditModal(addr)">Sửa</button>
@@ -90,7 +90,7 @@
 
             <div class="mb-3">
               <label class="form-label">Phí ship</label>
-              <input type="number" v-model="form.shipping_fee" class="form-control">
+              <input type="number" v-model="form.shipping_fee" class="form-control" readonly>
             </div>
           </div>
           <div class="modal-footer">
@@ -113,7 +113,8 @@ import Modal from "bootstrap/js/dist/modal";
 export default {
   name: "ShippingAddress",
   props: {
-    accountId: { type: Number, required: true }
+    accountId: { type: Number, required: true },
+    orderId: { type: Number, required: false }
   },
   data() {
     return {
@@ -255,10 +256,24 @@ export default {
       }
     },
 
-    emitSelectedAddress() {
-      const addr = this.addresses.find(a => a.id === this.selectedAddressId);
-      this.$emit("address-selected", addr || null);
-    }
+   emitSelectedAddress() {
+  const addr = this.addresses.find(a => a.id === this.selectedAddressId);
+  this.$emit("address-selected", addr || null);
+
+  // Gọi API cập nhật shipping_id của order (nếu có order_id truyền từ parent)
+  if (this.orderId && addr) {
+    axios.put(`/api/order/${this.orderId}/update-shipping`, {
+      shipping_id: addr.id
+    })
+    .then(res => {
+      console.log("Cập nhật shipping_id thành công:", res.data);
+    })
+    .catch(err => {
+      console.error("Lỗi cập nhật shipping_id:", err.response?.data || err.message);
+    });
+  }
+}
+
   },
   mounted() {
     this.fetchAddresses();

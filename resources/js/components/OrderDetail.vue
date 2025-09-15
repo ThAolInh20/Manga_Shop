@@ -20,6 +20,8 @@
             <div class="card-body">
               <p><strong>Mã đơn:</strong> #{{ order.id }}</p>
               <p><strong>Trạng thái:</strong> {{ getStatusText(order.order_status) }}</p>
+              <p><strong>Cập nhật lúc:</strong> {{ formatDate(order.updated_at) }}</p>
+
               <p><strong>Ngày đặt:</strong> {{ formatDate(order.created_at) }}</p>
             </div>
           </div>
@@ -30,9 +32,9 @@
           <div class="card shadow-sm h-100">
             <div class="card-header bg-light fw-bold">Người nhận</div>
             <div class="card-body">
-              <p><strong>Tên:</strong> {{ order.name_recipient || "-" }}</p>
-              <p><strong>ĐT:</strong> {{ order.phone_recipient || "-" }}</p>
-              <p><strong>Địa chỉ:</strong> {{ order.shipping_address || "-" }}</p>
+              <p><strong>Tên:</strong> {{order.shipping? order.shipping.name_recipient : "-" }}</p>
+              <p><strong>ĐT:</strong> {{order.shipping? order.shipping.phone_recipient : "-" }}</p>
+              <p><strong>Địa chỉ:</strong> {{order.shipping? order.shipping.shipping_address : "-" }}</p>
             </div>
           </div>
         </div>
@@ -45,7 +47,8 @@
               <p>
                 {{ order.payment_status === 1 ? "Thanh toán online" : "Trả tiền mặt" }}
               </p>
-              <p><strong>Voucher:</strong> {{ order.voucher.code|| "Không có" }} giảm {{order.voucher.sale  }}% tối đa {{ formatPrice(order.voucher.max_discount) }}đ</p>
+              
+              <p v-if="order.voucher"><strong>Voucher:</strong> {{ order.voucher.code|| "Không có" }} giảm {{order.voucher.sale  }}% tối đa {{ formatPrice(order.voucher.max_discount) }}đ</p>
             </div>
           </div>
         </div>
@@ -53,13 +56,14 @@
         <!-- Tổng kết -->
         <div class="col-md-3">
           <div class="card shadow-sm h-100">
-            <div class="card-body text-end">
-              <p class="mb-1"><strong>Tạm tính:</strong> {{ formatPrice(order.total_price) }} đ</p>
-              <p class="mb-1"><strong>Phí ship:</strong> {{ formatPrice(order.shipping_fee || 0) }} đ</p>
+            <div class="card-body ">
+              <p class="mb-1"><strong>Tạm tính:</strong> {{ formatPrice(order.subtotal_price) }} đ</p>
+              <p class="mb-1"><strong>Phí ship:</strong> {{order.shipping? formatPrice(order.shipping.shipping_fee || 0) :0}} đ</p>
+              <p v-if="order.voucher"><strong>Giảm giá:</strong> -{{ formatPrice(discount ) }}</p>
               <!-- <p class="mb-1"><strong>Giảm giá:</strong> {{ order.voucher.sale}} %</p> -->
               <hr>
               <h6 class="text-danger fw-bold">
-                Tổng: {{ formatPrice(Number(order.total_price || 0) + Number(order.shipping_fee || 0)) }} đ
+                Tổng: {{ formatPrice(Number(order.total_price || 0) ) }} đ
               </h6>
             </div>
           </div>
@@ -77,11 +81,18 @@
           >
             <!-- Ảnh sản phẩm -->
             <img 
-              :src="item.product?.image_url || '/images/no-image.png'" 
+              :src="item.product.images ? `/storage/${item.product.images}` : '/storage/products/default.png'"
               alt="product" 
               class="me-3 rounded" 
               style="width: 60px; height: 60px; object-fit: cover;"
             >
+            <!-- <img
+            :src="item.product.images ? `/storage/${product.images}` : '/storage/products/default.png'"
+            class="card-img-top product-img"
+            alt="product"
+            @click="viewDetail(product)"
+            style="cursor: pointer"
+          > -->
             <!-- Thông tin sản phẩm -->
             <div class="flex-grow-1">
               <h6 class="mb-1">{{ item.product?.name || "Sản phẩm không khả dụng" }}</h6>
@@ -100,7 +111,7 @@
 
 
 <script setup>
-import { ref, onMounted, watch } from "vue"
+import { ref, onMounted, watch,computed } from "vue"
 import axios from "axios"
 
 const props = defineProps({
@@ -112,6 +123,7 @@ const props = defineProps({
 
 const order = ref(null)
 const loading = ref(false)
+
 
 const fetchOrderDetail = async () => {
   loading.value = true
@@ -147,7 +159,14 @@ const getStatusText = (status) => {
   }
   return statuses[status] || "Không xác định"
 }
-
+const discount = computed(() => {
+  if (!order.value || !order.value.voucher) return 0
+  const sale = order.value.voucher.sale || 0
+  const maxDiscount = order.value.voucher.max_discount || 0
+  const subtotal = order.value.subtotal_price || 0
+  const discountValue = (subtotal * sale) / 100
+  return Math.min(discountValue, maxDiscount) // không vượt quá max
+})
 onMounted(fetchOrderDetail)
 watch(() => props.orderId, fetchOrderDetail)
 </script>
