@@ -1,11 +1,34 @@
 <table class="table table-bordered" id="orders-table">
+    <div class="mb-2">
+        Tổng số: {{ $orders->total() }} đơn
+    </div>
     <thead>
         <tr>
-            <th><a href="?sort_field=id&sort_order=asc">ID</a></th>
-            <th><a href="?sort_field=customer_name&sort_order=asc">Tài khoản</a></th>
-            <th><a href="?sort_field=total_price&sort_order=asc">Tổng tiền</a></th>
-            <th><a href="?sort_field=order_status&sort_order=asc">Trạng thái</a></th>
-            <th><a href="?sort_field=created_at&sort_order=asc">Ngày đặt</a></th>
+            <th>
+                <a href="#" class="sort-link" data-field="id" data-order="{{ request('sort_field') === 'id' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
+                    ID
+                </a>
+            </th>
+            <th>
+                <a href="#" class="sort-link" data-field="customer_name" data-order="{{ request('sort_field') === 'customer_name' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
+                    Tài khoản
+                </a>
+            </th>
+            <th>
+                <a href="#" class="sort-link" data-field="total_price" data-order="{{ request('sort_field') === 'total_price' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
+                    Tổng tiền
+                </a>
+            </th>
+            <th>
+                <a href="#" class="sort-link" data-field="order_status" data-order="{{ request('sort_field') === 'order_status' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
+                    Trạng thái
+                </a>
+            </th>
+            <th>
+                <a href="#" class="sort-link" data-field="created_at" data-order="{{ request('sort_field') === 'created_at' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
+                    Ngày đặt
+                </a>
+            </th>
             <th>Hành động</th>
         </tr>
     </thead>
@@ -23,6 +46,6 @@
     </tbody>
 </table>
 
- <div id="pagination-links">
-            {{ $orders->links('pagination::bootstrap-5') }}
-        </div>
+<div id="pagination-links">
+    {{ $orders->appends(request()->query())->links('pagination::bootstrap-5') }}
+</div>
