@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+ 
 
 class AccountController extends Controller
 {
@@ -63,6 +65,7 @@ class AccountController extends Controller
             'password' => 'required|min:6',
             'role'     => 'required|integer',
             'image'    => 'nullable|image|max:2048',
+            
         ]);
 
         // Upload ảnh
@@ -83,6 +86,32 @@ class AccountController extends Controller
     {
         return view('admin.accounts.show', compact('account'));
     }
+    public function showBlade(){
+        return view('user.auth.profi');
+    }
+    public function show2()
+{
+    $user = Auth::user();
+
+    if (!$user) {
+        return response()->json(['message' => 'Chưa đăng nhập'], 401);
+    }
+
+    // Lấy thông tin account kèm shipping, order và sản phẩm trong order
+    $account = Account::with([
+        'shipping', 
+        'orders', 
+        'orders.productOrders.product' // lấy luôn thông tin sản phẩm trong order
+    ])->find($user->id);
+
+    if (!$account) {
+        return response()->json(['message' => 'Không tìm thấy account'], 404);
+    }
+
+    return response()->json([
+        'account' => $account
+    ]);
+}
 
     /**
      * Hiển thị form sửa tài khoản.
@@ -130,6 +159,42 @@ class AccountController extends Controller
         $mm = 'Cập nhật tài khoản'. $account->name.' thành công';
 
         return redirect()->route('accounts.index')->with('success', $mm);
+    }
+     public function update2(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->id != $id) {
+            return response()->json(['message' => 'Không có quyền'], 403);
+        }
+        try{
+        $data = $request->validate([
+                    'name' => 'required|string|max:100',
+                    'phone' => 'nullable|string|max:20',
+                    'address' => 'nullable|string|max:255',
+                    'gender' => 'nullable|in:male,female,other',
+                    'birth' => 'nullable|date',
+                ]);
+
+                $account = Account::find($id);
+                if (!$account) {
+                    return response()->json(['message' => 'Không tìm thấy tài khoản'], 404);
+                }
+
+                $account->update($data);
+
+                return response()->json([
+                    'message' => 'Cập nhật thông tin thành công',
+                    'account' => $account
+                ]);
+                }catch(\Exception $err){
+                    return response()->json([
+                    'message' => 'Lỗi'.$err
+                    
+                ]);
+                }
+
+        
     }
 
     /**

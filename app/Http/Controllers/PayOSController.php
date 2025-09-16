@@ -34,8 +34,8 @@ class PayOSController extends Controller
     $cancelUrl = 'http://localhost:8000/order/'.$data['order_id'].'/payos-cancel';
     $payload = [
             "orderCode"   => (int) substr(time(), -6), // 6 số cuối timestamp
-            // "amount"      => (int) $data['amount'],
-            "amount"      => 10000,
+            "amount"      => (int) $data['amount'],
+            // "amount"      => 10000,
             "description" => "Thanh toán đơn #" . $data['order_id'],
             
             "returnUrl"   => $returnUrl,

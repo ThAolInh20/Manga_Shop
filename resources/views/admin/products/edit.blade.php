@@ -64,7 +64,7 @@
                 <!-- Giảm giá -->
                 <div class="mb-3">
                     <label>Sale</label>
-                    <input type="number" step="0.01" name="sale" class="form-control" value="{{ old('sale', $product->sale) }}">
+                    <input type="number" name="sale" class="form-control" value="{{ old('sale', $product->sale) }}">
                 </div>
 
                 <!-- Số lượng -->

@@ -2,9 +2,9 @@
 <aside id="layout-menu" class="layout-menu menu-vertical bg-menu-theme">
   <div class="app-brand demo">
     <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
-      <span class="app-brand-logo demo">
+      <!-- <span class="app-brand-logo demo">
         <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="30">
-      </span>
+      </span> -->
       <span class="app-brand-text demo menu-text fw-bold">Admin</span>
     </a>
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -21,6 +21,26 @@
         <i class="menu-icon bx bx-home-circle"></i>
         <div>Dashboard</div>
       </a>
+    </li>
+    <li class="menu-item {{ request()->routeIs('products.*') ? 'active open' : '' }}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon bx bx-package"></i>
+        <div>Quản lý sản phẩm</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {{ request()->routeIs('products.index') ? 'active' : '' }}">
+          <a href="{{ route('products.index') }}" class="menu-link">
+            <i class="bx bx-list-ul"></i>
+            <div>Danh sách sản phẩm</div>
+          </a>
+        </li>
+        <li class="menu-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
+          <a href="{{ route('products.create') }}" class="menu-link">
+            <i class="bx bx-plus-circle"></i>
+            <div>Thêm sản phẩm</div>
+          </a>
+        </li>
+      </ul>
     </li>
     <!-- Quản lý đơn hàng -->
     <li class="menu-item {{ request()->routeIs('orders.*') ? 'active open' : '' }}">
@@ -61,7 +81,7 @@
     
   </ul>
 </li>
-
+@if(Auth::user()->role==0)
     <!-- Quản lý danh mục -->
     <li class="menu-item {{ request()->routeIs('categories.*') ? 'active open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -85,26 +105,7 @@
     </li>
 
     <!-- Quản lý sản phẩm -->
-    <li class="menu-item {{ request()->routeIs('products.*') ? 'active open' : '' }}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon bx bx-package"></i>
-        <div>Quản lý sản phẩm</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item {{ request()->routeIs('products.index') ? 'active' : '' }}">
-          <a href="{{ route('products.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Danh sách sản phẩm</div>
-          </a>
-        </li>
-        <li class="menu-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
-          <a href="{{ route('products.create') }}" class="menu-link">
-            <i class="bx bx-plus-circle"></i>
-            <div>Thêm sản phẩm</div>
-          </a>
-        </li>
-      </ul>
-    </li>
+    
 
     <!-- Quản lý nhà cung cấp -->
     <li class="menu-item {{ request()->routeIs('suppliers.*') || request()->routeIs('product_suppliers.*') ? 'active open' : '' }}">
@@ -147,8 +148,18 @@
             <div>Thêm tài khoản admin hoặc staff</div>
           </a>
         </li>
+       
       </ul>
+  @endif
     </li>
+     <li><form method="POST" action="{{ route('admin.logout') }}">
+              @csrf
+              <button type="submit" class="dropdown-item">
+                <i class="bx bx-power-off me-2"></i>
+                <span class="align-middle">Đăng xuất</span>
+              </button>
+            </form></li>
+    
   </ul>
 </aside>
 <!-- / Menu -->

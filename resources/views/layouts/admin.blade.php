@@ -39,7 +39,7 @@
       <div class="layout-page">
 
         <!-- Navbar -->
-        @include('partials.navbar')
+        
 
         <!-- Content wrapper -->
         <div class="content-wrapper">

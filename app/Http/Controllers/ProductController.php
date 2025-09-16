@@ -63,62 +63,76 @@ class ProductController extends Controller
     }
 
     public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'name'        => 'required|string|max:255',
-                'category_id' => 'required|integer|exists:categories,id',
-                'price'       => 'required|numeric|min:0',
-                'images'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-                'images_sup.*'=> 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            ],[
-                'name.required' => 'Tên sản phẩm là bắt buộc.',
-                'name.max'      => 'Tên sản phẩm không được vượt quá 255 ký tự.',
+{
+    try {
+        // Validate dữ liệu
+        $validated = $request->validate([
+            'category_id'   => 'required|exists:categories,id',
+            'name'          => 'required|string|max:255',
+            'age'           => 'nullable|integer',
+            'author'        => 'required|string|max:255',
+            'publisher'     => 'nullable|string|max:255',
+            'language'      => 'nullable|string|max:100',
+            'price'         => 'required|numeric',
+            'sale'          => 'nullable|numeric',
+            'weight'        => 'nullable|string|max:50',
+            'size'          => 'nullable|string|max:50',
+            'categ'         => 'nullable|string|max:50',
+            'detail'        => 'nullable|string',
+            'images'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images_sup.*'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists'   => 'Danh mục không tồn tại.',
+            'name.required'        => 'Tên sản phẩm là bắt buộc.',
+            'name.max'             => 'Tên sản phẩm không được vượt quá 255 ký tự.',
+            'author.required'      => 'Tên tác giả là bắt buộc.',
+            'author.max'           => 'Tên tác giả không được vượt quá 255 ký tự.',
+            'publisher.max'        => 'Tên nhà xuất bản không được vượt quá 255 ký tự.',
+            'language.max'         => 'Ngôn ngữ không được vượt quá 100 ký tự.',
+            'price.required'       => 'Giá sản phẩm là bắt buộc.',
+            'price.numeric'        => 'Giá sản phẩm phải là số.',
+            'sale.numeric'         => 'Giá khuyến mãi phải là số.',
+            'weight.max'           => 'Trọng lượng không được vượt quá 50 ký tự.',
+            'size.max'             => 'Kích thước không được vượt quá 50 ký tự.',
+            'categ.max'            => 'Loại sản phẩm không được vượt quá 50 ký tự.',
+            'images.image'         => 'Ảnh chính phải là tệp hình ảnh.',
+            'images.mimes'         => 'Ảnh chính phải có định dạng: jpg, jpeg, png, webp.',
+            'images.max'           => 'Ảnh chính không được lớn hơn 2MB.',
+            'images_sup.*.image'   => 'Ảnh phụ phải là tệp hình ảnh.',
+            'images_sup.*.mimes'   => 'Ảnh phụ phải có định dạng: jpg, jpeg, png, webp.',
+            'images_sup.*.max'     => 'Ảnh phụ không được lớn hơn 2MB.',
+        ]);
 
-                'category_id.required' => 'Vui lòng chọn danh mục.',
-                'category_id.exists'   => 'Danh mục không tồn tại.',
-
-                'price.required' => 'Giá sản phẩm là bắt buộc.',
-                'price.numeric'  => 'Giá sản phẩm phải là số.',
-                'price.min'      => 'Giá sản phẩm phải lớn hơn hoặc bằng 0.',
-
-                'images.image'   => 'Ảnh chính phải là tệp hình ảnh.',
-                'images.mimes'   => 'Ảnh chính phải có định dạng: jpg, jpeg, png, webp.',
-                'images.max'     => 'Ảnh chính không được lớn hơn 2MB.',
-
-                'images_sup.*.image' => 'Ảnh phụ phải là tệp hình ảnh.',
-                'images_sup.*.mimes' => 'Ảnh phụ phải có định dạng: jpg, jpeg, png, webp.',
-                'images_sup.*.max'   => 'Ảnh phụ không được lớn hơn 2MB.',
-            ]);
-
-            // Upload ảnh chính
-            if ($request->hasFile('images')) {
-                $validated['images'] = $request->file('images')->store('products', 'public');
-            }
-
-            // Upload nhiều ảnh phụ
-            if ($request->hasFile('images_sup')) {
-                $supImages = [];
-                foreach ($request->file('images_sup') as $file) {
-                    $supImages[] = $file->store('products', 'public');
-                }
-                $validated['images_sup'] = json_encode($supImages);
-            }
-
-            Product::create($validated);
-
-            return redirect()->route('products.index')
-                ->with('success', 'Thêm sản phẩm thành công');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Nếu validate lỗi, Laravel sẽ tự redirect kèm errors nên không cần xử lý thêm
-            throw $e;
-        } catch (\Exception $e) {
-            // Nếu có lỗi khác (DB, upload, ...)
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
+        // Upload ảnh chính
+        if ($request->hasFile('images')) {
+            $validated['images'] = $request->file('images')->store('products', 'public');
         }
+
+        // Upload nhiều ảnh phụ
+        if ($request->hasFile('images_sup')) {
+            $supImages = [];
+            foreach ($request->file('images_sup') as $file) {
+                $supImages[] = $file->store('products', 'public');
+            }
+            $validated['images_sup'] = json_encode($supImages);
+        }
+
+        Product::create($validated);
+
+        return redirect()->route('products.index')
+            ->with('success', 'Thêm sản phẩm thành công');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Laravel tự redirect và kèm errors nếu validate lỗi
+        throw $e;
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
     }
+}
+
 
 
     public function edit(Product $product)
