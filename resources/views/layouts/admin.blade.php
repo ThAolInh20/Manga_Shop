@@ -29,7 +29,7 @@
 
 <body>
   <!-- Layout wrapper -->
-  <div class="layout-wrapper layout-content-navbar">
+  <div  class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
 
       <!-- Sidebar -->
@@ -45,7 +45,7 @@
         <div class="content-wrapper">
 
           <!-- Content -->
-          <div class="container-xxl flex-grow-1 container-p-y">
+          <div  class="container-xxl flex-grow-1 container-p-y">
             @yield('content')
           </div>
           <!-- / Content -->
@@ -58,7 +58,6 @@
 
       </div>
       <!-- / Layout page -->
-
     </div>
     <!-- / Layout container -->
   </div>
@@ -66,7 +65,7 @@
 
   <!-- Core JS -->
   <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-  <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
+  <!-- <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script> -->
   <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 
   <!-- Menu JS (bắt buộc cho sidebar & dropdown) -->

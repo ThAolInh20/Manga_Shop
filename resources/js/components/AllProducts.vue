@@ -40,7 +40,7 @@
   </div>
 
   <!-- Số lượng hiển thị -->
-  <!-- <div class="col-md-3">
+  <div class="col-md-3">
     <label class="form-label">📄 Số sản phẩm/trang</label>
     <select class="form-select" v-model.number="perPage" @change="fetchProducts(1)">
       <option :value="6">6</option>
@@ -48,16 +48,17 @@
       <option :value="12">12</option>
       <option :value="24">24</option>
     </select>
-  </div> -->
+  </div>
 
   <!-- Sắp xếp -->
   <div class="col-md-3">
     <label class="form-label">Sắp xếp theo:</label>
     <div class="input-group">
       <select class="form-select" v-model="sortBy">
-        <option value="name">Tên</option>
-        <option value="price">Giá</option>
+        <option value="name">Tên sản phẩm</option>
+        <option value="price">Giá sản phẩm</option>
         <option value="quantity_buy">Lượt mua</option>
+        <option value="sale">Giảm giá</option>
       </select>
       <button class="btn btn-outline-secondary sort-btn" @click="toggleSortOrder">
         <i :class="sortOrder === 'asc' ? 'bi bi-sort-down-alt' : 'bi bi-sort-down'"></i>
@@ -276,7 +277,7 @@ if (filters.value.maxPrice !== null) {
     let valB = b[sortBy.value]
 
     // Nếu là số (giá, lượt mua) → ép về number
-  if (sortBy.value === 'price' || sortBy.value === 'quantity_buy') {
+  if (sortBy.value === 'price' || sortBy.value === 'quantity_buy'||sortBy.value==='sale') {
     valA = Number(valA)
     valB = Number(valB)
   } else if (typeof valA === 'string') {

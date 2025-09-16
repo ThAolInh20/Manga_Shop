@@ -1,9 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Trang chủ admin')
+@section('title', 'Thống kê đơn hàng')
 
 @section('content')
-<div class="container mt-4">
-    Xin chào {{ Auth::user()->name }}
+<div class="row">
+    <div class="col-md-6">
+        @include('admin.chart.chartorder')
+    </div>
+    <div class="col-md-6">
+        @include('admin.chart.chartorder')
+    </div>
+
 </div>
+
 @endsection

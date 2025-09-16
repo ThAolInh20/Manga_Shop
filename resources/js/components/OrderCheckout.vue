@@ -201,6 +201,7 @@ const confirmCOD = async () => {
 
     if (res.data.success) {
       order.value.order_status = 1;
+      window.location.reload();
       alert(res.data.message);
     }
   } catch (err) {

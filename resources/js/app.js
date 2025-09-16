@@ -18,6 +18,7 @@ import MomoPayment from './components/MomoPayment.vue';
 import PayOSPayment from './components/PayOSPayment.vue';
 import ListVoucher from './components/ListVoucher.vue';
 import Profi from './components/Profi.vue';
+import OrderChart from './components/chart/OrderChart.vue';
 
 const app = createApp({});
 
@@ -40,8 +41,10 @@ app.component('MomoPayment',MomoPayment);
 app.component('PayOSPayment',PayOSPayment);
 app.component('ListVoucher',ListVoucher);
 app.component('Profi',Profi)
+app.component('OrderChart',OrderChart)
 
 
 // Mount Vue vào #app (trong Blade)
 // app.use(pinia);
-app.mount('#app');
+// app.mount('#app');
+app.mount('#app')

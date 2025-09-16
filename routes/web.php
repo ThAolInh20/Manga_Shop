@@ -19,6 +19,7 @@ use App\Models\Wishlist;
 use App\Http\Controllers\ShippingController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\PayOSController;
+use App\Http\Controllers\ChartController;
 
 
 // User login
@@ -63,7 +64,12 @@ Route::middleware(['role:0,1'])->group(function () {
         Route::post('logout', [AccountAuthController::class, 'logout'])->name('admin.logout');
         Route::post('/orders/{orderId}/cancel', [OrderController::class, 'cancelAdminOrder']);
         Route::post('/orders/{orderId}/status', [OrderController::class, 'updateAdminStatus']);
+       
+        Route::prefix('/api')->group(function () {
+            Route::get('/orders/chart', [ChartController::class, 'chartForOrder'])->name('admin.chart.orders');
+        });
     });
+    
     
 
 });
