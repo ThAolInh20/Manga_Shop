@@ -17,6 +17,7 @@ import OrderCheckout from './components/OrderCheckout.vue';
 import MomoPayment from './components/MomoPayment.vue';
 import PayOSPayment from './components/PayOSPayment.vue';
 import ListVoucher from './components/ListVoucher.vue';
+import Profi from './components/Profi.vue';
 
 const app = createApp({});
 
@@ -37,7 +38,8 @@ app.component('ShippingAddress',ShippingAddress);
 app.component('OrderCheckout',OrderCheckout);
 app.component('MomoPayment',MomoPayment);
 app.component('PayOSPayment',PayOSPayment);
-app.component('ListVoucher',ListVoucher)
+app.component('ListVoucher',ListVoucher);
+app.component('Profi',Profi)
 
 
 // Mount Vue vào #app (trong Blade)

@@ -56,4 +56,8 @@ class Account extends Authenticatable
     {
         return $this->hasMany(Cart::class);
     }
+    public function shipping() {
+        return $this->hasMany(Shipping::class);
+    }
+    
 }

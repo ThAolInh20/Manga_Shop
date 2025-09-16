@@ -14,9 +14,7 @@
             <!-- Logo -->
             <div class="app-brand justify-content-center mb-4">
               <a href="{{ route('admin.login') }}" class="app-brand-link gap-2">
-                <span class="app-brand-logo demo">
-                  <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40">
-                </span>
+                
                 <span class="app-brand-text demo text-body fw-bolder">Admin</span>
               </a>
             </div>

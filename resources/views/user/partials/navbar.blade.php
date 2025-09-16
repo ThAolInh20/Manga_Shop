@@ -2,9 +2,11 @@
   <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
     
     <!-- Logo -->
-    <a href="{{ url('/') }}" class="navbar-brand d-flex align-items-center fw-bold me-4">
-      <i class='bx bx-book-open text-primary me-1'></i> MangaShop
-    </a>
+    
+<a href="{{ url('/') }}" class="navbar-brand d-flex align-items-center fw-bold me-4">
+    <img src="{{ asset('storage/logo/logo.png') }}" alt="MangaShop" style="height: 60px; object-fit: contain; margin-right: 10px;">
+  
+</a>
 
     <!-- Search -->
     <form class="d-none d-md-flex ms-3" action="{{ route('user.products.list') }}" method="GET">
@@ -44,7 +46,7 @@
                     👋 Xin chào, <strong>{{ Auth::user()->name }}</strong>
                 </h6>
             </li>
-            <li><a class="dropdown-item" href="#"><i class="bx bx-user me-2"></i> Hồ sơ cá nhân</a></li>
+            <li><a class="dropdown-item" href="{{ route('user.profi') }}"><i class="bx bx-user me-2"></i> Hồ sơ cá nhân</a></li>
             <li><a class="dropdown-item" href="{{ route('user.order.list') }}"><i class="bx bx-shopping-bag me-2"></i> Đơn hàng của tôi</a></li>
             @endauth
             <li><a class="dropdown-item" href="{{ route('user.wishlist.list') }}"><i class="bx bx-heart me-2"></i> Danh sách yêu thích</a></li>

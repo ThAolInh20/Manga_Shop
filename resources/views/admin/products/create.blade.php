@@ -18,23 +18,96 @@
     <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <div class="mb-3">
-            <label>Tên</label>
-            <input type="text" name="name" class="form-control" value="{{ old('name') }}">
-        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Danh mục -->
+                <div class="mb-3">
+                    <label>Danh mục</label>
+                    <select name="category_id" class="form-control">
+                        @foreach($categories as $c)
+                            <option value="{{ $c->id }}" {{ old('category_id') == $c->id ? 'selected' : '' }}>
+                {{ $c->name }}
+            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <div class="mb-3">
-            <label>Danh mục</label>
-            <select name="category_id" class="form-control">
-                @foreach($categories as $c)
-                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                @endforeach
-            </select>
-        </div>
+                <div class="mb-3">
+    <label>Tên sản phẩm <span class="text-danger">*</span></label>
+    <input type="text" name="name" class="form-control" value="{{ old('name') }}">
+    @error('name')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
 
-        <div class="mb-3">
-            <label>Giá</label>
-            <input type="number" name="price" class="form-control" value="{{ old('price') }}">
+<!-- Tác giả -->
+<div class="mb-3">
+    <label>Tác giả <span class="text-danger">*</span></label>
+    <input type="text" name="author" class="form-control" value="{{ old('author') }}">
+    @error('author')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+<!-- Giá -->
+<div class="mb-3">
+    <label>Giá<span class="text-danger">*</span></label>
+    <input type="number" step="0.01" name="price" class="form-control" value="{{ old('price') }}">
+    @error('price')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+
+                <!-- Tuổi -->
+                <div class="mb-3">
+                    <label>Độ tuổi</label>
+                    <input type="number" name="age" class="form-control" value="">
+                </div>
+
+               
+
+             
+                
+            </div>
+
+            <div class="col-md-6">
+               
+           
+                <!-- Giảm giá -->
+                <div class="mb-3">
+                    <label>Sale</label>
+                    <input type="number" step="0.01" name="sale" class="form-control" value="0.00">
+                </div>
+                 <div class="mb-3">
+                    <label>Thể loại</label>
+                    <input type="text" name="categ" class="form-control" value="">
+                </div>
+<div class="mb-3">
+                    <label>Nhà xuất bản</label>
+                    <input type="text" name="publisher" class="form-control" value="">
+                </div>
+
+                <!-- Ngôn ngữ -->
+                <div class="mb-3">
+                    <label>Ngôn ngữ</label>
+                    <input type="text" name="language" class="form-control" value="">
+                </div>
+               
+
+
+
+                <!-- Trọng lượng -->
+                <div class="mb-3">
+                    <label>Trọng lượng</label>
+                    <input type="text" name="weight" class="form-control" value="">
+                </div>
+
+                <!-- Kích thước -->
+                <div class="mb-3">
+                    <label>Kích thước</label>
+                    <input type="text" name="size" class="form-control" value="">
+                </div>
+            </div>
         </div>
 
         {{-- Ảnh chính --}}

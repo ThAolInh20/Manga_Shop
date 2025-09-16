@@ -46,7 +46,7 @@
                         <!-- <option value="2" {{ old('role', $account->role) == 2 ? 'selected' : '' }}>Khách hàng</option> -->
                     </select>
                 </div>
-                <div class="mb-3 text-center">
+                <!-- <div class="mb-3 text-center">
                     <label class="form-label">Ảnh đại diện</label>
                     <img 
                         id="preview-avatar" 
@@ -60,7 +60,7 @@
                     @error('image')
                         <div class="text-danger small">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
             </div>
 
             {{-- Cột phải: thông tin khác --}}

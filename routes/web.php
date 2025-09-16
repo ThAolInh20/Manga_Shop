@@ -48,10 +48,9 @@ Route::post('logout', [AccountAuthController::class, 'userLogout'])->name('user.
 Route::get('admin/login', [AccountAuthController::class, 'showAdminLoginForm'])->name('admin.login');
  Route::post('admin/login', [AccountAuthController::class, 'adminLogin']);
 
-Route::middleware(['auth', 'role:0,1'])->group(function () {
+Route::middleware(['role:0,1'])->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::prefix('admin')->group(function () {
-        
         Route::resource('accounts', AccountController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
@@ -68,8 +67,12 @@ Route::middleware(['auth', 'role:0,1'])->group(function () {
     
 
 });
+
 Route::prefix('api')->group(function () {
      Route::get('/user', [AccountAuthController::class, 'checkLogin']);
+     Route::get('/user/profi', [AccountController::class, 'show2']);
+    Route::put('/user/profi/{id}', [AccountController::class, 'update2']);
+
     Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
 
     Route::get('/wishlist', [WishlistController::class, 'index']);
@@ -128,6 +131,8 @@ Route::middleware(['auth', 'role:2'])->group(function () {
 });
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+route::get('/user/profi', [AccountController::class, 'showBlade'])->name('user.profi');
+
 
 route::get('/products/{product}', [ProductController::class, 'showProductForUser'])->name('user.products.show');
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
