@@ -30,6 +30,7 @@
   <script src="{{ asset('assets/js/config.js') }}"></script>
 </head>
 <body>
+  
   @yield('content')
 
   <!-- Core JS -->

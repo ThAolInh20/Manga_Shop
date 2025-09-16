@@ -275,6 +275,7 @@ class ProductController extends Controller
 
         // Lấy giá trị duy nhất dùng Eloquent
         $values = Product::query()
+         ->whereNotNull($field)
             ->distinct()
             ->pluck($field);
 

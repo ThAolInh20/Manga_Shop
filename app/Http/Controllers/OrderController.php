@@ -225,6 +225,7 @@ class OrderController extends Controller
     // 3. Cập nhật trạng thái
     $order->order_status = $statusWant;
     // $order->updated_by = $user->id;
+   
 
     $order->save();
 
@@ -766,6 +767,7 @@ public function showOrder($order_id)
 
         // Cập nhật trạng thái sang "Đang xử lý"
         $order->order_status = 1;
+        // $order->order_date =now();
         $order->save();
 
         return response()->json([
