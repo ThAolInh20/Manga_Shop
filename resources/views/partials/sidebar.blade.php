@@ -43,28 +43,12 @@
       </ul>
     </li>
     <!-- Quản lý đơn hàng -->
-    <li class="menu-item {{ request()->routeIs('orders.*') ? 'active open' : '' }}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
+    <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
+    <a href="{{ route('orders.index') }}" class="menu-link">
         <i class="menu-icon bx bx-cart"></i>
         <div>Quản lý đơn hàng</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
-          <a href="{{ route('orders.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Thống kê doanh thu</div>
-          </a>
-        </li>
-        <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
-          <a href="{{ route('orders.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Danh sách đơn hàng</div>
-          </a>
-        </li>
-
-        
-      </ul>
-    </li>
+    </a>
+</li>
     <!-- Quản lý Voucher -->
 <li class="menu-item {{ request()->routeIs('vouchers.*') ? 'active open' : '' }}">
   <a href="javascript:void(0);" class="menu-link menu-toggle">

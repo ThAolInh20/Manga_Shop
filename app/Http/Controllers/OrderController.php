@@ -23,54 +23,81 @@ class OrderController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-{
-    $query = Order::with('account', 'products');
+    {
+        $query = Order::with('account', 'products');
 
-    // --- Bộ lọc ---
-    if ($request->filled('customer_name')) {
-        $query->whereHas('account', function ($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->customer_name . '%');
-        });
+        // --- Bộ lọc ---
+        if ($request->filled('customer_name')) {
+            $query->whereHas('account', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->customer_name . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('order_status', $request->status);
+        }
+        // Bộ lọc theo select-fill (tuần, tháng, năm...)
+        if ($request->filled('select_fill')) {
+            switch ($request->input('select_fill')) {
+                case 'week':
+                    $query->whereBetween('created_at', [
+                        now()->startOfWeek(), now()->endOfWeek()
+                    ]);
+                    break;
+                case 'lastWeek':
+                    $query->whereBetween('created_at', [
+                        now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()
+                    ]);
+                    break;
+                case 'month':
+                    $query->whereMonth('created_at', now()->month)
+                        ->whereYear('created_at', now()->year);
+                    break;
+                case 'lastMonth':
+                    $lastMonth = now()->subMonth();
+                    $query->whereMonth('created_at', $lastMonth->month)
+                        ->whereYear('created_at', $lastMonth->year);
+                    break;
+                case 'year':
+                    $query->whereYear('created_at', now()->year);
+                    break;
+                case 'lastYear':
+                    $query->whereYear('created_at', now()->subYear()->year);
+                    break;
+            }
+        }
+
+        if ($request->order_date) {
+            try {
+                $date = \Carbon\Carbon::parse($request->order_date)->toDateString();
+                $query->whereDate('created_at', '=', $date);
+            } catch (\Exception $e) {
+                // Nếu ngày không hợp lệ thì bỏ qua
+            }
+         }
+        // --- Sắp xếp ---
+        $sortField = $request->get('sort_field', 'id'); 
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        // Cho phép sắp xếp theo: id, total_price, order_status, created_at, customer_name
+        if ($sortField === 'customer_name') {
+            $query->join('accounts', 'orders.account_id', '=', 'accounts.id')
+                ->select('orders.*', 'accounts.name as customer_name')
+                ->orderBy('accounts.name', $sortOrder);
+        } else {
+            $query->orderBy($sortField, $sortOrder);
+        }
+
+        $orders = $query->paginate(10);
+
+        // Nếu AJAX thì chỉ trả bảng (render partial view)
+        if ($request->ajax()) {
+            return view('admin.orders.table', compact('orders'))->render();
+        }
+
+        // Nếu load full page
+        return view('admin.orders.index', compact('orders'));
     }
-
-    if ($request->filled('status')) {
-        $query->where('order_status', $request->status);
-    }
-
-    if ($request->order_date) {
-    try {
-        $date = \Carbon\Carbon::parse($request->order_date)->toDateString();
-        $query->whereDate('created_at', '=', $date);
-    } catch (\Exception $e) {
-        // Nếu ngày không hợp lệ thì bỏ qua
-    }
-}
-
- 
-
-    // --- Sắp xếp ---
-    $sortField = $request->get('sort_field', 'id'); 
-    $sortOrder = $request->get('sort_order', 'desc');
-
-    // Cho phép sắp xếp theo: id, total_price, order_status, created_at, customer_name
-    if ($sortField === 'customer_name') {
-        $query->join('accounts', 'orders.account_id', '=', 'accounts.id')
-              ->select('orders.*', 'accounts.name as customer_name')
-              ->orderBy('accounts.name', $sortOrder);
-    } else {
-        $query->orderBy($sortField, $sortOrder);
-    }
-
-    $orders = $query->paginate(10);
-
-    // Nếu AJAX thì chỉ trả bảng (render partial view)
-    if ($request->ajax()) {
-        return view('admin.orders.table', compact('orders'))->render();
-    }
-
-    // Nếu load full page
-    return view('admin.orders.index', compact('orders'));
-}
 
     public function userOrdersPage()
     {
@@ -790,5 +817,8 @@ public function showOrder($order_id)
         'shipping_id' => $order->shipping_id
     ]);
 }
+    public function showChart(){
+        return view('admin.orders.chart');
+    }
    
 }

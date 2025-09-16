@@ -3,6 +3,9 @@
 @section('title', 'Quản lý đơn hàng')
 
 @section('content')
+
+@include('admin.orders.chart')
+
 <div class="container">
     <h2>Danh sách đơn hàng</h2>
 
@@ -20,6 +23,17 @@
                 <option value="3">Hoàn tất</option>
                 <option value="4">Đổi trả</option>
                 <option value="5">Đã hủy</option>
+            </select>
+        </div>
+         <div class="col-md-2">
+            <select name="select_fill" class="form-select">
+                <option value="">-- Tất cả --</option>
+                <option value="week">Tuần này</option>
+                <option value="lastWeek">Tuần trước</option>
+                <option value="month">Tháng này</option>
+                <option value="lastMonth">Tháng trước</option>
+                <option value="year">Năm nay</option>
+                <option value="lastYear">Năm trước</option>
             </select>
         </div>
         <div class="col-md-3">
@@ -73,13 +87,29 @@ document.addEventListener("DOMContentLoaded", function () {
             fetchOrders(new URL(e.target.closest("a").href).searchParams.toString());
         }
     });
+    // Sắp xếp
+document.addEventListener("click", function (e) {
+    const link = e.target.closest(".sort-link");
+    if (link) {
+        e.preventDefault();
+        const field = link.dataset.field;
+        const order = link.dataset.order;
+
+        // Giữ filter hiện tại
+        let params = new URLSearchParams(new FormData(form));
+        params.set("sort_field", field);
+        params.set("sort_order", order);
+
+        fetchOrders(params.toString());
+    }
+});
 
     // Khởi tạo hành động
     function initActions() {
         document.querySelectorAll("#orders-table tbody tr").forEach(row => {
             const statusCode = parseInt(row.dataset.status);
             const orderStatuses = {
-                0: { text: "Chờ khách xác nhận đơn", class: "secondary" },
+                0: { text: "Chờ khách thanh toán", class: "secondary" },
                 1: { text: "Đang xử lý", class: "info" },
                 2: { text: "Đang giao", class: "primary" },
                 3: { text: "Hoàn tất", class: "success" },

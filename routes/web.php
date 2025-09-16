@@ -51,6 +51,7 @@ Route::get('admin/login', [AccountAuthController::class, 'showAdminLoginForm'])-
 
 Route::middleware(['role:0,1'])->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+    
     Route::prefix('admin')->group(function () {
         Route::resource('accounts', AccountController::class);
         Route::resource('categories', CategoryController::class);
@@ -61,12 +62,16 @@ Route::middleware(['role:0,1'])->group(function () {
         Route::resource('orders', OrderController::class)->only([
             'index', 'show', 'edit', 'update'
         ]);
+
+        Route::get('/orders/chart', [OrderController::class, 'showChart'])->name('orders.chart');
+
         Route::post('logout', [AccountAuthController::class, 'logout'])->name('admin.logout');
         Route::post('/orders/{orderId}/cancel', [OrderController::class, 'cancelAdminOrder']);
         Route::post('/orders/{orderId}/status', [OrderController::class, 'updateAdminStatus']);
        
-        Route::prefix('/api')->group(function () {
-            Route::get('/orders/chart', [ChartController::class, 'chartForOrder'])->name('admin.chart.orders');
+        Route::prefix('/api/chart')->group(function () {
+            Route::get('/orders', [ChartController::class, 'chartForOrder'])->name('admin.chart.orders');
+            Route::get('/productbuy', [ChartController::class, 'productPieChart'])->name('admin.chart.products.pie');
         });
     });
     
@@ -131,10 +136,6 @@ Route::prefix('api')->group(function () {
 
 });
 
-Route::middleware(['auth', 'role:2'])->group(function () {
-    
-
-});
 
 route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 route::get('/user/profi', [AccountController::class, 'showBlade'])->name('user.profi');
