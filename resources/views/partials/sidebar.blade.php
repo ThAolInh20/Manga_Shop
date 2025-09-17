@@ -22,6 +22,32 @@
         <div>Dashboard</div>
       </a>
     </li>
+    
+    <!-- Quản lý đơn hàng -->
+    <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
+    <a href="{{ route('orders.index') }}" class="menu-link">
+        <i class="menu-icon bx bx-cart"></i>
+        <div>Quản lý đơn hàng</div>
+    </a>
+</li> 
+    <!-- Quản lý Voucher -->
+<!-- <li class="menu-item {{ request()->routeIs('vouchers.*') ? 'active open' : '' }}">
+  <a href="javascript:void(0);" class="menu-link menu-toggle">
+    <i class="menu-icon bx bx-purchase-tag-alt"></i>
+    <div>Quản lý Voucher</div>
+  </a>
+  <ul class="menu-sub">
+    
+    
+  </ul>
+</li> -->
+<li class="menu-item {{ request()->routeIs('vouchers.index') ? 'active' : '' }}">
+      <a href="{{ route('vouchers.index') }}" class="menu-link">
+        <i class="bx menu-icon bx-purchase-tag-alt"></i>
+        <div>Quản lý voucher</div>
+      </a>
+    </li>
+<!-- Quản lý sản phẩm -->
     <li class="menu-item {{ request()->routeIs('products.*') ? 'active open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon bx bx-package"></i>
@@ -42,32 +68,15 @@
         </li>
       </ul>
     </li>
-    <!-- Quản lý đơn hàng -->
-    <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
-    <a href="{{ route('orders.index') }}" class="menu-link">
-        <i class="menu-icon bx bx-cart"></i>
-        <div>Quản lý đơn hàng</div>
-    </a>
-</li>
-    <!-- Quản lý Voucher -->
-<li class="menu-item {{ request()->routeIs('vouchers.*') ? 'active open' : '' }}">
-  <a href="javascript:void(0);" class="menu-link menu-toggle">
-    <i class="menu-icon bx bx-purchase-tag-alt"></i>
-    <div>Quản lý Voucher</div>
-  </a>
-  <ul class="menu-sub">
-    <li class="menu-item {{ request()->routeIs('vouchers.index') ? 'active' : '' }}">
-      <a href="{{ route('vouchers.index') }}" class="menu-link">
-        <i class="bx bx-list-ul"></i>
-        <div>Danh sách voucher</div>
-      </a>
-    </li>
-    
-  </ul>
-</li>
 @if(Auth::user()->role==0)
     <!-- Quản lý danh mục -->
-    <li class="menu-item {{ request()->routeIs('categories.*') ? 'active open' : '' }}">
+     <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
+          <a href="{{ route('categories.index') }}" class="menu-link">
+            <i class="bx menu-icon bx-category"></i>
+            <div>Danh sách danh mục</div>
+          </a>
+        </li>
+    <!-- <li class="menu-item {{ request()->routeIs('categories.*') ? 'active open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon bx bx-category"></i>
         <div>Quản lý danh mục</div>
@@ -86,13 +95,18 @@
           </a>
         </li>
       </ul>
-    </li>
+    </li> -->
 
-    <!-- Quản lý sản phẩm -->
     
 
     <!-- Quản lý nhà cung cấp -->
-    <li class="menu-item {{ request()->routeIs('suppliers.*') || request()->routeIs('product_suppliers.*') ? 'active open' : '' }}">
+     <li class="menu-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+  <a href="{{ route('suppliers.index') }}" class="menu-link">
+    <i class="menu-icon bx bx-store"></i>
+    <div>Quản lý nhà cung cấp</div>
+  </a>
+</li>
+    <!-- <li class="menu-item {{ request()->routeIs('suppliers.*') || request()->routeIs('product_suppliers.*') ? 'active open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon bx bx-store"></i>
         <div>Quản lý nhà cung cấp</div>
@@ -111,7 +125,7 @@
           </a>
         </li>
       </ul>
-    </li>
+    </li> -->
 
     <!-- Tài khoản -->
     <li class="menu-item {{ request()->routeIs('accounts.*') ? 'active open' : '' }}">
@@ -129,7 +143,7 @@
         <li class="menu-item {{ request()->routeIs('product_suppliers.index') ? 'active' : '' }}">
           <a href="{{ route('accounts.create') }}" class="menu-link">
             <i class="bx bx-cube-alt"></i>
-            <div>Thêm tài khoản admin hoặc staff</div>
+            <div>Thêm tài khoản</div>
           </a>
         </li>
        

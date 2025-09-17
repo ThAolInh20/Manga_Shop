@@ -37,7 +37,7 @@
 
         <div class="mb-3">
             <label class="form-label">Ngày hết hạn</label>
-            <input type="date" name="date_end" class="form-control" value="{{ old('date_end', $voucher->date_end) }}" required>
+            <input type="date" name="date_end" class="form-control" value="{{ old('date_end', $voucher->date_end) }}" >
         </div>
 
         <div class="mb-3">

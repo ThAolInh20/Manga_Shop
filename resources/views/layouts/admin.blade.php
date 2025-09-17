@@ -65,7 +65,7 @@
 
   <!-- Core JS -->
   <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-  <!-- <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script> -->
+  <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
   <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 
   <!-- Menu JS (bắt buộc cho sidebar & dropdown) -->

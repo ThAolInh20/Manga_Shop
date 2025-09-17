@@ -52,7 +52,7 @@
             <div class="col-md-6">
                 <h5 class="mb-3">Thông tin khác</h5>
 
-                {{-- Ảnh đại diện --}}
+                <!-- {{-- Ảnh đại diện --}}
                 <div class="mb-3 text-center">
                     <label class="form-label d-block">Ảnh đại diện</label>
                     <img id="previewImage" src="{{ asset('assets/img/avatars/default.png') }}" 
@@ -61,7 +61,7 @@
                     @error('image')
                         <div class="text-danger small">{{ $message }}</div>
                     @enderror
-                </div>
+                </div> -->
 
                 <div class="mb-3">
                     <label for="address" class="form-label">Địa chỉ</label>

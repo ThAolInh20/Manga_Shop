@@ -289,9 +289,14 @@ class ProductController extends Controller
 
     // 🔍 Tìm kiếm theo tên sản phẩm hoặc tác giả
     if ($request->search) {
-        $query->where(function ($q) use ($request) {
-            $q->where('name', 'like', "%{$request->search}%")
-              ->orWhere('author', 'like', "%{$request->search}%");
+        $search = strtolower($request->search);
+
+        $query->where(function ($q) use ($search) {
+            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+            ->orWhereRaw('LOWER(author) LIKE ?', ["%{$search}%"])
+            // ->orWhereRaw('LOWER(categ) LIKE ?', ["%{$search}%"])
+            // ->orWhereRaw('LOWER(publisher) LIKE ?', ["%{$search}%"])
+            ;
         });
     }
     else if($request->category_id){

@@ -68,7 +68,11 @@
 </div>
 
 </div>
-      <div class="product-grid">
+      <div v-if="!filteredProducts.length" class="text-center my-5">
+        <i class="bi bi-search fs-1 text-muted d-block mb-2"></i>
+        <p class="text-muted fs-5">Không tìm thấy sản phẩm phù hợp</p>
+      </div>
+      <div v-else class="product-grid">
         <div v-for="product in filteredProducts" :key="product.id" class="card h-100">
           <!-- Ảnh + actions -->
           <div class="position-relative product-img-wrapper">
@@ -128,11 +132,11 @@
               </p>
             </div>
               <div class="progress-wrapper mb-2">
-  <div class="progress-fill" :style="{ width: soldPercent(product) + '%' }"></div>
-  <div class="progress-text">
-    {{ product.quantity_buy }}/{{ product.quantity+product.quantity_buy }} đã bán
-  </div>
-</div>
+        <div class="progress-fill" :style="{ width: soldPercent(product) + '%' }"></div>
+        <div class="progress-text">
+          {{ product.quantity_buy }}/{{ product.quantity+product.quantity_buy }} đã bán
+        </div>
+      </div>
           </div>
         </div>
       </div>
@@ -368,8 +372,6 @@ const soldPercent = (product) => {
 
 onMounted(() => {
   const urlParams = new URLSearchParams(window.location.search)
- 
-
   searchKeyword.value = urlParams.get('search') || ''
   fetchProducts(1)
   eventBus.on('wishlist-updated', fetchProducts)
