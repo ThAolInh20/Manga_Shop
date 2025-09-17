@@ -752,8 +752,12 @@ public function showOrder($order_id)
         Log::info($orderId);
 
         $voucher = Voucher::where('code', $request->voucher_code)
-            ->where('is_active', 1) // chỉ lấy voucher còn hiệu lực
-            ->first();
+    ->where('is_active', 1)
+    ->where(function($q) {
+        $q->whereNull('date_end') // nếu chưa set ngày hết hạn
+          ->orWhere('date_end', '>=', now()); // hoặc còn hạn sử dụng
+    })
+    ->first();
 
         if (!$voucher) {
             return response()->json([

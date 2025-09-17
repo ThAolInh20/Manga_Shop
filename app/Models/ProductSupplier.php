@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class ProductSupplier extends Model
 {
     use HasFactory;
+    public $timestamps = true;
+
 
     protected $table = 'product_suppliers';
 
     protected $fillable = [
-        'product_id', 'supplier_id', 'date_import', 
-        'import_price', 'quantity', 'detail'
+        'product_id', 'supplier_id', 'import_at', 
+        'import_price', 'import_quantity', 'detail'
     ];
      public function product()
     {

@@ -1,8 +1,8 @@
 @extends('user.layouts.app')
 
-@section('title', 'Đăng nhập Admin')
+@section('title', 'Đăng nhập')
 
-@section('content')
+
 @section('content')
  <!-- Alerts nổi lên dưới navbar -->
   <div id="alerts-container" 

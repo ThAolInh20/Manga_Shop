@@ -18,7 +18,7 @@ class CheckRole
     {
        
         if (!Auth::check()) {
-            return redirect('/login');  
+            return redirect('/');  
         }
 
         // Lấy role user hiện tại
@@ -26,7 +26,7 @@ class CheckRole
 
         // Kiểm tra role
         if (!in_array($userRole, $role)) {
-            return redirect('/')->with('error', 'Bạn không có quyền truy cập!');
+            return redirect()->back()->with('error', 'Bạn không có quyền truy cập!');
         }
 
         return $next($request);
