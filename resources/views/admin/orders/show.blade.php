@@ -82,7 +82,7 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $productOrder->product_id }}</td>
-                <td>{{ $productOrder->product->name ?? 'Sản phẩm đã xoá' }}</td>
+                <td><a href="{{ route('products.edit',$productOrder->product_id) }}">{{ $productOrder->product->name ?? 'Sản phẩm đã xoá' }}</a></td>
                 <td>{{ number_format($productOrder->price, 0, ',', '.') }} đ</td>
                 <td>{{ $productOrder->quantity }}</td>
                 <td>{{ number_format($productOrder->price * $productOrder->quantity, 0, ',', '.') }} đ</td>

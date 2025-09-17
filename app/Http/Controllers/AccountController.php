@@ -37,7 +37,7 @@ class AccountController extends Controller
         $perPage = $request->get('per_page', 10);
        
 
-        $accounts = $query->orderBy($sort, $order)->paginate($perPage)->appends($request->all());
+        $accounts = $query->with('updatedBy')->orderBy($sort, $order)->paginate($perPage)->appends($request->all());
 
         if ($request->ajax()) {
             return view('admin.accounts.index', compact('accounts'))->render();
@@ -117,7 +117,11 @@ class AccountController extends Controller
      * Hiển thị form sửa tài khoản.
      */
     public function edit(Account $account)
+
     {
+        if($account->role==2){
+                return redirect()->route('accounts.index')->with('error', 'Không thể sửa tài khoản khách hàng');
+        }
         return view('admin.accounts.edit', compact('account'));
     }
 
@@ -126,16 +130,21 @@ class AccountController extends Controller
      */
     public function update(Request $request, Account $account)
     {
+        if($account->role==2){
+             return redirect()->route('accounts.index')->with('error', 'Không thể sửa tài khoản khách hàng');
+        }
         $validated = $request->validate([
             'name'      => 'nullable|string|max:100',
             // 'email'     => 'required|email|unique:accounts,email,' . $account->id,
             'role'      => 'required|integer',
-            'image'     => 'nullable|image|max:4076',
+            // 'image'     => 'nullable|image|max:4076',
             'address'   => 'nullable|string|max:255',
             'phone'     => 'nullable|string|max:20',
             'birth'     => 'nullable|date',
             'gender'    => 'nullable|in:Male,Female,Other',
-            'is_active' => 'required|boolean',
+            // 'is_active' => 'required|boolean',
+        ],[
+            'role.required'=>'Chọn role' 
         ]);
 
         // Nếu nhập password thì hash
@@ -154,6 +163,7 @@ class AccountController extends Controller
             }
             $validated['image'] = $request->file('image')->store('avatars', 'public');
         }
+        
 
         $account->update($validated);
         $mm = 'Cập nhật tài khoản'. $account->name.' thành công';
@@ -206,8 +216,39 @@ class AccountController extends Controller
         if ($account->image && Storage::disk('public')->exists($account->image)) {
             Storage::disk('public')->delete($account->image);
         }
+        if($account->is_active!=0){
+            return redirect()->route('accounts.index')->with('error', 'Tài khoản không thể xóa');
+        }
 
         $account->delete();
         return redirect()->route('accounts.index')->with('success', 'Xóa tài khoản thành công');
     }
+    public function deactivate(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Chưa đăng nhập'], 401);
+        }
+        if($user->is_active==0){
+            $user->is_active = 1;
+            $user->save();
+
+            return response()->json([
+            'message' => 'Tài khoản đã bị hủy thành công',
+            'account' => $user
+            ]);
+        }
+        $user->is_active = 0;
+        $user->save();
+
+        return response()->json([
+        'message' => 'Tài khoản đã khôi phục thành công',
+        'account' => $user
+        ]);
+        
+       
+
+        
+    }
+   
 }

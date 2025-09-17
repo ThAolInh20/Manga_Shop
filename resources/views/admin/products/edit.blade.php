@@ -5,6 +5,12 @@
 @section('content')
 <div class="container mt-4">
     <h2>Sửa sản phẩm</h2>
+     @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+   @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf @method('PUT')

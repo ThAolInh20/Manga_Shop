@@ -83,6 +83,7 @@ Route::prefix('api')->group(function () {
      Route::get('/user', [AccountAuthController::class, 'checkLogin']);
      Route::get('/user/profi', [AccountController::class, 'show2']);
     Route::put('/user/profi/{id}', [AccountController::class, 'update2']);
+    Route::put('/user/deactivate', [AccountController::class, 'deactivate']);
 
     Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
 

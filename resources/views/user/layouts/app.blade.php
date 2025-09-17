@@ -6,7 +6,7 @@
   <title>@yield('title', 'SHOPMANGA')</title>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="{{ asset('stored/logo/logo.png') }}" />
+  <link rel="icon" type="image/x-icon" href="{{ asset('storage/logo/logo.png') }}" />
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">

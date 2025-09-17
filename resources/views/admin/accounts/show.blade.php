@@ -49,25 +49,25 @@
             <strong>Giới tính:</strong> {{ $account->gender ?? 'Chưa có' }}
         </div>
 
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <strong>Lần đăng nhập cuối:</strong> 
             {{ $account->last_login ? \Carbon\Carbon::parse($account->last_login)->format('d/m/Y H:i') : 'Chưa đăng nhập' }}
-        </div>
+        </div> -->
 
         <div class="mb-3">
             <strong>Trạng thái:</strong> 
             @if($account->is_active)
                 <span class="badge bg-success">Hoạt động</span>
             @else
-                <span class="badge bg-danger">Khoá</span>
+                <span class="badge bg-danger">Đang chờ xóa</span>
             @endif
         </div>
     </div>
 
     <div class="mt-3">
-        <a href="{{ route('accounts.index') }}" class="btn btn-secondary">Quay lại</a>
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">Quay lại</a>
         <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-warning">Sửa</a>
-
+        @if(!$account->is_active)
         <form action="{{ route('accounts.destroy', $account->id) }}" method="POST" style="display:inline-block">
             @csrf
             @method('DELETE')
@@ -75,6 +75,7 @@
                 Xoá
             </button>
         </form>
+        @endif
     </div>
 </div>
 @endsection

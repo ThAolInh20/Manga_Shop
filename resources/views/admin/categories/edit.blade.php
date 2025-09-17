@@ -30,7 +30,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Cập nhật</button>
-        <a href="{{ route('categories.index') }}" class="btn btn-secondary">Quay lại</a>
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">Quay lại</a>
     </form>
 </div>
 @endsection

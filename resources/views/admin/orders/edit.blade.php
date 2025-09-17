@@ -5,6 +5,12 @@
 @section('content')
 <div class="container mt-4">
     <h2>Cập nhật đơn hàng #{{ $order->id }}</h2>
+     @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+   @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     <form action="{{ route('orders.update', $order->id) }}" method="POST">
         @csrf
@@ -77,7 +83,7 @@
 
         <!-- Nút -->
         <button type="submit" class="btn btn-success">Cập nhật</button>
-        <a href="{{ route('orders.index') }}" class="btn btn-secondary">Quay lại</a>
+        <a href="{{ url()->previous() }}" class="btn btn-secondary">Quay lại</a>
     </form>
 </div>
 @endsection

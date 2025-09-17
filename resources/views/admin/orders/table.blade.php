@@ -6,7 +6,7 @@
         <tr>
             <th>
                 <a href="#" class="sort-link" data-field="id" data-order="{{ request('sort_field') === 'id' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
-                    ID
+                    Mã đơn
                 </a>
             </th>
             <th>
@@ -29,6 +29,9 @@
                     Ngày đặt
                 </a>
             </th>
+            <th>
+                Người cập nhật
+            </th>
             <th>Hành động</th>
         </tr>
     </thead>
@@ -36,10 +39,12 @@
         @foreach($orders as $order)
         <tr data-id="{{ $order->id }}" data-status="{{ $order->order_status }}">
             <td>{{ $order->id }}</td>
-            <td>{{ $order->account->name ?? '' }}</td>
+            <td><a href="{{ route('accounts.show', $order->account ??0 ) }}">{{  $order->account->name ?? '' }}</a></td>
             <td>{{ number_format($order->total_price, 0, ',', '.') }}đ</td>
             <td class="status-cell"></td>
             <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+            <td><a href="{{ route('accounts.show',$order->updatedBy??0) }}">{{ $order->updatedBy->name??'' }}</a>
+            </td>
             <td class="action-cell"></td>
         </tr>
         @endforeach
