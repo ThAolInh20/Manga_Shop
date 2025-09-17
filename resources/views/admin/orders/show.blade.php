@@ -26,7 +26,7 @@
                 </tr>
                 <tr>
                     <th>Phí ship</th>
-                    <td>{{ number_format($order->shipping_fee, 0, ',', '.') }} đ</td>
+                    <td>{{ number_format($order->shipping?$order->shipping->shipping_fee:0, 0, ',', '.') }} đ</td>
                 </tr>
                 <tr>
                     <th>Tổng tiền</th>
@@ -59,7 +59,7 @@
                 </tr>
                 <tr>
                     <th>Địa chỉ giao</th>
-                    <td>{{ $order->shipping_address ?? 'Chưa có' }}</td>
+                    <td>{{ $order->shipping->shipping_address ?? 'Chưa có' }}</td>
                 </tr>
             </table>
         </div>

@@ -1,6 +1,6 @@
 <template>
   <div class="voucher-input">
-    <div class="input-group mb-2">
+    <div class="input-group mb-2" >
       <input 
         type="text"
         v-model="voucherCode"

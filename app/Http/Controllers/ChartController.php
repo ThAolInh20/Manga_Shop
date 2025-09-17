@@ -147,6 +147,119 @@ class ChartController extends Controller
             }
         }
     }
+    else if($type === 'lastWeek') {
+        $today = Carbon::today();
+        $start = $today->copy()->subWeek()->startOfWeek();
+        $end = $today->copy()->subWeek()->endOfWeek();
+        $startDate = $start;
+        $endDate = $end;
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $labels[] = $date->format('d/m');
+
+            foreach ($series as $key => &$arr) {
+                $statusMap = [
+                    'pending' => 0,
+                    'processing' => 1,
+                    'shipping' => 2,
+                    'completed' => 3,
+                    'returned' => 4,
+                    'canceled' => 5,
+                ];
+                $status = $statusMap[$key];
+
+                $count = Order::where('order_status', $status)
+                    ->whereDate('created_at', $date)
+                    ->count();
+
+                $arr[] = $count;
+
+                if ($status == 3) {
+                    $totalOrders += $count;
+                    $totalRevenue += Order::where('order_status', $status)
+                        ->whereDate('created_at', $date)
+                        ->sum('total_price');
+                }
+            }
+        }
+
+    } elseif ($type === 'lastMonth') {
+        $today = Carbon::today()->subMonth();
+        $start = $today->copy()->startOfMonth();
+        $end = $today->copy()->endOfMonth();
+        $startDate = $start;
+        $endDate = $end;
+
+        $daysInMonth = $today->daysInMonth;
+        for ($i = 0; $i < $daysInMonth; $i += 7) {
+            $from = $start->copy()->addDays($i);
+            $to = $from->copy()->addDays(6);
+            if ($to->month != $start->month) $to = $from->copy()->endOfMonth();
+
+            $labels[] = $from->format('d/m') . ' - ' . $to->format('d/m');
+
+            foreach ($series as $key => &$arr) {
+                $statusMap = [
+                    'pending' => 0,
+                    'processing' => 1,
+                    'shipping' => 2,
+                    'completed' => 3,
+                    'returned' => 4,
+                    'canceled' => 5,
+                ];
+                $status = $statusMap[$key];
+
+                $count = Order::where('order_status', $status)
+                    ->whereBetween('created_at', [$from, $to])
+                    ->count();
+
+                $arr[] = $count;
+
+                if ($status == 3) {
+                    $totalOrders += $count;
+                    $totalRevenue += Order::where('order_status', $status)
+                        ->whereBetween('created_at', [$from, $to])
+                        ->sum('total_price');
+                }
+            }
+        }
+
+    } elseif ($type === 'lastYear') {
+        $year = Carbon::today()->subYear()->year;
+        $startDate = Carbon::createFromDate($year, 1, 1);
+        $endDate = Carbon::createFromDate($year, 12, 31);
+
+        for ($month = 1; $month <= 12; $month++) {
+            $labels[] = Carbon::createFromDate($year, $month, 1)->format('M');
+
+            foreach ($series as $key => &$arr) {
+                $statusMap = [
+                    'pending' => 0,
+                    'processing' => 1,
+                    'shipping' => 2,
+                    'completed' => 3,
+                    'returned' => 4,
+                    'canceled' => 5,
+                ];
+                $status = $statusMap[$key];
+
+                $count = Order::where('order_status', $status)
+                    ->whereMonth('created_at', $month)
+                    ->whereYear('created_at', $year)
+                    ->count();
+
+                $arr[] = $count;
+
+                if ($status == 3) {
+                    $totalOrders += $count;
+                    $totalRevenue += Order::where('order_status', $status)
+                        ->whereMonth('created_at', $month)
+                        ->whereYear('created_at', $year)
+                        ->sum('total_price');
+                }
+            }
+        }
+    }
 
     // Tính tổng trạng thái
     $statusQuery = Order::query()->select('order_status', DB::raw('count(*) as total'))
