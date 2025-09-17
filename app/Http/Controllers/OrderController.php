@@ -433,7 +433,7 @@ $data['shipping_fee'] = $shipping_fee;
      */
     public function show(Order $order)
     {
-        $order = Order::with(['account', 'productOrders.product','voucher'])->findOrFail($order->id);
+        $order = Order::with(['account', 'productOrders.product','voucher','shipping'])->findOrFail($order->id);
         // $order->load('voucher');
         return view('admin.orders.show', compact('order'));
     }

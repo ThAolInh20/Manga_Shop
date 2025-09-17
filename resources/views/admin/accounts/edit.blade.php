@@ -43,7 +43,7 @@
                     <select name="role" class="form-select">
                         <option value="0" {{ old('role', $account->role) == 0 ? 'selected' : '' }}>Admin</option>
                         <option value="1" {{ old('role', $account->role) == 1 ? 'selected' : '' }}>Cộng tác viên</option>
-                        <!-- <option value="2" {{ old('role', $account->role) == 2 ? 'selected' : '' }}>Khách hàng</option> -->
+                        <option value="2" {{ old('role', $account->role) == 2 ? 'selected' : '' }}>Khách hàng</option>
                     </select>
                 </div>
                 <!-- <div class="mb-3 text-center">

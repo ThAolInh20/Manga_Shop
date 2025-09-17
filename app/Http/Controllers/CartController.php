@@ -25,6 +25,7 @@ class CartController extends Controller
 
         $productId = $request->product_id;
         $price = $request->price - ($request->price * ($request->sale ?? 0) / 100);
+        
         $userId = Auth::id();
 
         // Kiểm tra nếu đã có trong giỏ thì bỏ qua

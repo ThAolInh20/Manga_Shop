@@ -33,7 +33,7 @@
 
       <!-- Nút giỏ hàng -->
       <div class="d-flex gap-2 mb-3">
-        <button type="button" class="btn btn-primary w-50" onclick="addToCart('{{ $product->id }}, {{ $product->price }}, {{ $product->sale ?? 0 }}, {{ $product->name }}')">
+        <button type="button" class="btn btn-primary w-50" onclick="addToCart({{ $product->id }}, {{ $product->price }}, {{ $product->sale ?? 0 }})">
     <i class="bi bi-cart"></i> Thêm vào giỏ
   </button>
         <a href="{{ route('user.cart.list') }}" class="btn btn-outline-secondary w-50">
@@ -119,7 +119,7 @@ async function addToCart(productId, price, sale) {
     const res = await axios.post('/api/cart', {
       product_id: productId,
       price: price,
-      sale: sale
+      sale: sale||0
     }, {
       headers: {
         'X-CSRF-TOKEN': '{{ csrf_token() }}'

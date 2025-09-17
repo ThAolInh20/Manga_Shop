@@ -40,9 +40,8 @@
                     <a href="{{ route('categories.show', $category->id) }}" class="btn btn-sm btn-info">Xem</a>
 
                     <!-- Nút sửa mở modal -->
-                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ $category->id }}">
-                        Sửa
-                    </button>
+                    <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-warning">Sửa</a>
+                    
 
                     <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline-block">
                         @csrf

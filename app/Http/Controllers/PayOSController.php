@@ -25,9 +25,7 @@ class PayOSController extends Controller
     $apiKey   = config('services.payos.api_key');
     $checksum = config('services.payos.checksum');
 
-    $apiKey   ='755f89c2-414e-4aea-9ae3-d986af6ead2a';
-    $clientId = 'a8589b69-5134-40c4-b218-6c53747c0f0a';
-    $checksum = '76ac30b27fd535aa7e58a8e60dfb0d5a4dafcb4ebf5be8865c0a47e18cd98b67';
+    
 
 
     $returnUrl = 'http://localhost:8000/order/'.$data['order_id'].'/payos-return';
