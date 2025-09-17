@@ -49,6 +49,24 @@
 
       <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
     </form>
+    <span v-if="account && !account.is_active" class="text-danger">Tài khoản đang chờ xóa</span>
+    <div class="mt-4">
+  <button 
+    v-if="account && account.is_active"
+    class="btn btn-danger"
+    @click="deactivateAccount"
+  >
+    Hủy tài khoản
+  </button>
+
+  <button
+    v-else
+    class="btn btn-success"
+    @click="reactivateAccount"
+  >
+    Khôi phục tài khoản
+  </button>
+</div>
 
     <div v-if="success" class="alert alert-success mt-3">{{ success }}</div>
   </div>
@@ -57,6 +75,7 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
+// import router from "@/router" // nếu dùng vue-router để redirect sau khi hủy
 
 const account = ref(null)
 const loading = ref(false)
@@ -74,19 +93,15 @@ const form = ref({
 const fetchProfile = async () => {
   loading.value = true
   error.value = null
-  console.log(account)
   try {
-    const res = await axios.get("/api/user/profi") // endpoint của bạn
+    const res = await axios.get("/api/user/profi")
     account.value = res.data.account
-
-    // Gán dữ liệu vào form
+    
     form.value.name = account.value.name || ""
     form.value.phone = account.value.phone || ""
     form.value.address = account.value.address || ""
     form.value.gender = account.value.gender || ""
-    form.value.birth = account.value.birth ||""
-
-
+    form.value.birth = account.value.birth || ""
   } catch (err) {
     error.value = err.response?.data?.message || err.message
   } finally {
@@ -103,9 +118,32 @@ const updateProfile = async () => {
       gender: form.value.gender,
       birth: form.value.birth
     }
-    const res = await axios.put(`/api/user/profi/${account.value.id}`, payload)
+    await axios.put(`/api/user/profi/${account.value.id}`, payload)
     success.value = "Cập nhật thông tin thành công!"
     fetchProfile()
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message
+  }
+}
+
+// Nút hủy tài khoản
+const deactivateAccount = async () => {
+  if (!confirm("Bạn có chắc muốn hủy tài khoản?")) return
+  try {
+    await axios.put("/api/user/deactivate")
+    success.value = "Tài khoản đã yêu cầu hủy thành công"
+    // Tùy chọn: logout và redirect về login
+    fetchProfile()
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message
+  }
+}
+const reactivateAccount = async () => {
+  if (!confirm("Bạn có chắc muốn khôi phục tài khoản?")) return
+  try {
+    await axios.put("/api/user/deactivate")
+    success.value = "Tài khoản đã được khôi phục"
+    fetchProfile() // load lại dữ liệu
   } catch (err) {
     error.value = err.response?.data?.message || err.message
   }

@@ -6,6 +6,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
+
 class Account extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -24,19 +26,30 @@ class Account extends Authenticatable
         'gender',
         'last_login',
         'is_active',
+        'updated_by'
     ];
     protected $hidden = [
         'password',
         'remember_token',
         
     ];
-
+    protected static function booted()
+        {
+            static::saving(function ($account) {
+                if (Auth::check()) {
+                    $account->updated_by = Auth::user()->id;
+                }
+            });
+        }
     
     public function orders()
     {
         return $this->hasMany(Order::class);
     }
-
+    public function updatedBy()
+    {
+        return $this->belongsTo(Account::class, 'updated_by');
+    }
     public function comments()
     {
         return $this->hasMany(Comment::class);

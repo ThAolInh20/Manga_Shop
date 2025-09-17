@@ -93,13 +93,7 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Trạng thái</label>
-                    <select name="is_active" class="form-select">
-                        <option value="1" {{ old('is_active', $account->is_active) == 1 ? 'selected' : '' }}>Hoạt động</option>
-                        <option value="0" {{ old('is_active', $account->is_active) == 0 ? 'selected' : '' }}>Khoá</option>
-                    </select>
-                </div>
+                
             </div>
         </div>
 

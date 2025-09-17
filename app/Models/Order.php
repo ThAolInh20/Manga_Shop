@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+
 
 class Order extends Model
 {
@@ -16,7 +18,7 @@ class Order extends Model
     protected $fillable = [
         'account_id', 'order_date', 'deliver_date', 'order_status', 
         // 'shipping_fee', 'shipping_address', 'phone_recipient','name_recipient',
-        'total_price', 'payment_status', 'voucher_id','subtotal_price','shipping_id'
+        'total_price', 'payment_status', 'voucher_id','subtotal_price','shipping_id','update_by'
     ];
 //     public function calculateTotalPrice()
 // {
@@ -45,6 +47,8 @@ class Order extends Model
                 $shippingFee = $order->shipping ?$order->shipping->shipping_fee: 0;
                 // total = subtotal - discount + shipping
                 $order->total_price = max($subtotal - $discount + $shippingFee, 0);
+                $accout = Auth::user();
+                $order->update_by=$accout->id;
             });
         }
 
@@ -52,6 +56,10 @@ class Order extends Model
     {
         return $this->belongsTo(Account::class);
     }
+    public function updatedBy()
+{
+    return $this->belongsTo(Account::class, 'update_by', 'id');
+}
 
     public function products()
     {
