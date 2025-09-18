@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use App\Models\Cart;
+use App\Models\WebsiteCustom;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,12 @@ class AppServiceProvider extends ServiceProvider
             $cartCount = Cart::where('account_id', Auth::id())->count();
         }
         $view->with('cartCount', $cartCount);
+     });
+    //     $siteConfig = WebsiteCustom::first();
+    //   View::share('siteConfig', $siteConfig);
+     view()->composer('*', function ($view) {
+        $websiteConfig = WebsiteCustom::first(); // lấy bản ghi đầu tiên
+        $view->with('websiteConfig', $websiteConfig);
     });
     }
 }

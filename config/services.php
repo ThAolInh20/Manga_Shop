@@ -39,5 +39,10 @@ return [
         'api_key'   => env('PAYOS_API_KEY'),
         'checksum'  => env('PAYOS_CHECKSUM_KEY'),
     ],
+    'GHN'=>[
+        'token' => env('GHN_TOKEN'),
+        'shop_id' => env('GHN_SHOP_ID'),
+        'my_address_id'=>env('MY_ADDRESS_ID')
+    ]
 
 ];

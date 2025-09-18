@@ -8,6 +8,7 @@
         <!-- Nếu giỏ hàng trống -->
         <div v-if="cart.length === 0" class="alert alert-info">
           Giỏ hàng của bạn đang trống.
+        
         </div>
 
         <!-- Danh sách giỏ hàng -->
@@ -66,19 +67,20 @@
                       </small>
                     <!-- <small class="text-muted">Giá sau khuyến mãi: {{ item.product.price }}</small> -->
 
-                    <br></br><small class="text-muted">Kho: {{ item.product.quantity }}</small>
+                    <br></br><small class="text-muted">Kho: {{ item.product.quantity>0?'Còn hàng':'Hết hàng' }}</small>
                     
                   </div>
                 </div>
               </td>
 
               <!-- Số lượng -->
-              <td style="width: 100px;">
+              <td style="width: 150px;">
                 <input
                   type="number"
                   class="form-control form-control-sm"
                   v-model.number="item.quantity"
                   min="0"
+                  @focus="item.oldQuantity = item.quantity"
                   @change="updateQuantity(item)"
                 />
               </td>
@@ -190,7 +192,10 @@ const selectedShipping = ref(null) // Địa chỉ đã chọn
 const fetchCart = async () => {
   try {
     const res = await axios.get("/api/cart")
-    cart.value = res.data
+    cart.value = res.data.map(item => ({
+      ...item,
+      oldQuantity: item.quantity   // 👉 lưu số lượng cũ
+    }))
   } catch (err) {
     if (err.response?.status === 401) {
       alert("⚠️ Bạn cần đăng nhập để xem giỏ hàng!")
@@ -274,19 +279,24 @@ watch([selectedItems, () => appliedVoucher.value], () => {
 })
 
 const updateQuantity = async (item) => {
-  if (item.quantity > item.product.quantity) {
-    alert(`Số lượng vượt quá tồn kho! Chỉ còn ${item.product.quantity} sản phẩm.`)
-    item.quantity = item.product.quantity
+  const newQuantity = item.quantity
+  const oldQuantity = item.oldQuantity
+
+  if (newQuantity > item.product.quantity) {
+    alert(`⚠️ Số lượng vượt quá tồn kho!`)
+    item.quantity = oldQuantity  // rollback
     return
   }
+
   try {
     await axios.put(`/api/cart/${item.product_id}`, {
-      quantity: item.quantity,
+      quantity: newQuantity,
     })
+    item.oldQuantity = newQuantity // ✅ cập nhật lại số cũ sau khi thành công
   } catch (err) {
     console.error(err)
-    alert("Lỗi khi cập nhật số lượng!")
-    fetchCart()
+    alert("❌ Lỗi khi cập nhật số lượng!")
+    item.quantity = oldQuantity // rollback khi lỗi
   }
 }
 

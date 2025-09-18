@@ -46,9 +46,9 @@
     </select>
 </div>
 
-        <div class="col-md-1 d-flex align-items-center">
+        <!-- <div class="col-md-1 d-flex align-items-center">
     <button type="button" id="filter-btn" class="btn btn-primary w-100">Lọc</button>
-</div>
+</div> -->
         <div class="col-md-1 d-flex align-items-center">
             <button type="button" id="reset-filter" class="btn btn-secondary w-100">Reset</button>
         </div>

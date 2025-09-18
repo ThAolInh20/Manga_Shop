@@ -12,11 +12,11 @@
     <p><strong>Email:</strong> {{ $supplier->email }}</p>
     <p><strong>Mã số thuế:</strong> {{ $supplier->tax_code }}</p>
     <p><strong>Hợp đồng:</strong> 
-        @if($supplier->contract)
-            <a href="{{ asset('storage/' . $supplier->contract) }}" target="_blank">Xem</a>
-        @else
-            Không có
-        @endif
+        @if($supplier->link_contract)
+                        <a href="{{ $supplier->link_contract }}" target="_blank">Xem</a>
+                    @else
+                        Không có
+                    @endif
     </p>
 
     <h3 class="mt-4">Danh sách sản phẩm nhập</h3>

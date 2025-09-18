@@ -12,6 +12,7 @@ use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\WebsiteCustomController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Models\Category;
@@ -63,8 +64,9 @@ Route::middleware(['role:0,1'])->group(function () {
          
         Route::resource('suppliers', SupplierController::class);
         Route::get('/suppliers/{supplier}/filter-products', [SupplierController::class, 'filterProducts'])->name('suppliers.filterProducts');
-
-        Route::resource('product_suppliers', ProductSupplierController::class);
+        Route::post('/{supplier}/active', [SupplierController::class, 'active'])->name('suppliers.active');
+        
+         Route::resource('product_suppliers', ProductSupplierController::class);
         Route::resource('vouchers', VoucherController::class);
         Route::resource('orders', OrderController::class)->only([
             'index', 'show', 'edit', 'update'
@@ -80,6 +82,9 @@ Route::middleware(['role:0,1'])->group(function () {
             Route::get('/orders', [ChartController::class, 'chartForOrder'])->name('admin.chart.orders');
             Route::get('/productbuy', [ChartController::class, 'productPieChart'])->name('admin.chart.products.pie');
         });
+
+        Route::get('/website-custom/edit', [WebsiteCustomController::class, 'edit'])->name('website_custom.edit');
+        Route::post('/website-custom/update', [WebsiteCustomController::class, 'update'])->name('website_custom.update');
     });
     
     

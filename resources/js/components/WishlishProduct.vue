@@ -1,30 +1,28 @@
 <template>
   <div>
     <!-- Chọn tất cả -->
-    <div class="mb-2">
+    <!-- <div class="mb-2">
       <input type="checkbox" id="select-all" v-model="selectAll" @change="toggleSelectAll">
       <label for="select-all">Chọn tất cả</label>
-    </div>
+    </div> -->
 
     <!-- Bảng danh sách -->
     <table class="table table-bordered table-hover">
       <thead>
         <tr>
-          <th></th>
+          
           <th>STT</th>
           <th>Ảnh</th>
           <th>Tên sản phẩm</th>
           <th>Giá</th>
           <th>Khuyến mãi</th>
-          <th>Số lượng còn</th>
+          <th>Trạng thái</th>
           <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item,index) in wishlists.data" :key="item.id">
-          <td>
-            <input type="checkbox" v-model="selected" :value="item.id">
-          </td>
+          
           <td>{{ index + 1 + (wishlists.current_page - 1) * wishlists.per_page }}</td>
           <td>
             <img :src="item.images ? `/storage/${item.images}` : '/storage/products/default.png'" 
@@ -40,7 +38,7 @@
             <span v-if="item.sale">{{ item.sale }}%</span>
             <span v-else>-</span>
           </td>
-          <td>{{ item.quantity }}</td>
+          <td>{{ item.quantity>0?'Còn hàng':'Hết hàng' }}</td>
           <td>
   <!-- Nút Thêm giỏ hàng -->
   <button  v-if="isLoggedIn" class="btn btn-sm btn-primary me-1" @click="addToCart(item)">

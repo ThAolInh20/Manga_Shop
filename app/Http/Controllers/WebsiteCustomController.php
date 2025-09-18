@@ -7,61 +7,32 @@ use Illuminate\Http\Request;
 
 class WebsiteCustomController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    // public function index($id)
-    // {
-    //     $web = WebsiteCustom::findOrFail($id);
-    //     if()
-    //     return response()->json()
-    // }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+   public function edit()
     {
-        //
+        // Giả sử chỉ có 1 record
+        $config = WebsiteCustom::first();
+        return view('admin.website_custom.edit', compact('config'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function update(Request $request)
     {
-        //
-    }
+        $validated = $request->validate([
+            'address'          => 'nullable|string|max:50',
+            'hotline'          => 'nullable|string|max:50',
+            'email'            => 'nullable|email|max:50',
+            'primary_color'    => 'nullable|string|max:50',
+            'background_color' => 'nullable|string|max:50',
+            'background'       => 'nullable|string|max:50',
+            'font_family'      => 'nullable|string|max:50',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(WebsiteCustom $websiteCustom)
-    {
-        //
-    }
+        $config = WebsiteCustom::first();
+        if (!$config) {
+            WebsiteCustom::create($validated);
+        } else {
+            $config->update($validated);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(WebsiteCustom $websiteCustom)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, WebsiteCustom $websiteCustom)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(WebsiteCustom $websiteCustom)
-    {
-        //
+        return redirect()->back()->with('success', 'Cấu hình website cập nhật thành công!');
     }
 }

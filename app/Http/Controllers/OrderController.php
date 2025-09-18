@@ -88,7 +88,7 @@ class OrderController extends Controller
             $query->orderBy($sortField, $sortOrder);
         }
 
-        $orders = $query->with('updatedBy')->paginate(10);
+        $orders = $query->with('updatedBy')->paginate(20);
 
         // Nếu AJAX thì chỉ trả bảng (render partial view)
         if ($request->ajax()) {
