@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
 class SupplierController extends Controller
 {
      public function index()
@@ -40,7 +42,35 @@ class SupplierController extends Controller
 
     public function show(Supplier $supplier)
     {
-        return view('admin.suppliers.show', compact('supplier'));
+        $products = $supplier->productSuppliers()
+                         ->with('importBy','product')
+                         ->orderBy('created_at','desc')
+                         ->paginate(10); // 10 bản ghi / trang
+
+          return view('admin.suppliers.show', compact('supplier', 'products'));
+    }
+    public function filterProducts(Request $request, Supplier $supplier)
+    {
+        $query = $supplier->productSuppliers()->with('importBy','product');
+
+        // $query = $supplier->productSuppliers()->with('importBy','product');
+
+        if($request->filled('name')) {
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->name.'%')
+                // ->orWhere('name', 'like', '%'.$request->name.'%')
+                ;
+            });
+        }
+
+        if($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $products = $query->orderBy('created_at','desc')->paginate(10);
+
+        // Trả về partial kèm $supplier
+        return view('admin.suppliers.products_table', compact('products','supplier'))->render();
     }
 
     public function edit(Supplier $supplier)

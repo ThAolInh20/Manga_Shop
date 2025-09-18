@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Supplier;
+use Illuminate\Support\Facades\Auth;
+
+use App\Models\ProductSupplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+
 
 class ProductController extends Controller
 {
@@ -52,7 +57,39 @@ class ProductController extends Controller
         // Lần đầu load view
         return view('admin.products.index', compact('products'));
     }
-    
+            public function import($productId)
+        {
+            $product = Product::findOrFail($productId);
+            $suppliers = Supplier::all();
+            return view('admin.products.importProduct', compact('product','suppliers'));
+        }
+       public function importStore(Request $request, $productId)
+{
+    $request->validate([
+        'quantity' => 'required|integer|min:1',
+        'import_price' => 'required|numeric|min:0',
+        'supplier_id' => 'required|exists:suppliers,id',
+        'detail' => 'nullable|string|max:500',
+    ]);
+
+    $product = Product::findOrFail($productId);
+
+    // Lưu lịch sử nhập kho
+    ProductSupplier::create([
+        'product_id'   => $product->id,
+        'supplier_id'  => $request->supplier_id,
+        'quantity'     => $request->quantity,
+        'import_price' => $request->import_price,
+        'import_by'    => Auth::user()->id,
+        'detail'       => $request->detail,
+    ]);
+    // Cập nhật số lượng sản phẩm
+
+    return redirect()
+        ->route('products.edit',$product->id)
+        ->with('success', 'Nhập kho sản phẩm thành công!');
+}
+        
 
 
 
@@ -152,8 +189,8 @@ class ProductController extends Controller
         'language'      => 'nullable|string|max:100',
         'price'         => 'required|numeric',
         'sale'          => 'nullable|numeric',
-        'quantity'      => 'required|integer',
-        'quantity_buy'  => 'nullable|integer',
+        // 'quantity'      => 'required|integer',
+        // 'quantity_buy'  => 'nullable|integer',
         'weight'        => 'nullable|string|max:50',
         'size'          => 'nullable|string|max:50',
         'status'        => 'nullable|string|max:50',

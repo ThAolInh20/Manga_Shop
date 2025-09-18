@@ -23,6 +23,7 @@ class Product extends Model
         'quantity', 
         'price',
         'sale', 
+        'price_sale',
         'detail',
         'categ',
         'status',
@@ -32,6 +33,17 @@ class Product extends Model
         'size',
         'quantity_buy',
     ];
+    protected static function booted()
+    {
+        static::saving(function ($product) {
+            if (!is_null($product->price) && !is_null($product->sale)) {
+                $product->price_sale = $product->price - ($product->price * $product->sale / 100);
+            } else {
+                // Nếu chưa có sale thì để = giá gốc
+                $product->price_sale = $product->price;
+            }
+        });
+    }
     public function buy($quantity){
         if($this->quantity >= $quantity){
             $this->quantity -= $quantity;
@@ -65,8 +77,8 @@ class Product extends Model
 
     public function suppliers()
     {
-        return $this->belongsToMany(Supplier::class, 'product_supplier')
-            ->withPivot('date_import', 'import_price', 'quantity', 'detail');
+        return $this->belongsToMany(Supplier::class, 'product_suppliers')
+            ->withPivot('created_at', 'import_price', 'quantity', 'detail');
     }
 
     public function comments()

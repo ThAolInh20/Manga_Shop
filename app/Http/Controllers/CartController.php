@@ -23,7 +23,9 @@ class CartController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+
         $productId = $request->product_id;
+        
         $price = $request->price - ($request->price * ($request->sale ?? 0) / 100);
         
         $userId = Auth::id();
@@ -32,6 +34,7 @@ class CartController extends Controller
         $exists = Cart::where('account_id', $userId)
                       ->where('product_id', $productId)
                       ->first();
+        
         if ($exists) {
             $exists->quantity += 1; // tăng số lượng
             $exists->save();
@@ -101,6 +104,27 @@ public function update(Request $request, $productId)
 
         return response()->json(['message' => 'Đã xóa sản phẩm khỏi giỏ hàng']);
     }
+    public function removeV2($product,$userId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+       
+
+        $cartItem = Cart::where('account_id', $userId)
+                        ->where('product_id', $product['product_id'])
+                        ->first();
+
+        if($cartItem){
+            $cartItem->delete();
+            return true;
+        }
+        return false;
+        
+
+    }
+   
 
     // // Lấy danh sách giỏ hàng của user
     public function list()

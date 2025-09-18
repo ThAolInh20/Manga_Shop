@@ -100,7 +100,7 @@
             </div>
             <!-- Giá -->
             <div class="text-end">
-              <p class="mb-1 text-danger">{{ formatPrice(item.product?.price || 0) }} đ</p>
+              <p class="mb-1 text-danger">{{ formatPrice(item.product?.price_sale || 0) }} đ</p>
             </div>
           </div>
         </div>
