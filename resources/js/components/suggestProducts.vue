@@ -1,7 +1,13 @@
 <template>
+  
   <div class="card p-3 mb-4 mt-3 shadow-sm ">
     <h4 class="mb-3">📖 Gợi ý sản phẩm cho bạn</h4>
-    <div class="product-grid">
+    <div v-if="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+</div>
+    <div v-else class="product-grid">
       <div
         v-for="product in paginatedProducts"
         :key="product.id"
@@ -65,7 +71,7 @@
           <div class="progress-wrapper mb-2">
   <div class="progress-fill" :style="{ width: soldPercent(product) + '%' }"></div>
   <div class="progress-text">
-    {{ product.quantity_buy }}/{{ product.quantity+product.quantity_buy }} đã bán
+    {{ product.quantity_buy }} đã bán
   </div>
 </div>
         </div>
@@ -101,6 +107,7 @@ import { eventBus } from '../eventBus'
 const products = ref([])
 const page = ref(1)
 const perPage = 6
+const loading = ref(false)
 
 const isLoggedIn=ref(false)
 
@@ -129,8 +136,15 @@ function discountedPrice(p) {
 }
 
 async function fetchProducts() {
-  const res = await fetch('/api/suggest-products')
-  products.value = await res.json()
+  loading.value = true   // 👉 bật spinner
+  try {
+    const res = await fetch('/api/suggest-products')
+    products.value = await res.json()
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false  // 👉 tắt spinner khi xong
+  }
 }
 
 async function toggleWishlist(product) {

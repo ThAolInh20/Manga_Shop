@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SupplierRequest;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,16 +21,10 @@ class SupplierController extends Controller
         return view('admin.suppliers.create');
     }
 
-    public function store(Request $request)
+    public function store(SupplierRequest $request)
     {
-        $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'address'   => 'nullable|string',
-            'phone'     => 'nullable|string|max:20',
-            'email'     => 'nullable|email',
-            'tax_code'  => 'nullable|string|max:50',
-            'contract'  => 'nullable|image|mimes:jpg,jpeg,png,pdf|max:2048'
-        ]);
+        $validated = $request->validated();
+
 
         if ($request->hasFile('contract')) {
             $validated['contract'] = $request->file('contract')->store('contracts', 'public');
@@ -78,16 +73,10 @@ class SupplierController extends Controller
         return view('admin.suppliers.edit', compact('supplier'));
     }
 
-    public function update(Request $request, Supplier $supplier)
+    public function update(SupplierRequest $request, Supplier $supplier)
     {
-        $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'address'   => 'nullable|string',
-            'phone'     => 'nullable|string|max:20',
-            'email'     => 'nullable|email',
-            'tax_code'  => 'nullable|string|max:50',
-            'contract'  => 'nullable|image|mimes:jpg,jpeg,png,pdf|max:2048'
-        ]);
+        $validated = $request->validated();
+
 
         if ($request->hasFile('contract')) {
             // Xóa file cũ nếu có
@@ -111,5 +100,18 @@ class SupplierController extends Controller
         $supplier->delete();
 
         return redirect()->route('suppliers.index')->with('success', 'Xóa nhà cung cấp thành công!');
+    }
+    public function active(Supplier $supplier)
+    {
+        if($supplier->is_active==1){
+            $supplier->update(['is_active' => 0]);
+        
+        // Optional: redirect hoặc trả về JSON
+             return redirect()->back()->with('success', 'Nhà cung cấp đã bị vô hiệu hóa.');
+        }
+        $supplier->update(['is_active' => 1]);
+        // Optional: redirect hoặc trả về JSON
+        return redirect()->back()->with('success', 'Nhà cung cấp đã mở lại.');
+        
     }
 }

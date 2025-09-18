@@ -12,7 +12,7 @@ class Supplier extends Model
     protected $table = 'suppliers';
 
     protected $fillable = [
-        'name', 'address', 'phone', 'email', 'tax_code','contract'
+        'name', 'address', 'phone', 'email', 'tax_code','contract','is_active','link_contract'
     ];
 
     public function products()

@@ -32,6 +32,24 @@ public function userLogin(Request $request)
 
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
+         // 🔹 Merge wishlist từ session vào DB
+        $sessionWishlist = session()->get('wishlist', []);
+        if (!empty($sessionWishlist)) {
+            foreach ($sessionWishlist as $productId) {
+                $exists = \App\Models\Wishlist::where('account_id', Auth::id())
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if (!$exists) {
+                    \App\Models\Wishlist::create([
+                        'account_id' => Auth::id(),
+                        'product_id' => $productId,
+                    ]);
+                }
+            }
+            // Xóa wishlist trong session sau khi merge
+            session()->forget('wishlist');
+        }
         return redirect()->route('home')->with('status', 'Đăng nhập thành công!');
     }
 
@@ -66,7 +84,7 @@ public function adminLogin(Request $request)
         Auth::logout();
        $request->session()->invalidate();
         $request->session()->regenerateToken();
-            return redirect()->route('admin.login')->with('status', 'Đăng xuất thành công.');
+        return redirect()->route('admin.login')->with('status', 'Đăng xuất thành công.');
        
     }
     public function userLogout(Request $request)

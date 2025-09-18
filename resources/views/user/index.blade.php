@@ -1,6 +1,6 @@
 @extends('user.layouts.app')
 
-@section('title', 'Trang chủ - MangaBook')
+@section('title', 'Trang chủ - MangaShop')
 
 @section('content')
  <!-- Alerts nổi lên dưới navbar -->
@@ -19,9 +19,9 @@
   <div class="col-lg-12 mb-4">
     <div class="card">
       <div class="card-body">
-        <h4 class="card-title">📚 Chào mừng đến với ShopManga</h4>
+        <h4 class="card-title">📚 Chào mừng đến với MangaShop</h4>
         <p>Khám phá hàng ngàn đầu sách từ văn học, kinh tế, công nghệ đến manga.</p>
-        <a href="{{ route('user.products.list') }}" class="btn btn-primary">Xem sản phẩm</a>
+        <a href="{{ route('user.products.list') }}" class="btn btn-primary">Cửa hàng</a>
       </div>
     </div>
   </div>

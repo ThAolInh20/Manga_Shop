@@ -11,5 +11,13 @@ class WebsiteCustom extends Model
 
     protected $table = 'website_customs';
 
-    protected $fillable = ['site_name', 'color', 'email', 'phone', 'detail'];
+    protected $fillable = [
+        'address',
+        'hotline',
+        'email',
+        'primary_color',
+        'background_color',
+        'background',
+        'font_family'
+    ];
 }

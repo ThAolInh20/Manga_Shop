@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use Illuminate\Http\Request;
+use App\Http\Requests\AccountRequest;
+
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+
  
 
 class AccountController extends Controller
@@ -57,7 +60,7 @@ class AccountController extends Controller
     /**
      * Lưu tài khoản mới.
      */
-    public function store(Request $request)
+    public function store(AccountRequest $request)
     {
         $validated = $request->validate([
             'name'     => 'required|string|max:100',
@@ -170,7 +173,7 @@ class AccountController extends Controller
 
         return redirect()->route('accounts.index')->with('success', $mm);
     }
-     public function update2(Request $request, $id)
+     public function update2(AccountRequest $request, $id)
     {
         $user = Auth::user();
 
@@ -178,13 +181,7 @@ class AccountController extends Controller
             return response()->json(['message' => 'Không có quyền'], 403);
         }
         try{
-        $data = $request->validate([
-                    'name' => 'required|string|max:100',
-                    'phone' => 'nullable|string|max:20',
-                    'address' => 'nullable|string|max:255',
-                    'gender' => 'nullable|in:male,female,other',
-                    'birth' => 'nullable|date',
-                ]);
+        $data = $request->validated();
 
                 $account = Account::find($id);
                 if (!$account) {

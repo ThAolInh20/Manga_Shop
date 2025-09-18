@@ -59,13 +59,15 @@
       <h3 class="fw-bold mb-3">{{ $product->name }}</h3>
       <div class="row">
         <div class="col-md-6">
-          <p><strong>📚 Thể loại:</strong> {{ $product->categ ?? 'Đang cập nhật' }}</p>
-          <p><strong>✍️ Tác giả:</strong> {{ $product->author ?? 'Đang cập nhật' }}</p>
-          <p><strong>💰 Giá gốc:</strong> {{ number_format($product->price, 0, ',', '.') }} đ</p>
+          <p><strong>Thể loại:</strong> {{ $product->categ ?? 'Đang cập nhật' }}</p>
+          <p><strong>Tác giả:</strong> {{ $product->author ?? 'Đang cập nhật' }}</p>
+          <p><strong>Giá gốc:</strong> {{ number_format($product->price, 0, ',', '.') }} đ</p>
         </div>
         <div class="col-md-6">
-          <p><strong>🏢 NXB:</strong> {{ $product->publisher ?? 'Đang cập nhật' }}</p>
-          <p><strong>🚚 Nhà cung cấp:</strong> {{ $product->supplier ?? 'Đang cập nhật' }}</p>
+          <p><strong>NXB:</strong> {{ $product->publisher ?? 'Đang cập nhật' }}</p>
+          <p><strong>Nhà cung cấp:</strong> {{ $product->supplier ?? 'Đang cập nhật' }}</p>
+          <p><strong>Trạng thái: </strong> {{ $product->quantity>0 ? 'Còn hàng':'Hết hàng' }}</p>
+
         </div>
       </div>
 
@@ -91,7 +93,7 @@
 
     <!-- Thông tin chi tiết -->
     <div class="card p-3 shadow-sm mb-3">
-      <h5 class="fw-bold mb-3">📋 Thông tin chi tiết</h5>
+      <h5 class="fw-bold mb-3">Thông tin chi tiết</h5>
       <div class="row">
         <div class="col-md-6">
           <p><strong>Độ tuổi:</strong> {{ $product->age ?? 'Đang cập nhật' }}</p>
@@ -100,14 +102,14 @@
         </div>
         <div class="col-md-6">
           <p><strong>Kích thước:</strong> {{ $product->size ?? 'Đang cập nhật' }}</p>
-          <p><strong>Tình trạng:</strong> {{ $product->status ?? 'Đang cập nhật' }}</p>
+          <!-- <p><strong>Tình trạng:</strong> {{ $product->status ?? 'Đang cập nhật' }}</p> -->
         </div>
       </div>
     </div>
 
     <!-- Mô tả -->
     <div class="card p-3 shadow-sm">
-      <h5 class="fw-bold mb-3">📝 Mô tả sản phẩm</h5>
+      <h5 class="fw-bold mb-3">Mô tả sản phẩm</h5>
       <p class="mb-0">{{ $product->detail ?? 'Chưa có mô tả cho sản phẩm này.' }}</p>
     </div>
   </div>

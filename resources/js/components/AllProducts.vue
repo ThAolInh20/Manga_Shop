@@ -1,7 +1,9 @@
 <template>
+  
   <div class="row">
     <!-- <Alert v-if="alertMessage" :message="alertMessage" /> -->
     <!-- Sidebar filter -->
+     
     <div class="col-3">
       <CategoriesList v-model="filters.category_id[0]" @change="onCategorySelected" />
       <h4 class="mb-3">Bộ lọc</h4>
@@ -10,10 +12,15 @@
       
       <filter-field v-model="filters.author" row-name="author" label="Tác giả" @change="onFilterChange"></filter-field>
       <filter-field v-model="filters.publisher" row-name="publisher" label="Nhà xuất bản" @change="onFilterChange"></filter-field>
-    </div>
     
+    </div>
+      <div v-if="loading" class="text-center my-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+    </div>
     <!-- Product list -->
-    <div class="col-9">
+    <div  v-else  class="col-9">
       <h4 class="mb-3">Danh sách sản phẩm</h4>
       <div class="card p-3 mb-3">
   <div class="row g-3 align-items-end">
@@ -134,7 +141,7 @@
               <div class="progress-wrapper mb-2">
         <div class="progress-fill" :style="{ width: soldPercent(product) + '%' }"></div>
         <div class="progress-text">
-          {{ product.quantity_buy }}/{{ product.quantity+product.quantity_buy }} đã bán
+          {{ product.quantity_buy }} đã bán
         </div>
       </div>
           </div>
@@ -176,6 +183,7 @@ const sortOrder = ref('asc')
 const searchKeyword = ref('')
 const alertMessage = ref('')
 const isLoggedIn = ref(false)
+const loading = ref(false)
 
 const filters = ref({
   category_id: [],
@@ -226,7 +234,7 @@ function formatMaxPrice(e) {
 }
 async function fetchProducts(p = 1) {
   if (p < 1 || (lastPage.value && p > lastPage.value)) return
-
+  loading.value = true
   const params = new URLSearchParams({
     page: p,
     perPage: perPage.value,
@@ -249,6 +257,8 @@ async function fetchProducts(p = 1) {
     lastPage.value = data.last_page
   }catch (err) {
     console.error(err)
+  }finally{
+    loading.value = false 
   }
   
 }

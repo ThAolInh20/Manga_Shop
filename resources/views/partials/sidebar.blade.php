@@ -2,9 +2,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical bg-menu-theme">
   <div class="app-brand demo">
     <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
-      <!-- <span class="app-brand-logo demo">
-        <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="30">
-      </span> -->
       <span class="app-brand-text demo menu-text fw-bold">Admin</span>
     </a>
     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -15,6 +12,7 @@
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
+
     <!-- Dashboard -->
     <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
       <a href="{{ route('admin.dashboard') }}" class="menu-link">
@@ -22,32 +20,24 @@
         <div>Dashboard</div>
       </a>
     </li>
-    
+
     <!-- Quản lý đơn hàng -->
     <li class="menu-item {{ request()->routeIs('orders.index') ? 'active' : '' }}">
-    <a href="{{ route('orders.index') }}" class="menu-link">
+      <a href="{{ route('orders.index') }}" class="menu-link">
         <i class="menu-icon bx bx-cart"></i>
         <div>Quản lý đơn hàng</div>
-    </a>
-</li> 
-    <!-- Quản lý Voucher -->
-<!-- <li class="menu-item {{ request()->routeIs('vouchers.*') ? 'active open' : '' }}">
-  <a href="javascript:void(0);" class="menu-link menu-toggle">
-    <i class="menu-icon bx bx-purchase-tag-alt"></i>
-    <div>Quản lý Voucher</div>
-  </a>
-  <ul class="menu-sub">
-    
-    
-  </ul>
-</li> -->
-<li class="menu-item {{ request()->routeIs('vouchers.index') ? 'active' : '' }}">
+      </a>
+    </li>
+
+    <!-- Quản lý voucher -->
+    <li class="menu-item {{ request()->routeIs('vouchers.index') ? 'active' : '' }}">
       <a href="{{ route('vouchers.index') }}" class="menu-link">
-        <i class="bx menu-icon bx-purchase-tag-alt"></i>
+        <i class="menu-icon bx bx-purchase-tag-alt"></i>
         <div>Quản lý voucher</div>
       </a>
     </li>
-<!-- Quản lý sản phẩm -->
+
+    <!-- Quản lý sản phẩm -->
     <li class="menu-item {{ request()->routeIs('products.*') ? 'active open' : '' }}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon bx bx-package"></i>
@@ -68,96 +58,66 @@
         </li>
       </ul>
     </li>
-@if(Auth::user()->role==0)
-    <!-- Quản lý danh mục -->
-     <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
-          <a href="{{ route('categories.index') }}" class="menu-link">
-            <i class="bx menu-icon bx-category"></i>
-            <div>Danh sách danh mục</div>
-          </a>
-        </li>
-    <!-- <li class="menu-item {{ request()->routeIs('categories.*') ? 'active open' : '' }}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon bx bx-category"></i>
-        <div>Quản lý danh mục</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
-          <a href="{{ route('categories.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Danh sách danh mục</div>
-          </a>
-        </li>
-        <li class="menu-item {{ request()->routeIs('categories.create') ? 'active' : '' }}">
-          <a href="{{ route('categories.create') }}" class="menu-link">
-            <i class="bx bx-plus-circle"></i>
-            <div>Thêm danh mục</div>
-          </a>
-        </li>
-      </ul>
-    </li> -->
 
-    
+    @if(Auth::user()->role == 0)
+      <!-- Quản lý danh mục -->
+      <li class="menu-item {{ request()->routeIs('categories.index') ? 'active' : '' }}">
+        <a href="{{ route('categories.index') }}" class="menu-link">
+          <i class="menu-icon bx bx-category"></i>
+          <div>Danh sách danh mục</div>
+        </a>
+      </li>
 
-    <!-- Quản lý nhà cung cấp -->
-     <li class="menu-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
-  <a href="{{ route('suppliers.index') }}" class="menu-link">
-    <i class="menu-icon bx bx-store"></i>
-    <div>Quản lý nhà cung cấp</div>
-  </a>
-</li>
-    <!-- <li class="menu-item {{ request()->routeIs('suppliers.*') || request()->routeIs('product_suppliers.*') ? 'active open' : '' }}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon bx bx-store"></i>
-        <div>Quản lý nhà cung cấp</div>
-      </a>
-      <ul class="menu-sub">
-        <li class="menu-item {{ request()->routeIs('suppliers.index') ? 'active' : '' }}">
-          <a href="{{ route('suppliers.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Danh sách nhà cung cấp</div>
-          </a>
-        </li>
-        <li class="menu-item {{ request()->routeIs('product_suppliers.index') ? 'active' : '' }}">
-          <a href="{{ route('product_suppliers.index') }}" class="menu-link">
-            <i class="bx bx-cube-alt"></i>
-            <div>Sản phẩm của nhà cung cấp</div>
-          </a>
-        </li>
-      </ul>
-    </li> -->
+      <!-- Quản lý nhà cung cấp -->
+      <li class="menu-item {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+        <a href="{{ route('suppliers.index') }}" class="menu-link">
+          <i class="menu-icon bx bx-store"></i>
+          <div>Quản lý nhà cung cấp</div>
+        </a>
+      </li>
 
-    <!-- Tài khoản -->
-    <li class="menu-item {{ request()->routeIs('accounts.*') ? 'active open' : '' }}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon bx bx-user"></i>
-        <div>Quản lý tài khoản</div>
-      </a>
-       <ul class="menu-sub">
-        <li class="menu-item {{ request()->routeIs('suppliers.index') ? 'active' : '' }}">
-          <a href="{{ route('accounts.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Danh sách tài khoản</div>
-          </a>
-        </li>
-        <li class="menu-item {{ request()->routeIs('product_suppliers.index') ? 'active' : '' }}">
-          <a href="{{ route('accounts.create') }}" class="menu-link">
-            <i class="bx bx-cube-alt"></i>
-            <div>Thêm tài khoản</div>
-          </a>
-        </li>
-       
-      </ul>
-  @endif
+      <!-- Quản lý tài khoản -->
+      <li class="menu-item {{ request()->routeIs('accounts.*') ? 'active open' : '' }}">
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <i class="menu-icon bx bx-user"></i>
+          <div>Quản lý tài khoản</div>
+        </a>
+        <ul class="menu-sub">
+          <li class="menu-item {{ request()->routeIs('accounts.index') ? 'active' : '' }}">
+            <a href="{{ route('accounts.index') }}" class="menu-link">
+              <i class="bx bx-list-ul"></i>
+              <div>Danh sách tài khoản</div>
+            </a>
+          </li>
+          <li class="menu-item {{ request()->routeIs('accounts.create') ? 'active' : '' }}">
+            <a href="{{ route('accounts.create') }}" class="menu-link">
+              <i class="bx bx-plus-circle"></i>
+              <div>Thêm tài khoản</div>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Cấu hình website -->
+      <li class="menu-item {{ request()->routeIs('website_custom.edit') ? 'active' : '' }}">
+        <a href="{{ route('website_custom.edit') }}" class="menu-link">
+          <i class="menu-icon bx bx-cog"></i>
+          <div>Cấu hình website</div>
+        </a>
+      </li>
+    @endif
+
+    <!-- Đăng xuất -->
+    <li class="menu-item">
+      <form method="POST" action="{{ route('admin.logout') }}">
+        @csrf
+        <button type="submit" class="menu-link btn btn-link text-start w-100">
+          <i class="bx bx-power-off me-2"></i>
+          <span>Đăng xuất</span>
+        </button>
+      </form>
     </li>
-     <li><form method="POST" action="{{ route('admin.logout') }}">
-              @csrf
-              <button type="submit" class="dropdown-item">
-                <i class="bx bx-power-off me-2"></i>
-                <span class="align-middle">Đăng xuất</span>
-              </button>
-            </form></li>
-    
+
   </ul>
 </aside>
 <!-- / Menu -->
