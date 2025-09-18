@@ -165,7 +165,7 @@
 
         <button type="submit" class="btn btn-success">Cập nhật</button>
         
-        <a href="{{ route('products.index') }}" class="btn btn-secondary">Hủy</a>
+        <a href="{{ route('products.index') }}" class="btn btn-secondary">Quay lại danh sách</a>
     </form>
 </div>
 

@@ -66,7 +66,9 @@
 
     <div class="mt-3">
         <a href="{{ url()->previous() }}" class="btn btn-secondary">Quay lại</a>
+        @if($account->role!=2)
         <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-warning">Sửa</a>
+        @endif
         @if(!$account->is_active)
         <form action="{{ route('accounts.destroy', $account->id) }}" method="POST" style="display:inline-block">
             @csrf
