@@ -40,20 +40,21 @@
     @enderror
 </div>
 
-<!-- Tác giả -->
-<div class="mb-3">
-    <label>Tác giả <span class="text-danger">*</span></label>
-    <input type="text" name="author" class="form-control" value="{{ old('author') }}">
-    @error('author')
-        <small class="text-danger">{{ $message }}</small>
-    @enderror
-</div>
+
 
 <!-- Giá -->
 <div class="mb-3">
     <label>Giá<span class="text-danger">*</span></label>
     <input type="number" step="0.01" name="price" class="form-control" value="{{ old('price') }}">
     @error('price')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
+<!-- Tác giả -->
+<div class="mb-3">
+    <label>Tác giả </label>
+    <input type="text" name="author" class="form-control" value="{{ old('author') }}">
+    @error('author')
         <small class="text-danger">{{ $message }}</small>
     @enderror
 </div>

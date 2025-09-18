@@ -57,7 +57,7 @@
     {{-- Table --}}
     <div id="product-container">
         <table class="table table-bordered table-striped">
-            Số lượng sản phẩm: {{ $products->count() }}
+            <!-- Số lượng sản phẩm: {{ $products->count() }} -->
             <thead class="table-dark">
                 <tr>
                     <th><a href="#" class="sort" data-sort="id">ID</a></th>

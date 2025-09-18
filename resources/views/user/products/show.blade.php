@@ -8,6 +8,7 @@
   <div class="col-md-5">
     <div class="card p-3 shadow-sm">
       <!-- Ảnh chính -->
+      @if($product->images)
       <div class="text-center mb-3">
         <a href="{{ asset('storage/' . $product->images) }}" data-lightbox="product-gallery">
           <img src="{{ asset('storage/' . $product->images) }}" 
@@ -16,6 +17,7 @@
                alt="{{ $product->name }}">
         </a>
       </div>
+      @endif
 
       <!-- Ảnh phụ -->
       @if($product->images_sup)
@@ -34,8 +36,8 @@
       <!-- Nút giỏ hàng -->
       <div class="d-flex gap-2 mb-3">
         <button type="button" class="btn btn-primary w-50" onclick="addToCart({{ $product->id }}, {{ $product->price }}, {{ $product->sale ?? 0 }})">
-    <i class="bi bi-cart"></i> Thêm vào giỏ
-  </button>
+          <i class="bi bi-cart"></i> Thêm vào giỏ
+        </button>
         <a href="{{ route('user.cart.list') }}" class="btn btn-outline-secondary w-50">
           <i class="bi bi-bag-check"></i> Xem giỏ hàng
         </a>
@@ -59,19 +61,19 @@
       <h3 class="fw-bold mb-3">{{ $product->name }}</h3>
       <div class="row">
         <div class="col-md-6">
-          <p><strong>Thể loại:</strong> {{ $product->categ ?? 'Đang cập nhật' }}</p>
-          <p><strong>Tác giả:</strong> {{ $product->author ?? 'Đang cập nhật' }}</p>
-          <p><strong>Giá gốc:</strong> {{ number_format($product->price, 0, ',', '.') }} đ</p>
+          @if($product->categ)<p><strong>Thể loại:</strong> {{ $product->categ }}</p>@endif
+          @if($product->author)<p><strong>Tác giả:</strong> {{ $product->author }}</p>@endif
+          @if($product->price)<p><strong>Giá gốc:</strong> {{ number_format($product->price, 0, ',', '.') }} đ</p>@endif
         </div>
         <div class="col-md-6">
-          <p><strong>NXB:</strong> {{ $product->publisher ?? 'Đang cập nhật' }}</p>
-          <p><strong>Nhà cung cấp:</strong> {{ $product->supplier ?? 'Đang cập nhật' }}</p>
+          @if($product->publisher)<p><strong>NXB:</strong> {{ $product->publisher }}</p>@endif
+          @if($product->supplier)<p><strong>Nhà cung cấp:</strong> {{ $product->supplier }}</p>@endif
           <p><strong>Trạng thái: </strong> {{ $product->quantity>0 ? 'Còn hàng':'Hết hàng' }}</p>
-
         </div>
       </div>
 
       <!-- Giá khuyến mãi -->
+      @if ($product->price)
       <div class="mt-3">
         @if ($product->sale>0)
           <p class="mb-1">
@@ -89,6 +91,7 @@
           </p>
         @endif
       </div>
+      @endif
     </div>
 
     <!-- Thông tin chi tiết -->
@@ -96,25 +99,28 @@
       <h5 class="fw-bold mb-3">Thông tin chi tiết</h5>
       <div class="row">
         <div class="col-md-6">
-          <p><strong>Độ tuổi:</strong> {{ $product->age ?? 'Đang cập nhật' }}</p>
-          <p><strong>Ngôn ngữ:</strong> {{ $product->language ?? 'Đang cập nhật' }}</p>
-          <p><strong>Trọng lượng:</strong> {{ $product->weight ?? 'Đang cập nhật' }} g</p>
+          @if($product->age)<p><strong>Độ tuổi:</strong> {{ $product->age }}</p>@endif
+          @if($product->language)<p><strong>Ngôn ngữ:</strong> {{ $product->language }}</p>@endif
+          @if($product->weight)<p><strong>Trọng lượng:</strong> {{ $product->weight }} g</p>@endif
         </div>
         <div class="col-md-6">
-          <p><strong>Kích thước:</strong> {{ $product->size ?? 'Đang cập nhật' }}</p>
-          <!-- <p><strong>Tình trạng:</strong> {{ $product->status ?? 'Đang cập nhật' }}</p> -->
+          @if($product->size)<p><strong>Kích thước:</strong> {{ $product->size }}</p>@endif
         </div>
       </div>
     </div>
 
     <!-- Mô tả -->
+    @if($product->detail)
     <div class="card p-3 shadow-sm">
       <h5 class="fw-bold mb-3">Mô tả sản phẩm</h5>
-      <p class="mb-0">{{ $product->detail ?? 'Chưa có mô tả cho sản phẩm này.' }}</p>
+      <p class="mb-0">{{ $product->detail }}</p>
     </div>
+    @endif
   </div>
 </div>
- <suggest-products></suggest-products>  
+
+<suggest-products></suggest-products>
+
 <script>
 async function addToCart(productId, price, sale) {
   try {
@@ -138,17 +144,17 @@ async function addToCart(productId, price, sale) {
       alert('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng!');
     } else {
       console.error(err);
-      alert('Có lỗi xảy ra khi thêm sản phẩm!');
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi thêm sản phẩm!');
     }
   }
 }
 </script>
+
 <style>
 .lb-close, .lb-prev, .lb-next {
   display: block !important;
   opacity: 1 !important;
   z-index: 9999 !important;
 }
-
 </style>
 @endsection

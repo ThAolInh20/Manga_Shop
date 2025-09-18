@@ -90,10 +90,10 @@
               {{ form.shipping_address || "Chưa nhập địa chỉ" }}
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <label class="form-label">Phí ship</label>
               <input type="number" v-model="form.shipping_fee" class="form-control" readonly>
-            </div>
+            </div> -->
           </div>
 
           <div class="modal-footer">
@@ -265,8 +265,13 @@ export default {
         this.emitSelectedAddress();
         this.modalInstance.hide();
       } catch (error) {
+         const message = error.response?.data?.message || 
+                    error.response?.data || 
+                    error.message || 
+                    "Không thể lưu địa chỉ, vui lòng thử lại!";
         console.error("Lỗi khi lưu địa chỉ:", error.response?.data || error.message);
-        alert("Không thể lưu địa chỉ, vui lòng kiểm tra lại!");
+        // alert("Không thể lưu địa chỉ, vui lòng kiểm tra lại!");
+        alert(message);
       }
     },
     emitSelectedAddress() {
