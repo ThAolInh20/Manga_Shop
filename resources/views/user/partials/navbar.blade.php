@@ -27,11 +27,11 @@
       <li class="nav-item position-relative">
   <a class="nav-link p-0" href="{{ route('user.cart.list') }}" title="Giỏ hàng">
     <i class="bx bx-cart fs-4"></i>
-    @if($cartCount > 0)
+  
       <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
         {{ $cartCount }}
       </span>
-    @endif
+
   </a>
 </li>
         <li class="nav-item dropdown me-md-3">

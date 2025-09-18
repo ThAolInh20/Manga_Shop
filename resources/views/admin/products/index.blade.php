@@ -65,7 +65,8 @@
                     <th><a href="#" class="sort" data-sort="category_id">Danh mục</a></th>
                     <th>Ảnh</th>
                     <th><a href="#" class="sort" data-sort="author">Tác giả</a></th>
-                    <th><a href="#" class="sort" data-sort="price">Giá</a></th>
+                    <th><a href="#" class="sort" data-sort="price">Giá gốc</a></th>
+                    
                     <th><a href="#" class="sort" data-sort="quantity">Số lượng</a></th>
                     <th width="170">Hành động</th>
                 </tr>

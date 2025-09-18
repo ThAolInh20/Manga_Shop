@@ -56,7 +56,14 @@ Route::middleware(['role:0,1'])->group(function () {
         Route::resource('accounts', AccountController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
+        // Route::get('products/import',[ProductController::class,'import'])->name('products.import');
+        Route::get('products/{product}/import', [ProductController::class, 'import'])->name('products.import');
+    // Lưu thông tin nhập kho
+        Route::post('products/{product}/import', [ProductController::class, 'importStore'])->name('products.import.store');
+         
         Route::resource('suppliers', SupplierController::class);
+        Route::get('/suppliers/{supplier}/filter-products', [SupplierController::class, 'filterProducts'])->name('suppliers.filterProducts');
+
         Route::resource('product_suppliers', ProductSupplierController::class);
         Route::resource('vouchers', VoucherController::class);
         Route::resource('orders', OrderController::class)->only([

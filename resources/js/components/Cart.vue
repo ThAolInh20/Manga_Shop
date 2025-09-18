@@ -55,8 +55,19 @@
                     <a :href="`/products/${item.product.id}`" class="fw-bold d-block">
                       {{ item.product.name }}
                     </a>
-                    <small class="text-muted">Giá: {{ formatPrice(item.price) }} đ</small><br />
-                    <small class="text-muted">Kho: {{ item.product.quantity }}</small>
+                    <small class="text-muted">
+                        Giá: {{ formatPrice(item.product.price) }} đ
+                        <span v-if="item.product.sale > 0" class="text-success">
+                          (Giảm {{ item.product.sale }}%)  → Giá sau KM: <strong>{{ formatPrice(item.product.price_sale) }} đ</strong>
+                        </span>
+                        <!-- <span v-if="item.product.price_sale">
+                         
+                        </span> -->
+                      </small>
+                    <!-- <small class="text-muted">Giá sau khuyến mãi: {{ item.product.price }}</small> -->
+
+                    <br></br><small class="text-muted">Kho: {{ item.product.quantity }}</small>
+                    
                   </div>
                 </div>
               </td>
@@ -73,7 +84,7 @@
               </td>
 
               <!-- Tổng -->
-              <td class="fw-bold">{{ formatPrice(item.price * item.quantity) }} đ</td>
+              <td class="fw-bold">{{ formatPrice(item.product.price_sale * item.quantity) }} đ</td>
 
               <!-- Hành động -->
               <td>
@@ -175,6 +186,7 @@ const discount = ref(0)
 const shippingAddresses = ref([])  // Danh sách địa chỉ
 const selectedShipping = ref(null) // Địa chỉ đã chọn
 
+
 const fetchCart = async () => {
   try {
     const res = await axios.get("/api/cart")
@@ -227,7 +239,7 @@ const finalTotal = computed(() =>{
   const subtotal = Number(totalSelected.value || 0)
   const discountVal = Number(discount.value || 0)
   const shippingFee = Number(selectedShipping.value?.shipping_fee || 0)
-  
+  console.log(subtotal.value)
   return Math.max(subtotal - discountVal + shippingFee, 0)
 }
 
@@ -240,7 +252,7 @@ const total = computed(() =>
 const totalSelected = computed(() =>
   cart.value
     .filter(item => selectedItems.value.includes(item.product_id))
-    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    .reduce((sum, item) => sum + item.product.price_sale*item.quantity, 0)
 )
 
 const toggleSelectAll = () => {
@@ -300,7 +312,7 @@ const checkout = async () => {
     .map(item => ({
       product_id: item.product_id,
       quantity: item.quantity,
-      price: item.price,
+      price: item.product.price_sale,
     }))
     // console.log(orderData)
   const payload = {
@@ -310,14 +322,12 @@ const checkout = async () => {
     voucher: appliedVoucher.value ? appliedVoucher.value.code : null,
     shipping_id: selectedShipping.value?.id || null
   }
-  console.log(payload)
 
   try {
     // const res = await axios.post("/api/order", payload)
     const res = await axios.post("/api/order",payload)
     alert("✅ Tạo đơn hàng thành công!")
     const order_id = res.data.order_id
-     
     window.location.href = `/order/checkout/${order_id}`
     // Sau khi tạo đơn xong có thể xóa các sản phẩm đã đặt khỏi giỏ
     

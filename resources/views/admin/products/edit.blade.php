@@ -11,7 +11,9 @@
    @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
-
+<a href="{{ route('products.import', $product->id) }}" class="btn btn-sm btn-warning">
+    Nhập hàng
+</a>
     <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf @method('PUT')
 
@@ -76,13 +78,13 @@
                 <!-- Số lượng -->
                 <div class="mb-3">
                     <label>Số lượng</label>
-                    <input type="number" name="quantity" class="form-control" value="{{ old('quantity', $product->quantity) }}">
+                    <input type="number" name="quantity" class="form-control" value="{{ old('quantity', $product->quantity) }}" disabled>
                 </div>
 
                 <!-- Số lượng đã mua -->
                 <div class="mb-3">
                     <label>Số lượng đã mua</label>
-                    <input type="number" name="quantity_buy" class="form-control" value="{{ old('quantity_buy', $product->quantity_buy) }}">
+                    <input type="number" name="quantity_buy" class="form-control" value="{{ old('quantity_buy', $product->quantity_buy) }}" disabled>
                 </div>
 
                 <!-- Trọng lượng -->

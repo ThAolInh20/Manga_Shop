@@ -330,11 +330,14 @@ class OrderController extends Controller
             ]);
 
             $productOrderController = new ProductOrderController();
+            $cartController = new CartController();
 
             // 2. Lặp từng sản phẩm và gọi add()
             foreach ($request->products as $product) {
                 $productOrderController->add($product, $order->id);
+                $cartController->removeV2($product,$user->id);
             }
+           
 
             DB::commit();
 
@@ -349,6 +352,11 @@ class OrderController extends Controller
     //     'products' => $request->products,
     //     'user_id' => Auth::id() ?? null
     // ]);
+    Log::error('❌ Lỗi tạo order: ' . $e->getMessage(), [
+        'products' => $request->products ?? null,
+        'user_id'  => Auth::id() ?? null,
+        'trace'    => $e->getTraceAsString(), // nếu muốn debug sâu hơn
+    ]);
             return response()->json([
                 'message' => 'Error creating order',
                 'error' => $e->getMessage()

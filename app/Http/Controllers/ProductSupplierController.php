@@ -32,7 +32,7 @@ class ProductSupplierController extends Controller
             'quantity'     => 'required|integer|min:1',
         ]);
         $data = $request->all();
-        $data['date_import'] = now();
+        // $data['date_import'] = now();
         ProductSupplier::create($data);
 
         return redirect()->route('product_suppliers.index')->with('success', 'Thêm nhập hàng thành công');
@@ -57,7 +57,7 @@ class ProductSupplierController extends Controller
         $request->validate([
             'product_id'   => 'required|exists:products,id',
             'supplier_id'  => 'required|exists:suppliers,id',
-            'date_import'  => 'required|date',
+            // 'date_import'  => 'required|date',
             'import_price' => 'required|numeric',
             'quantity'     => 'required|integer|min:1',
         ]);

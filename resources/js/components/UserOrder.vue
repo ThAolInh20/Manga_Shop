@@ -1,25 +1,27 @@
 <template>
   <div class="container py-4">
-    <h3 class="mb-4">Đơn hàng của bạn</h3>
+    <h3 class="mb-4 text-center fw-bold">Đơn hàng của bạn</h3>
 
     <!-- Bộ lọc trạng thái -->
-    <div class="mb-3 d-flex gap-2 flex-wrap">
-      <button 
-        class="btn btn-outline-primary"
-        :class="{ active: filterStatus === null }"
-        @click="filterStatus = null; fetchOrders()"
-      >
-        Tất cả
-      </button>
-      <button 
-        v-for="s in statuses" 
-        :key="s.value" 
-        class="btn btn-outline-primary"
-        :class="{ active: filterStatus === s.value }"
-        @click="filterStatus = s.value; fetchOrders()"
-      >
-        {{ s.text }}
-      </button>
+    <div class="mb-4 text-center">
+      <div class="btn-group flex-wrap">
+        <button 
+          class="btn btn-outline-primary"
+          :class="{ active: filterStatus === null }"
+          @click="filterStatus = null; fetchOrders()"
+        >
+          Tất cả
+        </button>
+        <button 
+          v-for="s in statuses" 
+          :key="s.value" 
+          class="btn btn-outline-primary"
+          :class="{ active: filterStatus === s.value }"
+          @click="filterStatus = s.value; fetchOrders()"
+        >
+          {{ s.text }}
+        </button>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -34,72 +36,113 @@
 
     <!-- Danh sách đơn hàng -->
     <div v-else>
-      <div v-for="order in orders" :key="order.id" class="card mb-4 shadow-sm">
-        <!-- Header đơn hàng -->
-         <a :href="`/order/${order.id}`"  class="card-header d-flex justify-content-between text-decoration-none text-dark">
-        <div class="card-header d-flex justify-content-between flex-wrap align-items-center">
+      <div v-for="order in orders" :key="order.id" class="card mb-4 shadow-sm border-0 rounded-3">
+        <!-- Header -->
+        <a 
+          :href="`/order/${order.id}`"  
+          class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap text-decoration-none text-dark rounded-top"
+        >
           <div>
-            <strong>Mã đơn hàng:</strong> #{{ order.id }} <br>
-            <strong>Trạng thái:</strong> {{ getStatusText(order.order_status) }}
+            <strong>Mã đơn:</strong> #{{ order.id }} <br>
+            <strong>Trạng thái:</strong> <span class="badge bg-info text-dark">{{ getStatusText(order.order_status) }}</span>
           </div>
-          <div>
-            <strong>Ngày đặt:</strong> {{ formatDate(order.created_at) }} <br>
-            <strong>Giờ đặt:</strong> {{ formatTime(order.created_at) }}
+          <div class="text-end">
+            <strong>Ngày:</strong> {{ formatDate(order.created_at) }} <br>
+            <strong>Giờ:</strong> {{ formatTime(order.created_at) }}
+          </div>
+        </a>
+        <hr>
+        <!-- Body -->
+        <div class="card-body d-flex align-items-center">
+          
+           <div >
+            <strong>Sản phẩm:</strong> {{ order.product_count }}
+          </div>
+
+          <!-- Tổng tiền luôn ở giữa, fix cứng -->
+          <div class="ms-fixed">
+            <strong>Tổng tiền:</strong>
+            <span class="text-danger fw-bold">{{ formatPrice(order.total_price) }} đ</span>
+          </div>
+          <div class="d-flex gap-2 flex-wrap ms-auto">
+            <!-- Nút thanh toán -->
+            <a 
+              v-if="order.order_status === 0" 
+              :href="`/order/checkout/${order.id}`" 
+              class="btn btn-sm btn-primary"
+            >
+              Thanh toán
+            </a>
+
+            <!-- Nút hủy đơn -->
+            <button 
+              v-if="order.order_status === 0"
+              class="btn btn-sm btn-outline-danger"
+              @click="openCancelModal(order.id)"
+            >
+              Hủy đơn
+            </button>
+
+            <!-- Nút mua lại -->
+            <button 
+              v-if="order.order_status == 5"
+              class="btn btn-sm btn-outline-secondary"
+              @click="recallOrder(order.id)"
+            >
+              Mua lại
+            </button>
+
+            <!-- Nút xác nhận nhận hàng -->
+            <button 
+              v-if="order.order_status === 2"
+              class="btn btn-sm btn-success"
+              @click="updateOrderStatus(order.id, 3)" 
+            >
+              Đã nhận
+            </button>
           </div>
         </div>
-        </a>
-        <hr class="my-1">
+      </div>
+    </div>
+  </div>
 
-        <!-- Body: thông tin sản phẩm và tổng -->
-        <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
-          <div>
-            <strong>Số sản phẩm:</strong> {{ order.product_count }}
-          </div>
-          <div>
-            <strong>Tổng tiền:</strong> {{ formatPrice(order.total_price) }} đ
-          </div>
-          <div>
-             <!-- Nút thanh toán (chỉ khi chờ thanh toán) -->
-    <a 
-      v-if="order.order_status === 0" 
-      :href="`/order/checkout/${order.id}`" 
-      class="btn btn-primary btn-sm me-2"
-    >
-      Thanh toán
-    </a>
+  <!-- Modal hủy đơn -->
+  <div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-3">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Xác nhận hủy đơn</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="fw-bold">Vui lòng chọn lý do hủy đơn:</p>
           
-          <button 
-                  class="btn btn-danger btn-sm"
-                  v-if="order.order_status==0"
-                  @click="cancelOrder(order.id)"
-                >
-                  Hủy đơn
-                </button>
-                <button 
-                  class="btn btn-danger btn-sm"
-                  v-if="order.order_status == 5"
-                  @click="recallOrder(order.id)"
-                >
-                  Mua lại
-                </button>
-                <!-- Nút xác nhận đã nhận hàng -->
-      <button 
-    class="btn btn-success btn-sm"
-    v-if="order.order_status === 2"
-    @click="updateOrderStatus(order.id, 3)" 
-  >
-    Đã nhận được hàng
-  </button>
-
-  <!-- Nút đổi trả -->
-  <!-- <button 
-    class="btn btn-warning btn-sm"
-    v-if="order.order_status === 3"
-    @click="updateOrderStatus(order.id, 4)" 
-  >
-    Đổi trả
-  </button> -->
+          <div class="form-check mb-2" v-for="reason in reasons" :key="reason">
+            <input 
+              class="form-check-input" 
+              type="radio" 
+              :id="reason" 
+              :value="reason" 
+              v-model="cancelReason"
+              name="cancelReason"
+            >
+            <label class="form-check-label" :for="reason">
+              {{ reason }}
+            </label>
           </div>
+
+          <!-- Nếu chọn Khác -->
+          <textarea 
+            v-if="cancelReason === 'Khác'" 
+            v-model="cancelOther" 
+            class="form-control mt-2" 
+            placeholder="Nhập lý do khác..."
+          ></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button class="btn btn-danger" @click="confirmCancelOrder">Xác nhận hủy</button>
         </div>
       </div>
     </div>
@@ -114,6 +157,10 @@ const orders = ref([])
 const loading = ref(false)
 const filterStatus = ref(null)
 
+const cancelReason = ref("")
+const cancelOther = ref("")
+const orderIdToCancel = ref(null)
+
 const statuses = [
   {value: 0, text:"Chờ thanh toán"},
   { value: 1, text: "Đang xử lý" },
@@ -122,6 +169,13 @@ const statuses = [
   { value: 4, text: "Đổi trả" },
   { value: 5, text: "Đã hủy" },
   
+]
+const reasons = [
+  "Đặt nhầm sản phẩm",
+  "Muốn thay đổi địa chỉ",
+  "Tìm được giá rẻ hơn",
+  "Thay đổi ý định mua",
+  "Khác"
 ]
 
 const fetchOrders = async () => {
@@ -144,17 +198,17 @@ const getStatusText = (status) => {
   const statusObj = statuses.find(s => s.value === status)
   return statusObj ? statusObj.text : "Không xác định"
 }
-const cancelOrder = async (orderId) => {
-  if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return
-  try {
-    await axios.post(`/api/order/${orderId}/cancel`)
-    alert("✅ Hủy đơn thành công!")
-    fetchOrders()
-  } catch (err) {
-    console.error(err)
-    alert("❌ Lỗi khi hủy đơn!")
-  }
-}
+// const cancelOrder = async (orderId) => {
+//   if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return
+//   try {
+//     await axios.post(`/api/order/${orderId}/cancel`)
+//     alert("✅ Hủy đơn thành công!")
+//     fetchOrders()
+//   } catch (err) {
+//     console.error(err)
+//     alert("❌ Lỗi khi hủy đơn!")
+//   }
+// }
 const updateOrderStatus = async (orderId, statusWant) => {
   try {
     const res = await axios.post(`/api/order/${orderId}/status`, {
@@ -199,7 +253,32 @@ const formatTime = (datetime) => {
   if (!datetime) return "-"
   return new Date(datetime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
 }
+const openCancelModal = (orderId) => {
+  orderIdToCancel.value = orderId
+  cancelReason.value = ""
+  cancelOther.value = ""
+  const modal = new bootstrap.Modal(document.getElementById("cancelModal"))
+  modal.show()
+}
+const confirmCancelOrder = async () => {
+  if (!cancelReason.value) {
+    alert("⚠️ Vui lòng chọn lý do hủy!")
+    return
+  }
 
+  const reasonText = cancelReason.value === "Khác" ? cancelOther.value : cancelReason.value
+  console.log("📌 Lý do hủy:", reasonText) // chỉ log ra, không lưu DB
+
+  try {
+    await axios.post(`/api/order/${orderIdToCancel.value}/cancel`)
+    alert("✅ Hủy đơn thành công!")
+    fetchOrders()
+    bootstrap.Modal.getInstance(document.getElementById("cancelModal")).hide()
+  } catch (err) {
+    console.error(err)
+    alert("❌ Lỗi khi hủy đơn!")
+  }
+}
 onMounted(() => {
   fetchOrders()
 })
@@ -212,5 +291,8 @@ onMounted(() => {
 .btn.active {
   background-color: #0d6efd;
   color: white;
+}
+.ms-fixed {
+  margin-left: 300px; /* cách trái 300px */
 }
 </style>

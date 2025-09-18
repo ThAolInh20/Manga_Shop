@@ -14,12 +14,15 @@ class ProductSupplier extends Model
     protected $table = 'product_suppliers';
 
     protected $fillable = [
-        'product_id', 'supplier_id', 'import_at', 
-        'import_price', 'import_quantity', 'detail'
+        'product_id', 'supplier_id', 'import_by', 
+        'import_price', 'quantity', 'detail'
     ];
      public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+    public function importBy(){
+        return $this->belongsTo(Account::class,'import_by');
     }
 
     // Quan hệ tới Supplier

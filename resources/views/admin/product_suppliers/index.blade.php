@@ -33,7 +33,7 @@
                     <td>{{ $i->id }}</td>
                     <td>{{ $i->product->name ?? 'N/A' }}</td>
                     <td>{{ $i->supplier->name ?? 'N/A' }}</td>
-                    <td>{{ $i->date_import }}</td>
+                    <td>{{ $i->created_at }}</td>
                     <td>{{ number_format($i->import_price, 0, ',', '.') }} đ</td>
                     <td>{{ $i->quantity }}</td>
                     <td>{{ $i->detail }}</td>
