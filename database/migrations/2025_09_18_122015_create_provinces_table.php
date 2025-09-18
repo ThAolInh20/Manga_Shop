@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('provinces', function (Blueprint $table) {
-             $table->id();
-            $table->unsignedInteger('province_id')->unique(); // Mã tỉnh GHN
-            $table->string('name'); // Tên tỉnh/thành phố
-            $table->timestamps();
-        });
+        // Schema::create('provinces', function (Blueprint $table) {
+        //      $table->id();
+        //     $table->unsignedInteger('province_id')->unique(); // Mã tỉnh GHN
+        //     $table->string('name'); // Tên tỉnh/thành phố
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('provinces');
+        // Schema::dropIfExists('provinces');
     }
 };

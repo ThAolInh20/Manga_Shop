@@ -21,6 +21,7 @@ use App\Http\Controllers\ShippingController;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\PayOSController;
 use App\Http\Controllers\ChartController;
+use App\Services\GHNService;
 
 
 // User login
@@ -133,17 +134,32 @@ Route::prefix('api')->group(function () {
     Route::get('/shippings', [ShippingController::class, 'index']);
     Route::post('/shippings', [ShippingController::class, 'store']);
     Route::put('/shippings/{id}', [ShippingController::class, 'update']);
+    Route::delete('/shippings/{id}', [ShippingController::class, 'delete']);
 
-    Route::get('/provinces', function () {
-        $response = Http::get("https://provinces.open-api.vn/api/?depth=1");
-        return $response->json();
-    });
-    Route::get('/provinces/{code}', function ($code) {
-         return Http::get("https://provinces.open-api.vn/api/p/{$code}?depth=2")->json();
+    // Route::get('/provinces', function () {
+    //     $response = Http::get("https://provinces.open-api.vn/api/?depth=1");
+    //     return $response->json();
+    // });
+    // Route::get('/provinces/{code}', function ($code) {
+    //      return Http::get("https://provinces.open-api.vn/api/p/{$code}?depth=2")->json();
+    // });
+
+    // Route::get('/districts/{code}', function ($code) {
+    //     return Http::get("https://provinces.open-api.vn/api/d/{$code}?depth=2")->json();
+    // });
+    // Lấy danh sách Tỉnh/Thành
+    Route::get('/provinces', function (GHNService $ghn) {
+        return response()->json($ghn->getProvinces());
     });
 
-    Route::get('/districts/{code}', function ($code) {
-        return Http::get("https://provinces.open-api.vn/api/d/{$code}?depth=2")->json();
+    // Lấy danh sách Quận/Huyện theo province_id
+    Route::get('/districts/{provinceId}', function ($provinceId, GHNService $ghn) {
+        return response()->json($ghn->getDistricts((int)$provinceId));
+    });
+
+    // Lấy danh sách Phường/Xã theo district_id
+    Route::get('/wards/{districtId}', function ($districtId, GHNService $ghn) {
+        return response()->json($ghn->getWards((int)$districtId));
     });
 
 
