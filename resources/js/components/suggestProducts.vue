@@ -1,7 +1,7 @@
 <template>
   
   <div class="card p-3 mb-4 mt-3 shadow-sm ">
-    <h4 class="mb-3">📖 Gợi ý sản phẩm cho bạn</h4>
+    <h4 class="mb-3">📖 Sản phẩm hot</h4>
     <div v-if="loading" class="text-center my-5">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
       <span class="visually-hidden">Đang tải...</span>

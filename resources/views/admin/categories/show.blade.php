@@ -25,7 +25,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($category->products as $product)
+                @foreach($products as $product)
                     <tr>
                         <td>{{ $product->id }}</td>
                         <td>{{ $product->name }}</td>
@@ -46,6 +46,9 @@
                 @endforeach
             </tbody>
         </table>
+        <div>
+    {{ $products->links('pagination::bootstrap-5') }}
+</div>
     @endif
 
     <a href="{{ url()->previous() }}" class="btn btn-secondary mt-3">Quay lại</a>

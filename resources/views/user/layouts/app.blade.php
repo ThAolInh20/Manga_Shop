@@ -32,7 +32,7 @@
 
 
 </head>
-<body>
+<body id="app"> 
 
   <!-- Navbar -->
   @include('user.partials.navbar')
@@ -40,7 +40,7 @@
 
 
   <!-- Content -->
-  <div id="app"  class="content-wrapper pt-3" style="margin-top: 50px;">
+  <div   class="content-wrapper pt-3" style="margin-top: 50px;">
     <div class="container-xl flex-grow-1 container-p-y">
 
     @yield('content')

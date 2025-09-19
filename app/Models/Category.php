@@ -30,8 +30,13 @@ class Category extends Model
     protected static function booted()
     {
         static::deleting(function ($category) {
-            // Khi xoá category, update tất cả sản phẩm về category_id = -1
-            $category->products()->update(['category_id' => 0]);
+            // Khi xoá category, update tất cả sản phẩm về category_id = id gốc
+            $category->products()->update(['category_id' => 2]);
+
+           if ($category->id == 2) {
+                    // Ngăn chặn xóa
+                return false; // trả về false để hủy delete
+            }
         });
         // Khi tạo -> gán created_by
         static::creating(function ($category) {

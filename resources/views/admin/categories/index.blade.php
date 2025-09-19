@@ -45,12 +45,13 @@
                     <!-- Nút sửa mở modal -->
                     <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-warning">Sửa</a>
                     
-
+                    @if($category->id!=2)
                     <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline-block">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xoá?')">Xoá</button>
                     </form>
+                    @endif
                 </td>
             </tr>
         @empty

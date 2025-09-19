@@ -53,8 +53,9 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        $category->load('products');
-        return view('admin.categories.show', compact('category'));
+         $products = $category->products()->paginate(10); // 10 sp / trang
+    
+        return view('admin.categories.show', compact('category', 'products'));
     }
 
     /**
@@ -86,6 +87,9 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        if($category->id==2){
+            return redirect()->route('categories.index')->with('error', 'Không thể xóa danh mục này');
+        }
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Xóa danh mục thành công');

@@ -63,44 +63,46 @@
                 </tr>
             </thead>
             <tbody id="account-table">
-                @foreach($accounts as $account)
-                <tr>
-                    <td>{{ $account->id }}</td>
-                    <td>{{ $account->name }}</td>
-                    <td>{{ $account->email }}</td>
-                    <td>{{ $account->phone }}</td>
-                    <td>
-                        @switch($account->role)
-                            @case(0)<span class="badge bg-primary">Admin</span>@break
-                            @case(1)<span class="badge bg-secondary">Cộng tác viên</span>@break
-                            @default<span class="badge bg-success">Khách hàng</span>
-                        @endswitch
-                    </td>
-                    
-                    <td>
-                        @if($account->is_active)
-                            <span class="badge bg-success">Hoạt động</span>
-                        @else
-                            <span class="badge bg-danger">Yêu cầu xóa</span>
-                        @endif
-                    </td>
-                    <td>{{ $account->updatedBy?$account->updatedBy->name:'' }}</td>
-                    <td class="d-flex  gap-1">
-                        <a href="{{ route('accounts.show', $account->id) }}" class="btn btn-sm btn-info">Xem</a>
-                        @if($account->role!=2)
-                        <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-sm btn-warning">Sửa</a>
-                        @endif
-                        @if(!$account->is_active||$account->role==1)
-                        
-                        <form action="{{ route('accounts.destroy', $account->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xoá?')">Xoá</button>
-                        </form>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
+                @forelse($accounts as $account)
+                    <tr>
+                        <td>{{ $account->id }}</td>
+                        <td>{{ $account->name }}</td>
+                        <td>{{ $account->email }}</td>
+                        <td>{{ $account->phone }}</td>
+                        <td>
+                            @switch($account->role)
+                                @case(0)<span class="badge bg-primary">Admin</span>@break
+                                @case(1)<span class="badge bg-secondary">Cộng tác viên</span>@break
+                                @default<span class="badge bg-success">Khách hàng</span>
+                            @endswitch
+                        </td>
+                        <td>
+                            @if($account->is_active)
+                                <span class="badge bg-success">Hoạt động</span>
+                            @else
+                                <span class="badge bg-danger">Yêu cầu xóa</span>
+                            @endif
+                        </td>
+                        <td>{{ $account->updatedBy? $account->updatedBy->name : '' }}</td>
+                        <td class="d-flex gap-1">
+                            <a href="{{ route('accounts.show', $account->id) }}" class="btn btn-sm btn-info">Xem</a>
+                            @if($account->role!=2)
+                                <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-sm btn-warning">Sửa</a>
+                            @endif
+                            @if(!$account->is_active || $account->role==1)
+                                <form action="{{ route('accounts.destroy', $account->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xoá?')">Xoá</button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Không có tài khoản phù hợp</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
 
