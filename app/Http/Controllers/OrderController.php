@@ -594,19 +594,31 @@ $data['shipping_fee'] = $shipping_fee;
         'status_want' => $statusWant
     ]);
     if ($statusWant == 2) {
+        $currentUser = Auth::user();
+        $orderOwner = $order->account;
+
+        // Chặn tự xác nhận
+        if ($currentUser->id == $orderOwner->id) {
+            return response()->json([
+                'message' => "Bạn không thể xác nhận đơn của chính bạn!"
+            ], 400);
+        }
+        if ($currentUser->role != 0 && $currentUser->role >= $orderOwner->role) {
+            return response()->json([
+                'message' => "Bạn không có quyền xác nhận đơn này!"
+            ], 400);
+        }
         foreach ($order->products as $product) {
             $quantity = $product->pivot->quantity; // lấy từ bảng trung gian
             $price    = $product->pivot->price;
-           
+            if ($product->quantity < $quantity) {
+                return response()->json([
+                    'message' => "Sản phẩm {$product->name} không đủ hàng trong kho"
+                ], 400);
+            }
 
-    if ($product->quantity < $quantity) {
-        return response()->json([
-            'message' => "Sản phẩm {$product->name} không đủ hàng trong kho"
-        ], 400);
-    }
-
-        $product->buy($quantity);
-        $product->save();
+                $product->buy($quantity);
+                $product->save();
         }
     }
     // 3. Cập nhật trạng thái
@@ -801,6 +813,13 @@ public function showOrder($order_id)
             return response()->json([
                 'success' => false,
                 'message' => 'Đơn hàng đã được xử lý hoặc không hợp lệ.'
+            ], 400);
+        }
+        // Kiểm tra xem đã có địa chỉ giao hàng chưa
+        if (!$order->shipping_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng chọn địa chỉ giao hàng trước khi xác nhận COD.'
             ], 400);
         }
 

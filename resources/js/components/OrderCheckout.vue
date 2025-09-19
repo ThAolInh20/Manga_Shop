@@ -192,7 +192,10 @@ const finalTotal = computed(() => {
 
 const confirmCOD = async () => {
   if (!order.value) return;
-
+  if (!selectedShipping.value) {
+    alert("🚚 Vui lòng chọn địa chỉ giao hàng trước khi thanh toán!");
+    return;
+  }
   try {
     console.log(order)
     const res = await axios.post('/api/order/cod-confirm', {
