@@ -336,7 +336,7 @@ const checkout = async () => {
   try {
     // const res = await axios.post("/api/order", payload)
     const res = await axios.post("/api/order",payload)
-    alert("✅ Tạo đơn hàng thành công!")
+    alert("Tạo đơn hàng thành công!")
     const order_id = res.data.order_id
     window.location.href = `/order/checkout/${order_id}`
     // Sau khi tạo đơn xong có thể xóa các sản phẩm đã đặt khỏi giỏ

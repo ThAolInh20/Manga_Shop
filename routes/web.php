@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\PayOSController;
 use App\Http\Controllers\ChartController;
 use App\Services\GHNService;
+use App\Http\Controllers\NotificationController;
 
 
 // User login
@@ -55,8 +56,8 @@ Route::middleware(['role:0,1'])->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
     
     Route::prefix('admin')->group(function () {
-        Route::resource('accounts', AccountController::class);
-        Route::resource('categories', CategoryController::class);
+        Route::resource('accounts', AccountController::class)->middleware(['role:0']);
+        Route::resource('categories', CategoryController::class)->middleware(['role:0']);
         Route::resource('products', ProductController::class);
         // Route::get('products/import',[ProductController::class,'import'])->name('products.import');
         Route::get('products/{product}/import', [ProductController::class, 'import'])->name('products.import');
@@ -84,8 +85,8 @@ Route::middleware(['role:0,1'])->group(function () {
             Route::get('/productbuy', [ChartController::class, 'productPieChart'])->name('admin.chart.products.pie');
         });
 
-        Route::get('/website-custom/edit', [WebsiteCustomController::class, 'edit'])->name('website_custom.edit');
-        Route::post('/website-custom/update', [WebsiteCustomController::class, 'update'])->name('website_custom.update');
+        Route::get('/website-custom/edit', [WebsiteCustomController::class, 'edit'])->name('website_custom.edit')->middleware(['role:0']);;
+        Route::post('/website-custom/update', [WebsiteCustomController::class, 'update'])->name('website_custom.update')->middleware(['role:0']);;
     });
     
     
@@ -98,6 +99,9 @@ Route::prefix('api')->group(function () {
     Route::put('/user/profi/{id}', [AccountController::class, 'update2']);
     Route::put('/user/deactivate', [AccountController::class, 'deactivate']);
 
+    Route::get('/notifications', [NotificationController::class, 'index']);
+
+
     Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
 
     Route::get('/wishlist', [WishlistController::class, 'index']);
@@ -106,6 +110,8 @@ Route::prefix('api')->group(function () {
     
     Route::get('/boloc', [ProductController::class, 'filterField']);
     route::get('/products', [ProductController::class, 'getAllProducts']);
+    Route::get('/products/{id}/related', [ProductController::class, 'related'])->name('products.related');
+
     route::get('/categories', [CategoryController::class, 'listCategories']);
 
     Route::post('/cart', [CartController::class, 'add']);
@@ -172,6 +178,7 @@ route::get('/user/profi', [AccountController::class, 'showBlade'])->name('user.p
 
 route::get('/products/{product}', [ProductController::class, 'showProductForUser'])->name('user.products.show');
 route::get('/products', [ProductController::class, 'indexForUser'])->name('user.products.list');
+
 route::get('/wishlist', [WishlistController::class, 'showWishlist'])->name('user.wishlist.list');
 route::get('/cart', [CartController::class, 'index'])->name('user.cart.list');
 route::get('/order', [OrderController::class, 'userOrdersPage'])->name('user.order.list');

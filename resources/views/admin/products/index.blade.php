@@ -19,36 +19,42 @@
         <div class="col-md-3">
             <input type="text" name="search" class="form-control" placeholder="Tên hoặc tác giả">
         </div>
+        {{-- lọc theo category --}}
         <div class="col-md-3">
-    <select name="price_range" class="form-select">
-        <option value="">-- Khoảng giá --</option>
-        <option value="0-100000" {{ request('price_range')=='0-100000' ? 'selected' : '' }}>0 - 100k</option>
-        <option value="100001-500000" {{ request('price_range')=='100001-500000' ? 'selected' : '' }}>100k - 500k</option>
-        <option value="500001-1000000" {{ request('price_range')=='500001-1000000' ? 'selected' : '' }}>500k - 1tr</option>
-        <option value="1000001-99999999" {{ request('price_range')=='1000001-99999999' ? 'selected' : '' }}>> 1tr</option>
-    </select>
-</div>
+            <select name="category_id" class="form-select">
+                <option value="">-- Chọn danh mục --</option>
+                @foreach($categories as $c)
+                    <option value="{{ $c->id }}" {{ request('category_id')==$c->id ? 'selected' : '' }}>
+                        {{ $c->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="price_range" class="form-select">
+                <option value="">-- Khoảng giá --</option>
+                <option value="0-100000" {{ request('price_range')=='0-100000' ? 'selected' : '' }}>0 - 100k</option>
+                <option value="100001-500000" {{ request('price_range')=='100001-500000' ? 'selected' : '' }}>100k - 500k</option>
+                <option value="500001-1000000" {{ request('price_range')=='500001-1000000' ? 'selected' : '' }}>500k - 1tr</option>
+                <option value="1000001-99999999" {{ request('price_range')=='1000001-99999999' ? 'selected' : '' }}>> 1tr</option>
+            </select>
+        </div>
 
+        {{-- thay vì chọn khoảng số lượng -> nhập số lượng max --}}
         <div class="col-md-3">
-        <select name="quantity_range" class="form-select">
-            <option value="">-- Số lượng --</option>
-            <option value="1-10" {{ request('quantity_range')=='1-10' ? 'selected' : '' }}>1 - 10</option>
-            <option value="11-50" {{ request('quantity_range')=='11-50' ? 'selected' : '' }}>11 - 50</option>
-            <option value="51-100" {{ request('quantity_range')=='51-100' ? 'selected' : '' }}>51 - 100</option>
-            <option value="101-99999" {{ request('quantity_range')=='101-99999' ? 'selected' : '' }}>> 100</option>
-        </select>
-    </div>
+            <input type="number" name="quantity_max" class="form-control" 
+                   placeholder="Số lượng nhỏ hơn hoặc bằng..."
+                   value="{{ request('quantity_max') }}">
+        </div>
+
         <div class="col-md-2">
-    <select name="per_page" class="form-select" id="per-page">
-        <option value="10" {{ request('per_page')=='10' ? 'selected' : '' }}>10 / trang</option>
-        <option value="20" {{ request('per_page')=='20' ? 'selected' : '' }}>20 / trang</option>
-        <option value="30" {{ request('per_page')=='30' ? 'selected' : '' }}>30 / trang</option>
-    </select>
-</div>
+            <select name="per_page" class="form-select" id="per-page">
+                <option value="10" {{ request('per_page')=='10' ? 'selected' : '' }}>10 / trang</option>
+                <option value="20" {{ request('per_page')=='20' ? 'selected' : '' }}>20 / trang</option>
+                <option value="30" {{ request('per_page')=='30' ? 'selected' : '' }}>30 / trang</option>
+            </select>
+        </div>
 
-        <!-- <div class="col-md-1 d-flex align-items-center">
-    <button type="button" id="filter-btn" class="btn btn-primary w-100">Lọc</button>
-</div> -->
         <div class="col-md-1 d-flex align-items-center">
             <button type="button" id="reset-filter" class="btn btn-secondary w-100">Reset</button>
         </div>
@@ -57,7 +63,6 @@
     {{-- Table --}}
     <div id="product-container">
         <table class="table table-bordered table-striped">
-            <!-- Số lượng sản phẩm: {{ $products->count() }} -->
             <thead class="table-dark">
                 <tr>
                     <th><a href="#" class="sort" data-sort="id">ID</a></th>
@@ -66,31 +71,34 @@
                     <th>Ảnh</th>
                     <th><a href="#" class="sort" data-sort="author">Tác giả</a></th>
                     <th><a href="#" class="sort" data-sort="price">Giá gốc</a></th>
-                    
                     <th><a href="#" class="sort" data-sort="quantity">Số lượng</a></th>
                     <th width="170">Hành động</th>
                 </tr>
             </thead>
             <tbody id="product-table">
-                @foreach($products as $p)
-                    <tr>
-                        <td>{{ $p->id }}</td>
-                        <td>{{ $p->name }}</td>
-                        <td>{{ $p->category->name ?? '—' }}</td>
-                        <td>@if($p->images)<img src="{{ asset('storage/'.$p->images) }}" width="50">@endif</td>
-                        <td>{{ $p->author ?? '—' }}</td>
-                        <td>{{ number_format($p->price) }} đ</td>
-                        <td>{{ $p->quantity }}</td>
-                        <td>
-                            <a href="{{ route('products.edit', $p->id) }}" class="btn btn-sm btn-warning">Sửa</a>
-                            <form action="{{ route('products.destroy', $p->id) }}" method="POST" style="display:inline-block">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xoá?')">Xoá</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
+    @forelse($products as $p)
+        <tr>
+            <td>{{ $p->id }}</td>
+            <td>{{ $p->name }}</td>
+            <td>{{ $p->category->name ?? '—' }}</td>
+            <td>@if($p->images)<img src="{{ asset('storage/'.$p->images) }}" width="50">@endif</td>
+            <td>{{ $p->author ?? '—' }}</td>
+            <td>{{ number_format($p->price) }} đ</td>
+            <td>{{ $p->quantity }}</td>
+            <td>
+                <a href="{{ route('products.edit', $p->id) }}" class="btn btn-sm btn-warning">Sửa</a>
+                <form action="{{ route('products.destroy', $p->id) }}" method="POST" style="display:inline-block">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xoá?')">Xoá</button>
+                </form>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="8" class="text-center text-muted">Không tìm thấy sản phẩm nào</td>
+        </tr>
+    @endforelse
+</tbody>
         </table>
 
         {{-- Pagination --}}
@@ -119,12 +127,9 @@ function loadData(page = 1) {
     });
 }
 
- $('#filter-form select, #filter-form input').on('change', function() {
-        loadData(1);
-    });
-
-// Khi click lọc
-$('#filter-btn').click(()=> loadData(1));
+$('#filter-form select, #filter-form input').on('change', function() {
+    loadData(1);
+});
 
 // Reset
 $('#reset-filter').click(()=>{
@@ -140,14 +145,5 @@ $(document).on('click', '.sort', function(e){
     else { sort = newSort; order = 'asc'; }
     loadData(1);
 });
-
-// $(document).on('click', '#pagination-links a', function(e){
-//     e.preventDefault();
-    
-//     loadData(page);
-// });
 </script>
-
-
-
 @endsection

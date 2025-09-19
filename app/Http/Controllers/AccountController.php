@@ -87,6 +87,7 @@ class AccountController extends Controller
      */
     public function show(Account $account)
     {
+        
         return view('admin.accounts.show', compact('account'));
     }
     public function showBlade(){
@@ -210,15 +211,25 @@ class AccountController extends Controller
     public function destroy(Account $account)
     {
         // Xóa ảnh khi xóa account
-        if ($account->image && Storage::disk('public')->exists($account->image)) {
-            Storage::disk('public')->delete($account->image);
-        }
-        if($account->is_active!=0){
-            return redirect()->route('accounts.index')->with('error', 'Tài khoản không thể xóa');
+        // if ($account->image && Storage::disk('public')->exists($account->image)) {
+        //     Storage::disk('public')->delete($account->image);
+        // }
+        $user = auth()->user();
+
+        // Nếu là Admin → xóa tất cả
+        if ($user->role === 0) {
+            $account->delete();
+            return redirect()->route('accounts.index')->with('success', 'Xóa tài khoản thành công');
         }
 
-        $account->delete();
-        return redirect()->route('accounts.index')->with('success', 'Xóa tài khoản thành công');
+        // Nếu là CTV → chỉ xóa tài khoản role = 2
+        if ($user->role === 1 && $account->role === 2) {
+            $account->delete();
+            return redirect()->route('accounts.index')->with('success', 'Xóa tài khoản thành công');
+        }
+
+        // Các trường hợp còn lại → không được phép xóa
+        return redirect()->route('accounts.index')->with('error', 'Bạn không có quyền xóa tài khoản này');
     }
     public function deactivate(Request $request)
     {

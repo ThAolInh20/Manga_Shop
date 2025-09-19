@@ -1,76 +1,89 @@
 <template>
-  <div class="profile-container container py-4">
+  <div class="profile-container container">
     <h3 class="mb-4">Hồ sơ cá nhân</h3>
 
+    <!-- Thông báo -->
     <div v-if="loading" class="alert alert-info">Đang tải...</div>
-    <div v-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-else-if="success" class="alert alert-success">{{ success }}</div>
 
-    <form v-if="account" @submit.prevent="updateProfile">
-      <!-- Email (readonly) -->
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" :value="account.email" class="form-control" readonly>
+    <div class="row">
+      <!-- Cột trái: Form -->
+      <div class="col-md-6">
+        <form v-if="account" @submit.prevent="updateProfile">
+          <!-- Email -->
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" :value="account.email" class="form-control" readonly>
+          </div>
+
+          <!-- Tên -->
+          <div class="mb-3">
+            <label class="form-label">Tên</label>
+            <input type="text" v-model="form.name" class="form-control" required>
+          </div>
+
+          <!-- SĐT -->
+          <div class="mb-3">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" v-model="form.phone" class="form-control">
+          </div>
+
+          <!-- Địa chỉ -->
+          <div class="mb-3">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" v-model="form.address" class="form-control">
+          </div>
+
+          <!-- Giới tính -->
+          <div class="mb-3">
+            <label class="form-label">Giới tính</label>
+            <select v-model="form.gender" class="form-select">
+              <option value="">Chọn giới tính</option>
+              <option value="male">Nam</option>
+              <option value="female">Nữ</option>
+              <option value="other">Khác</option>
+            </select>
+          </div>
+
+          <!-- Ngày sinh -->
+          <div class="mb-3">
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" v-model="form.birth" class="form-control">
+          </div>
+
+          <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+        </form>
+
+        <!-- Trạng thái tài khoản -->
+        <div v-if="account" class="mt-4">
+          <span v-if="!account.is_active" class="text-danger d-block mb-2">
+            ⚠️ Tài khoản đang chờ xóa
+          </span>
+          <button
+            :class="['btn', account.is_active ? 'btn-danger' : 'btn-success']"
+            @click="toggleAccount"
+          >
+            {{ account.is_active ? 'Hủy tài khoản' : 'Khôi phục tài khoản' }}
+          </button>
+        </div>
       </div>
 
-      <!-- Tên -->
-      <div class="mb-3">
-        <label class="form-label">Tên</label>
-        <input type="text" v-model="form.name" class="form-control" required>
+      <!-- Cột phải: Địa chỉ giao hàng -->
+      <div class="col-md-6">
+        <div class="card shadow-sm p-3">
+          <h5 class="mb-3">🏠 Địa chỉ giao hàng</h5>
+          <shipping-address
+            v-if="account"
+            :account_id="account.id"
+            @address-selected="handleSelectedAddress"
+          />
+        </div>
       </div>
-
-      <!-- Số điện thoại -->
-      <div class="mb-3">
-        <label class="form-label">Số điện thoại</label>
-        <input type="text" v-model="form.phone" class="form-control">
-      </div>
-
-      <!-- Địa chỉ -->
-      <div class="mb-3">
-        <label class="form-label">Địa chỉ</label>
-        <input type="text" v-model="form.address" class="form-control">
-      </div>
-
-      <!-- Giới tính -->
-      <div class="mb-3">
-        <label class="form-label">Giới tính</label>
-        <select v-model="form.gender" class="form-select">
-          <option value="">Chọn giới tính</option>
-          <option value="male">Nam</option>
-          <option value="female">Nữ</option>
-          <option value="other">Khác</option>
-        </select>
-      </div>
-
-      <!-- Ngày sinh -->
-      <div class="mb-3">
-        <label class="form-label">Ngày sinh</label>
-        <input type="date" v-model="form.birth" class="form-control">
-      </div>
-
-      <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
-    </form>
-    <span v-if="account && !account.is_active" class="text-danger">Tài khoản đang chờ xóa</span>
-    <div class="mt-4">
-  <button 
-    v-if="account && account.is_active"
-    class="btn btn-danger"
-    @click="deactivateAccount"
-  >
-    Hủy tài khoản
-  </button>
-
-  <button
-    v-else
-    class="btn btn-success"
-    @click="reactivateAccount"
-  >
-    Khôi phục tài khoản
-  </button>
-</div>
-
-    <div v-if="success" class="alert alert-success mt-3">{{ success }}</div>
+    </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from "vue"
@@ -156,7 +169,7 @@ onMounted(() => {
 
 <style scoped>
 .profile-container {
-  max-width: 600px;
+  max-width: 1200px;
   margin: auto;
 }
 </style>

@@ -11,6 +11,9 @@ use App\Models\ProductSupplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
+
+// use App\Models\Category;
 
 
 class ProductController extends Controller
@@ -33,6 +36,12 @@ class ProductController extends Controller
             [$min, $max] = explode('-', $request->price_range);
             $query->whereBetween('price', [(int)$min, (int)$max]);
         }
+        if ($request->filled('quantity_max')) {
+            $query->where('quantity', '<=', $request->quantity_max);
+        }
+        if ($request->category_id) {
+            $query->where('category_id', $request->category_id);
+        }
 
         // Lọc theo khoảng số lượng
         if ($request->filled('quantity_range')) {
@@ -48,14 +57,15 @@ class ProductController extends Controller
         // Phân trang
         $perPage = $request->get('per_page', 10);
         $products = $query->with('category')->paginate($perPage)->appends($request->all());
-
+        $categories =Category::all();
         // Nếu là AJAX trả về table
         if ($request->ajax()) {
-            return view('admin.products.index', compact('products'))->render();
+            return view('admin.products.index', compact('products','categories'))->render();
         }
+        
 
         // Lần đầu load view
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products','categories'));
     }
             public function import($productId)
         {
@@ -280,7 +290,8 @@ class ProductController extends Controller
     // Update sản phẩm
     $product->update($validated);
 
-    return redirect()->route('products.index')->with('success', 'Cập nhật sản phẩm thành công');
+    return redirect()->back()->with('success', 'Cập nhật sản phẩm thành công');
+
 }
 
 
@@ -396,6 +407,44 @@ class ProductController extends Controller
 
         return view('user.products.list', [
             'search' => $search, // truyền xuống Blade
+        ]);
+    }
+    public function related(Request $request, $id)
+    {
+        // Lấy cột từ request
+        $column = $request->input('column');
+
+        // Kiểm tra cột có tồn tại trong bảng
+        if (!in_array($column, (new Product)->getFillable())) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cột không hợp lệ'
+            ], 400);
+        }
+
+        // Lấy sản phẩm gốc
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không tìm thấy sản phẩm'
+            ], 404);
+        }
+
+        // Lấy giá trị cột
+        $value = $product->$column;
+        Log::info($value);
+
+        // Lấy danh sách sản phẩm có cùng giá trị (trừ chính nó)
+        $related = Product::where($column, $value)
+            ->where('id', '!=', $id)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'column' => $column,
+            'value' => $value,
+            'related' => $related
         ]);
     }
 

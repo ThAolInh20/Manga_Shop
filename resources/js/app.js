@@ -19,8 +19,12 @@ import PayOSPayment from './components/PayOSPayment.vue';
 import ListVoucher from './components/ListVoucher.vue';
 import Profi from './components/Profi.vue';
 import OrderChart from './components/chart/OrderChart.vue';
+import NotificationDropdown from './components/NotificationDropdown.vue';
+import RelatedProducts from './components/RelatedProducts.vue';
 
 const app = createApp({});
+
+
 
 // const pinia = createPinia()
 
@@ -41,7 +45,9 @@ app.component('MomoPayment',MomoPayment);
 app.component('PayOSPayment',PayOSPayment);
 app.component('ListVoucher',ListVoucher);
 app.component('Profi',Profi)
-app.component('OrderChart',OrderChart)
+app.component('OrderChart',OrderChart);
+app.component('NotificationDropdown',NotificationDropdown)
+app.component('RelatedProducts',RelatedProducts)
 
 
 // Mount Vue vào #app (trong Blade)

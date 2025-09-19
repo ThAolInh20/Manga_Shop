@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Scopes\ActiveScope;
+use Illuminate\Support\Facades\DB;
+
 class Product extends Model
 {
     use HasFactory;
@@ -33,6 +35,20 @@ class Product extends Model
         'size',
         'quantity_buy',
     ];
+
+     public static function countLowStock($threshold = 50)
+    {
+        return static::where('quantity', '<=', $threshold)->count();
+    }
+    public static function topCategoryByOrders()
+    {
+        return static::select('category_id', DB::raw('COUNT(product_orders.product_id) as total'))
+            ->join('product_orders', 'products.id', '=', 'product_orders.product_id')
+            ->groupBy('category_id')
+            ->orderByDesc('total')
+            ->with('category:id,name') // lấy tên danh mục
+            ->first();
+    }
     protected static function booted()
     {
         static::saving(function ($product) {

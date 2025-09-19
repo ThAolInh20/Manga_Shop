@@ -110,15 +110,16 @@
     </div>
 
     <!-- Mô tả -->
-    @if($product->detail)
+    <!-- @if($product->detail) -->
     <div class="card p-3 shadow-sm">
       <h5 class="fw-bold mb-3">Mô tả sản phẩm</h5>
+      <h6>{{ $product->name }}</h6>
       <p class="mb-0">{{ $product->detail }}</p>
     </div>
-    @endif
+    <!-- @endif -->
   </div>
 </div>
-
+<related-products :product-id="{{ $product->id }}" column="author"></related-products>
 <suggest-products></suggest-products>
 
 <script>

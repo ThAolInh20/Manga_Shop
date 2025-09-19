@@ -33,6 +33,18 @@ class Account extends Authenticatable
         'remember_token',
         
     ];
+
+     // Đếm account yêu cầu xóa (is_active = 0)
+    public static function countInactive()
+    {
+        return static::where('is_active', 0)->count();
+    }
+
+    // Đếm account tạo trong 1 tuần gần nhất
+    public static function countNewThisWeek()
+    {
+        return static::where('created_at', '>=', now()->subWeek())->count();
+    }
     protected static function booted()
         {
             static::saving(function ($account) {
@@ -41,6 +53,11 @@ class Account extends Authenticatable
                 }
             });
         }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
     
     public function orders()
     {

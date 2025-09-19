@@ -7,10 +7,14 @@
     <div class="card-body">
       <!-- Nếu đã có địa chỉ -->
       <div v-if="addresses.length > 0" class="mb-3">
-        <label class="form-label">Chọn địa chỉ có sẵn</label>
+
+        <label v-if="this.orderId" class="form-label">Chọn địa chỉ có sẵn</label>
+        <label v-else class="form-label">Địa chỉ của bạn</label>
+
+
         <div v-for="addr in addresses" :key="addr.id" class="form-check d-flex justify-content-between align-items-center">
           <div>
-            <input 
+            <input v-if="this.orderId"
               class="form-check-input me-2" 
               type="radio" 
               name="selectedAddress" 
