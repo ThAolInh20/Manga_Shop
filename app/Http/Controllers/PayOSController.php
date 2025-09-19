@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\Order;
 
 class PayOSController extends Controller
 {
@@ -19,6 +20,22 @@ class PayOSController extends Controller
     'api_key' => config('services.payos.api_key'),
     'checksum' => config('services.payos.checksum'),
 ]);
+    $order = Order::findOrFail($data['order_id']);
+
+ if ($order->order_status != 0) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Đơn hàng đã được xử lý hoặc không hợp lệ.'
+        ], 400);
+    }
+
+    // Kiểm tra xem đã có địa chỉ giao hàng chưa
+    if (!$order->shipping_id) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Vui lòng chọn địa chỉ giao hàng trước khi thanh toán.'
+        ], 400);
+    }
 
     $endpoint = "https://api-merchant.payos.vn/v2/payment-requests";
     $clientId = config('services.payos.client_id');

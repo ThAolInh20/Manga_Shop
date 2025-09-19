@@ -4,25 +4,25 @@
 
     <!-- Bộ lọc trạng thái -->
     <div class="mb-4 text-center">
-      <div class="btn-group flex-wrap">
-        <button 
-          class="btn btn-outline-primary"
-          :class="{ active: filterStatus === null }"
-          @click="filterStatus = null; fetchOrders()"
-        >
-          Tất cả
-        </button>
-        <button 
-          v-for="s in statuses" 
-          :key="s.value" 
-          class="btn btn-outline-primary"
-          :class="{ active: filterStatus === s.value }"
-          @click="filterStatus = s.value; fetchOrders()"
-        >
-          {{ s.text }}
-        </button>
-      </div>
-    </div>
+  <div class="btn-group flex-wrap">
+    <button 
+      class="btn btn-outline-primary"
+      :class="{ active: filterStatus === null }"
+      @click="filterStatus = null; fetchOrders()"
+    >
+      Tất cả ({{ orders.length }})
+    </button>
+    <button 
+      v-for="s in statuses" 
+      :key="s.value" 
+      class="btn btn-outline-primary"
+      :class="{ active: filterStatus === s.value }"
+      @click="filterStatus = s.value; fetchOrders()"
+    >
+      {{ s.text }} ({{ countByStatus(s.value) }})
+    </button>
+  </div>
+</div>
 
     <!-- Loading -->
     <div v-if="loading" class="alert alert-info text-center">
@@ -278,6 +278,9 @@ const confirmCancelOrder = async () => {
     console.error(err)
     alert("❌ Lỗi khi hủy đơn!")
   }
+}
+const countByStatus = (status) => {
+  return orders.value.filter(o => o.order_status === status).length
 }
 onMounted(() => {
   fetchOrders()
