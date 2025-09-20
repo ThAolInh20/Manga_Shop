@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ProductsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 // use App\Models\Category;
 
@@ -446,6 +448,15 @@ class ProductController extends Controller
             'value' => $value,
             'related' => $related
         ]);
+    }
+    public function export($categoryId = null)
+    {
+        $cate = Category::findOrFail($categoryId);
+        if($cate){
+        return Excel::download(new ProductsExport($categoryId), 'products_of_'.$cate->name.'.xlsx');
+
+        }
+        return redirect()->back()->with('error','Không tìm thấy danh mục');
     }
 
 }

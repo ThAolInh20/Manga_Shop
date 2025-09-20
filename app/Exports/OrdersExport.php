@@ -22,6 +22,8 @@ class OrdersExport implements FromCollection, WithHeadings
 
         // Lọc theo khoảng thời gian
         switch($this->filter) {
+            case 'all':
+                break;
             case 'week':
                 $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
                 break;
@@ -63,6 +65,7 @@ class OrdersExport implements FromCollection, WithHeadings
                 'Tên người nhận' => $order->shipping->name_recipient ?? '-',
                 'SĐT người nhận' => $order->shipping->phone_recipient ?? '-',
                 'Địa chỉ người nhận' => $order->shipping->shipping_address ?? '-',
+                'Ngày đặt' => $order->created_at??'-'
             ];
         });
     }
@@ -80,6 +83,7 @@ class OrdersExport implements FromCollection, WithHeadings
             'Tên người nhận',
             'SĐT người nhận',
             'Địa chỉ người nhận',
+            'Ngày đặt'
         ];
     }
 }
