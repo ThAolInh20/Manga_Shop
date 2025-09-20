@@ -15,10 +15,11 @@
     @endif
     
 <div class="dropdown d-inline">
-        <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             Xuất báo cáo
         </button>
         <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'all') }}">Tất cả</a></li>
             <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'week') }}">Tuần này</a></li>
             <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'lastWeek') }}">Tuần trước</a></li>
             <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'month') }}">Tháng này</a></li>

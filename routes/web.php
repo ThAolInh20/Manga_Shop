@@ -93,6 +93,8 @@ Route::middleware(['role:0,1'])->group(function () {
         Route::get('/orders/export/{filter?}', function($filter = null){
             return Excel::download(new OrdersExport($filter), 'orders-'.$filter.'.xlsx');
         })->name('admin.orders.export');
+        Route::get('/products/export/{category_id?}', [ProductController::class, 'export'])
+            ->name('products.export');
     });
     
     

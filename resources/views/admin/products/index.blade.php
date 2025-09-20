@@ -9,10 +9,26 @@
    @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
-
+<div class="mb-3 d-flex gap-2">
     <div class="mb-3">
         <a href="{{ route('products.create') }}" class="btn btn-primary">+ Thêm sản phẩm</a>
     </div>
+    <div class="dropdown d-inline">
+        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Xuất danh sách
+        </button>
+            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                <li><a class="dropdown-item" href="{{ route('products.export') }}">Tất cả</a></li>
+                @foreach($categories as $c)
+                    <li>
+                        <a class="dropdown-item" href="{{ route('products.export', $c->id) }}">
+                            {{ $c->name }}
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+    </div>
+</div>
 
     {{-- Filters --}}
     <form id="filter-form" class="row g-3 mb-3">
