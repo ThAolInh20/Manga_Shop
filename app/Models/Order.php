@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderStatusChanged;
 
 
 
@@ -98,6 +100,10 @@ public static function topAccountByRevenue()
                         'content' => $messageText,
                         'is_important' => $order->order_status == 5, // nếu hủy thì đánh dấu quan trọng
                     ]);
+
+                    Mail::to($order->account->email)->send(
+                        new OrderStatusChanged($order, $messageText)
+                    );
                     Log::info("Notification đã tạo cho Order ID: {$order->id}", [
                         // 'notification_id' => $notification->id,
                         'account_id' => $order->account->id,

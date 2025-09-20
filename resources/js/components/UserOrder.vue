@@ -3,26 +3,27 @@
     <h3 class="mb-4 text-center fw-bold">Đơn hàng của bạn</h3>
 
     <!-- Bộ lọc trạng thái -->
-    <div class="mb-4 text-center">
-  <div class="btn-group flex-wrap">
-    <button 
-      class="btn btn-outline-primary"
-      :class="{ active: filterStatus === null }"
-      @click="filterStatus = null; fetchOrders()"
-    >
-      Tất cả ({{ orders.length }})
-    </button>
-    <button 
-      v-for="s in statuses" 
-      :key="s.value" 
-      class="btn btn-outline-primary"
-      :class="{ active: filterStatus === s.value }"
-      @click="filterStatus = s.value; fetchOrders()"
-    >
-      {{ s.text }} ({{ countByStatus(s.value) }})
-    </button>
-  </div>
-</div>
+         <div class="mb-4 text-center">
+            <div class="btn-group flex-wrap">
+   <button 
+  class="btn btn-outline-primary"
+  :class="{ active: filterStatus === null }"
+  @click="filterStatus = null; fetchOrders()"
+>
+  Tất cả ({{ Object.values(orderCounts).reduce((a, b) => a + b, 0) }})
+</button>
+
+<button 
+  v-for="s in statuses" 
+  :key="s.value" 
+  class="btn btn-outline-primary"
+  :class="{ active: filterStatus === s.value }"
+  @click="filterStatus = s.value; fetchOrders()"
+>
+  {{ s.text }} ({{ orderCounts[s.value] || 0 }})
+</button>
+         </div>
+         </div>
 
     <!-- Loading -->
     <div v-if="loading" class="alert alert-info text-center">
@@ -160,6 +161,16 @@ const filterStatus = ref(null)
 const cancelReason = ref("")
 const cancelOther = ref("")
 const orderIdToCancel = ref(null)
+const orderCounts = ref({}) // lưu số lượng theo từng trạng thái
+
+const fetchStats = async () => {
+  try {
+    const res = await axios.get("/api/orders/stats")
+    orderCounts.value = res.data.counts
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 const statuses = [
   {value: 0, text:"Chờ thanh toán"},
@@ -284,6 +295,7 @@ const countByStatus = (status) => {
 }
 onMounted(() => {
   fetchOrders()
+  fetchStats()
 })
 </script>
 

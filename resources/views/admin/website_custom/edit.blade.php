@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
-@section('title', 'Cấu hình Website Custom')
+@section('title', 'Cấu hình Website')
 
 @section('content')
 <div class="container mt-4">
-    <h2>Cấu hình Website Custom</h2>
+    <h2>Cấu hình Website</h2>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

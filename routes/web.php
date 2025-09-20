@@ -138,6 +138,10 @@ Route::prefix('api')->group(function () {
     Route::post('/order/momo-dev', [OrderController::class, 'momoDevPay']);
     Route::post('/order/momo-dev/confirm', [OrderController::class, 'momoDevConfirm']);
     Route::post('/order/{order}/apply-voucher', [OrderController::class, 'applyVoucher'])->name('order.apply-voucher');
+   
+   
+    Route::get('/orders/stats', [OrderController::class, 'countStatus']);
+
 
     Route::post('/order/payos/create', [PayOSController::class, 'create']);
     Route::post('/order/payos/webhook', [PayOSController::class, 'webhook']);
