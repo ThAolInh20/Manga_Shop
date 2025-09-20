@@ -18,6 +18,7 @@ class WebsiteCustom extends Model
         'primary_color',
         'background_color',
         'background',
-        'font_family'
+        'font_family',
+        'logo'
     ];
 }
