@@ -851,5 +851,26 @@ public function showOrder($order_id)
     public function showChart(){
         return view('admin.orders.chart');
     }
+    public function countStatus() {
+        $userId = Auth::user()->id;
+
+        // Nhóm theo trạng thái và đếm số lượng
+        $stats = Order::where('account_id', $userId)
+            ->selectRaw('order_status, COUNT(*) as total')
+            ->groupBy('order_status')
+            ->pluck('total', 'order_status'); // trả về mảng key = status, value = total
+
+        // Đảm bảo có đủ tất cả trạng thái (0 -> 5), nếu thiếu thì set = 0
+        $statuses = [0, 1, 2, 3, 4, 5];
+        $result = [];
+        foreach ($statuses as $status) {
+            $result[$status] = $stats[$status] ?? 0;
+        }
+
+        return response()->json([
+            'user_id' => $userId,
+            'counts'  => $result
+        ]);
+    }
    
 }

@@ -60,9 +60,9 @@
         </div>
         <div class="col-md-2">
             <select id="per-page" class="form-select">
-                <option value="10" {{ request()->get('per_page') == 10 ? 'selected' : '' }}>10</option>
-                <option value="20" {{ request()->get('per_page') == 20 ? 'selected' : '' }}>20</option>
-                <option value="30" {{ request()->get('per_page') == 30 ? 'selected' : '' }}>30</option>
+                <option value="10" {{ request()->get('per_page') == 10 ? 'selected' : '' }}>10/trang</option>
+                <option value="20" {{ request()->get('per_page') == 20 ? 'selected' : '' }}>20/trang</option>
+                <option value="30" {{ request()->get('per_page') == 30 ? 'selected' : '' }}>30/trangư</option>
             </select>
         </div>
         <div class="col-md-2">

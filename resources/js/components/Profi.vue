@@ -161,7 +161,13 @@ const reactivateAccount = async () => {
     error.value = err.response?.data?.message || err.message
   }
 }
-
+const toggleAccount = () => {
+  if (account.value.is_active) {
+    deactivateAccount()
+  } else {
+    reactivateAccount()
+  }
+}
 onMounted(() => {
   fetchProfile()
 })
