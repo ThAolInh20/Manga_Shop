@@ -25,7 +25,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $query = Order::with('account', 'products');
-
+        $perPage = $request->get('per_page', 10);
         // --- Bộ lọc ---
         if ($request->filled('customer_name')) {
             $query->whereHas('account', function ($q) use ($request) {
@@ -88,7 +88,7 @@ class OrderController extends Controller
             $query->orderBy($sortField, $sortOrder);
         }
 
-        $orders = $query->with('updatedBy')->paginate(20);
+        $orders = $query->with('updatedBy')->paginate($perPage)->withQueryString();
 
         // Nếu AJAX thì chỉ trả bảng (render partial view)
         if ($request->ajax()) {

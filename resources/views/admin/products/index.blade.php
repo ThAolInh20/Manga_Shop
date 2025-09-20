@@ -20,7 +20,7 @@
             <input type="text" name="search" class="form-control" placeholder="Tên hoặc tác giả">
         </div>
         {{-- lọc theo category --}}
-        <div class="col-md-3">
+        <div class="col-md-2">
             <select name="category_id" class="form-select">
                 <option value="">-- Chọn danh mục --</option>
                 @foreach($categories as $c)
@@ -30,7 +30,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <select name="price_range" class="form-select">
                 <option value="">-- Khoảng giá --</option>
                 <option value="0-100000" {{ request('price_range')=='0-100000' ? 'selected' : '' }}>0 - 100k</option>
@@ -41,7 +41,7 @@
         </div>
 
         {{-- thay vì chọn khoảng số lượng -> nhập số lượng max --}}
-        <div class="col-md-3">
+        <div class="col-md-2">
             <input type="number" name="quantity_max" class="form-control" 
                    placeholder="Số lượng nhỏ hơn hoặc bằng..."
                    value="{{ request('quantity_max') }}">

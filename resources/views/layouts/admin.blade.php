@@ -20,7 +20,7 @@
   <!-- Vendors CSS -->
   <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
-  @include('admin.website_custom.custom_theme')
+  <!-- @include('admin.website_custom.custom_theme') -->
 
   <!-- Helpers -->
   <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>

@@ -36,7 +36,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($orders as $order)
+         @forelse($orders as $order)
         <tr data-id="{{ $order->id }}" data-status="{{ $order->order_status }}">
             <td>{{ $order->id }}</td>
             <td><a href="{{ route('accounts.show', $order->account ??0 ) }}">{{  $order->account->name ?? '' }}</a></td>
@@ -47,7 +47,11 @@
             </td>
             <td class="action-cell"></td>
         </tr>
-        @endforeach
+        @empty
+            <tr>
+                <td colspan="6" class="text-center text-muted">Không có đơn hàng phù hợp</td>
+            </tr>
+        @endforelse
     </tbody>
 </table>
 

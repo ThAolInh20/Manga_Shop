@@ -23,6 +23,8 @@ use App\Http\Controllers\PayOSController;
 use App\Http\Controllers\ChartController;
 use App\Services\GHNService;
 use App\Http\Controllers\NotificationController;
+use App\Exports\OrdersExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 // User login
@@ -87,6 +89,10 @@ Route::middleware(['role:0,1'])->group(function () {
 
         Route::get('/website-custom/edit', [WebsiteCustomController::class, 'edit'])->name('website_custom.edit')->middleware(['role:0']);;
         Route::post('/website-custom/update', [WebsiteCustomController::class, 'update'])->name('website_custom.update')->middleware(['role:0']);;
+    
+        Route::get('/orders/export/{filter?}', function($filter = null){
+            return Excel::download(new OrdersExport($filter), 'orders-'.$filter.'.xlsx');
+        })->name('admin.orders.export');
     });
     
     

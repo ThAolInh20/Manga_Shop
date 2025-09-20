@@ -4,7 +4,6 @@
 
 @section('content')
 
-@include('admin.orders.chart')
 
 <div class="container">
     <h2>Danh sách đơn hàng</h2>
@@ -14,10 +13,23 @@
    @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
-
+    
+<div class="dropdown d-inline">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Xuất báo cáo
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'week') }}">Tuần này</a></li>
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'lastWeek') }}">Tuần trước</a></li>
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'month') }}">Tháng này</a></li>
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'lastMonth') }}">Tháng trước</a></li>
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'year') }}">Năm nay</a></li>
+            <li><a class="dropdown-item" href="{{ route('admin.orders.export', 'lastYear') }}">Năm trước</a></li>
+        </ul>
+    </div>
     {{-- Bộ lọc --}}
     <form id="filter-form" class="row g-2 mb-3">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <input type="text" name="customer_name" class="form-control" placeholder="Tên khách hàng">
         </div>
         <div class="col-md-2">
@@ -42,16 +54,27 @@
                 <option value="lastYear">Năm trước</option>
             </select>
         </div>
-        <div class="col-md-3">
-        <input type="date" name="order_date" class="form-control">
-    </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-primary">Lọc</button>
+        <div class="col-md-2">
+            <input type="date" name="order_date" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <select id="per-page" class="form-select">
+                <option value="10" {{ request()->get('per_page') == 10 ? 'selected' : '' }}>10</option>
+                <option value="20" {{ request()->get('per_page') == 20 ? 'selected' : '' }}>20</option>
+                <option value="30" {{ request()->get('per_page') == 30 ? 'selected' : '' }}>30</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <!-- <button type="submit" class="btn btn-primary">Lọc</button> -->
             <button type="reset" class="btn btn-secondary" id="reset-filter">Reset</button>
+            
         </div>
     </form>
 
     <div id="orders-wrapper">
+        <div class="mb-3">
+    
+</div>
         @include('admin.orders.table', ['orders' => $orders])
     </div>
 </div>
@@ -73,12 +96,24 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(html => { wrapper.innerHTML = html; initActions(); })
             .catch(err => console.error(err));
     }
-
-    // Lọc
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        fetchOrders(new URLSearchParams(new FormData(form)).toString());
+    document.getElementById('per-page').addEventListener('change', function() {
+        let params = new URLSearchParams(new FormData(form));
+        params.set('per_page', this.value);
+        fetchOrders(params.toString());
     });
+
+    form.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('change', function() {
+            let params = new URLSearchParams(new FormData(form));
+            fetchOrders(params.toString());
+        });
+    });
+    // Lọc
+    // form.addEventListener("submit", function (e) {
+    //     e.preventDefault();
+    //     fetchOrders(new URLSearchParams(new FormData(form)).toString());
+    // });
+    
 
     // Reset filter
     document.getElementById("reset-filter").addEventListener("click", function () {

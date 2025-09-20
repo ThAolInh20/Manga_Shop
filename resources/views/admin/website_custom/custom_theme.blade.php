@@ -16,6 +16,8 @@ body {
     color: var(--secondary-color);
 }
 
+
+
 a {
     
 }
@@ -29,13 +31,6 @@ a:hover {
 
 }
 
-/* Nếu có background image */
-@if($config->background)
-body {
-    background-image: url('{{ $config->background }}');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-@endif
+
 </style>
+

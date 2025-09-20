@@ -1,11 +1,11 @@
+
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
   <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
     
     <!-- Logo -->
     
 <a href="{{ url('/') }}" class="navbar-brand d-flex align-items-center fw-bold me-4">
-    <img src="{{ asset('storage/logo/logo.png') }}" alt="MangaShop" style="height: 60px; object-fit: contain; margin-right: 10px;">
-  
+    <img class="logo" src="{{ asset('storage/logo/logo.png') }}" alt="MangaShop" style="height: 60px; object-fit: contain; margin-right: 10px;">
 </a>
 
     <!-- Search -->
@@ -79,3 +79,5 @@
 </ul>
   </div>
 </nav>
+
+
