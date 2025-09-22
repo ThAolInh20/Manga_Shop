@@ -36,7 +36,7 @@ class ProductsExport implements FromCollection, WithHeadings
             'price_sale',
             'detail',
             'categ',
-            'status',
+            
             'is_active',
             'language',
             'weight',
@@ -63,7 +63,7 @@ class ProductsExport implements FromCollection, WithHeadings
             'Chi tiết',
             'Categ',
             'Trạng thái',
-            'Kích hoạt',
+            
             'Ngôn ngữ',
             'Trọng lượng',
             'Kích thước',

@@ -32,13 +32,13 @@
           <!-- Địa chỉ -->
           <div class="mb-3">
             <label class="form-label">Địa chỉ</label>
-            <input type="text" v-model="form.address" class="form-control">
+            <input type="text" name="address" v-model="form.address" class="form-control">
           </div>
 
           <!-- Giới tính -->
           <div class="mb-3">
-            <label class="form-label">Giới tính</label>
-            <select v-model="form.gender" class="form-select">
+            <label class="form-label" >Giới tính</label>
+            <select name="gender" v-model="form.gender" class="form-select">
               <option value="">Chọn giới tính</option>
               <option value="male">Nam</option>
               <option value="female">Nữ</option>
@@ -49,7 +49,7 @@
           <!-- Ngày sinh -->
           <div class="mb-3">
             <label class="form-label">Ngày sinh</label>
-            <input type="date" v-model="form.birth" class="form-control">
+            <input type="date" name="date" v-model="form.birth" class="form-control">
           </div>
 
           <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
@@ -64,7 +64,7 @@
             :class="['btn', account.is_active ? 'btn-danger' : 'btn-success']"
             @click="toggleAccount"
           >
-            {{ account.is_active ? 'Hủy tài khoản' : 'Khôi phục tài khoản' }}
+            {{ account.is_active ? 'Yêu cầu hủy tài khoản' : 'Khôi phục tài khoản' }}
           </button>
         </div>
       </div>
@@ -131,6 +131,9 @@ const updateProfile = async () => {
       gender: form.value.gender,
       birth: form.value.birth
     }
+    console.log('account',account.value.id)
+        console.log('account',payload)
+
     await axios.put(`/api/user/profi/${account.value.id}`, payload)
     success.value = "Cập nhật thông tin thành công!"
     fetchProfile()

@@ -128,6 +128,7 @@ class AccountController extends Controller
         }
         return view('admin.accounts.edit', compact('account'));
     }
+    
 
     /**
      * Cập nhật tài khoản.
@@ -174,7 +175,7 @@ class AccountController extends Controller
 
         return redirect()->route('accounts.index')->with('success', $mm);
     }
-     public function update2(AccountRequest $request, $id)
+     public function update2(Request $request, $id)
     {
         $user = Auth::user();
 
@@ -182,7 +183,17 @@ class AccountController extends Controller
             return response()->json(['message' => 'Không có quyền'], 403);
         }
         try{
-        $data = $request->validated();
+        $data = $request->validate([
+            'name'      => 'nullable|string|max:100',
+            // 'email'     => 'required|email|unique:accounts,email,' . $account->id,
+            // 'role'      => 'required|integer',
+            // 'image'     => 'nullable|image|max:4076',
+            'address'   => 'nullable|string|max:255',
+            'phone'     => 'nullable|string|max:20',
+            'birth'     => 'nullable|date',
+            'gender'    => 'nullable'
+
+        ]);
 
                 $account = Account::find($id);
                 if (!$account) {

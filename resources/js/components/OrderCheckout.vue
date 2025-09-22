@@ -91,7 +91,7 @@
     <div class="ms-3 d-flex align-items-center flex-nowrap">
       <select v-model="paymentMethod" class="form-select me-2" :disabled="!selectedShipping">
         <option value="cod">Thanh toán khi nhận hàng</option>
-        <option value="bank">Chuyển khoản ngân hàng</option>
+        <option value="bank">Thanh toán online</option>
       </select>
 
       <div v-if="paymentMethod === 'bank' && order && selectedShipping">

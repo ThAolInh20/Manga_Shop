@@ -6,8 +6,12 @@
 <div class="container mt-4">
     <h2>Danh sách Voucher</h2>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+    @if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
     <!-- Nút mở modal thêm -->
@@ -74,11 +78,11 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label>Mã voucher</label>
-                    <input type="text" name="code" class="form-control" value="{{ $v->code }}">
+                    <input type="text" name="code" class="form-control" value="{{ $v->code }}" required>
                 </div>
                 <div class="mb-3">
                     <label>Sale (%)</label>
-                    <input type="number" name="sale" class="form-control" step="0.01" value="{{ $v->sale }}">
+                    <input type="number" name="sale" class="form-control" step="0.01" value="{{ $v->sale }}" required>
                 </div>
                 <div class="mb-3">
                     <label>Giảm tối đa</label>
@@ -121,27 +125,47 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label>Mã voucher</label>
-                    <input type="text" name="code" class="form-control">
+                    <input type="text" name="code" class="form-control" value="{{ old('code') }}" required>
+                    @error('code')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
                 </div>
+
                 <div class="mb-3">
                     <label>Sale (%)</label>
-                    <input type="number" name="sale" class="form-control" step="0.01">
+                    <input type="number" name="sale" class="form-control" step="0.01" value="{{ old('sale') }}" required>
+                    @error('sale')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
                 </div>
+
                 <div class="mb-3">
                     <label>Giảm tối đa</label>
-                    <input type="number" name="max_discount" class="form-control" step="0.01">
+                    <input type="number" name="max_discount" class="form-control" step="0.01" value="{{ old('max_discount') }}">
+                    @error('max_discount')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
                 </div>
+
                 <div class="mb-3">
                     <label>Ngày hết hạn</label>
-                    <input type="date" name="date_end" class="form-control">
+                    <input type="date" name="date_end" class="form-control" value="{{ old('date_end') }}">
+                    @error('date_end')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
                 </div>
+
                 <div class="mb-3">
                     <label>Kích hoạt</label>
                     <select name="is_active" class="form-control">
-                        <option value="1">Có</option>
-                        <option value="0">Không</option>
+                        <option value="1" {{ old('is_active') == 1 ? 'selected' : '' }}>Có</option>
+                        <option value="0" {{ old('is_active') == 0 ? 'selected' : '' }}>Không</option>
                     </select>
+                    @error('is_active')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
                 </div>
+
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success">Lưu</button>

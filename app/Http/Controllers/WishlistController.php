@@ -66,7 +66,7 @@ class WishlistController extends Controller
         // }
 
        
-        $suggested = Product::orderBy('quantity_buy', 'desc')->take(20)->get();
+        $suggested = Product::orderBy('quantity_buy', 'desc')->take(12)->get();
         
 
         // Thêm flag in_wishlist

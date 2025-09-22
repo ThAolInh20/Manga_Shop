@@ -301,7 +301,7 @@ const updateQuantity = async (item) => {
 }
 
 const removeFromCart = async (productId) => {
-  if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return
+  if (!confirm("Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?")) return
   try {
     await axios.delete(`/api/cart/${productId}`)
     cart.value = cart.value.filter((i) => i.product_id !== productId)
