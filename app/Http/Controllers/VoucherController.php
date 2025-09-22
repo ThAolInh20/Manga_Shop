@@ -39,12 +39,30 @@ class VoucherController extends Controller
      */
     public function store(Request $request)
     {
+
           $request->validate([
             'code' => 'required|unique:vouchers,code',
             'sale' => 'required|numeric|min:0|max:100',
             'is_active' => 'required|boolean',
             'date_end' => 'nullable|date',
             'max_discount' => 'nullable|numeric|min:0'
+        ],[
+            'code.required'      => '⚠️ Mã voucher không được để trống',
+        'code.unique'        => '⚠️ Mã voucher đã tồn tại, vui lòng nhập mã khác',
+
+        'sale.required'      => '⚠️ Vui lòng nhập phần trăm giảm giá',
+        'sale.numeric'       => '⚠️ Giá trị giảm giá phải là số',
+        'sale.min'           => '⚠️ Giảm giá không được nhỏ hơn 0',
+        'sale.max'           => '⚠️ Giảm giá không được vượt quá 100%',
+
+        'is_active.required' => '⚠️ Trạng thái bắt buộc chọn',
+        'is_active.boolean'  => '⚠️ Trạng thái không hợp lệ',
+
+        'date_end.date'      => '⚠️ Ngày kết thúc không hợp lệ (phải đúng định dạng date)',
+
+        'max_discount.numeric' => '⚠️ Giá trị giảm tối đa phải là số',
+        'max_discount.min'     => '⚠️ Giá trị giảm tối đa không được nhỏ hơn 0',
+
         ]);
 
         Voucher::create($request->all());
@@ -79,7 +97,24 @@ class VoucherController extends Controller
             'is_active' => 'required|boolean',
             'date_end' => 'nullable|date',
             'max_discount' => 'nullable|numeric|min:0'
-        ]);
+        ],[
+            'code.required'      => '⚠️ Mã voucher không được để trống',
+        'code.unique'        => '⚠️ Mã voucher đã tồn tại, vui lòng nhập mã khác',
+
+        'sale.required'      => '⚠️ Vui lòng nhập phần trăm giảm giá',
+        'sale.numeric'       => '⚠️ Giá trị giảm giá phải là số',
+        'sale.min'           => '⚠️ Giảm giá không được nhỏ hơn 0',
+        'sale.max'           => '⚠️ Giảm giá không được vượt quá 100%',
+
+        'is_active.required' => '⚠️ Trạng thái bắt buộc chọn',
+        'is_active.boolean'  => '⚠️ Trạng thái không hợp lệ',
+
+        'date_end.date'      => '⚠️ Ngày kết thúc không hợp lệ (phải đúng định dạng date)',
+
+        'max_discount.numeric' => '⚠️ Giá trị giảm tối đa phải là số',
+        'max_discount.min'     => '⚠️ Giá trị giảm tối đa không được nhỏ hơn 0',
+        ]
+    );
 
         $voucher->update($request->all());
 

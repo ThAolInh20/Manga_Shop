@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+
 
 class Account extends Authenticatable
 {
@@ -50,6 +52,21 @@ class Account extends Authenticatable
             static::saving(function ($account) {
                 if (Auth::check()) {
                     $account->updated_by = Auth::user()->id;
+                }
+                if ($account->isDirty('is_active') && $account->is_active == 0) {
+                    Mail::send('user.emails.account_deactivated', ['account' => $account], function ($m) use ($account) {
+                        $m->to($account->email, $account->name)
+                        ->subject('Tài khoản của bạn đã yêu cầu hủy');
+                    });
+                }
+            });
+            static::deleted(function ($account) {
+        // Gửi email thông báo khi xóa
+                if ($account->email) {
+                    Mail::send('user.emails.account_deleted', ['account' => $account], function ($message) use ($account) {
+                        $message->to($account->email)
+                                ->subject('Tài khoản đã được xóa thành công');
+                    });
                 }
             });
         }

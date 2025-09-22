@@ -39,7 +39,9 @@
             <select name="supplier_id" class="form-select" required>
                 <option value="">-- Chọn nhà cung cấp --</option>
                 @foreach($suppliers as $supplier)
+                    @if($supplier->is_active)
                     <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                    @endif
                 @endforeach
             </select>
         </div>

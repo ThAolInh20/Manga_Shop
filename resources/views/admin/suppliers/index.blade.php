@@ -21,6 +21,7 @@
                 <th>SĐT</th>
                 <th>Mã số thuế</th>
                 <th>Hợp đồng</th>
+                <th>Trạng thái</th>
                 <th>Hành động</th>
             </tr>
         </thead>
@@ -36,6 +37,13 @@
                         <a href="{{ $s->link_contract }}" target="_blank">Xem</a>
                     @else
                         Không có
+                    @endif
+                </td>
+                <td>
+                    @if($s->is_active)
+                        <span class="badge bg-success">Hoạt động</span>
+                    @else
+                        <span class="badge bg-danger">Khoá</span>
                     @endif
                 </td>
                 <td>

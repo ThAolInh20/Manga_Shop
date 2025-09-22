@@ -37,7 +37,7 @@
                     <label class="form-label">Mật khẩu (bỏ trống nếu không đổi)</label>
                     <input type="password" name="password" class="form-control" placeholder="••••••••">
                 </div>
-
+                
                 <div class="mb-3">
                     <label class="form-label">Quyền</label>
                     <select name="role" class="form-select">
@@ -46,6 +46,7 @@
                         <option value="2" {{ old('role', $account->role) == 2 ? 'selected' : '' }}>Khách hàng</option>
                     </select>
                 </div>
+             
                 <!-- <div class="mb-3 text-center">
                     <label class="form-label">Ảnh đại diện</label>
                     <img 

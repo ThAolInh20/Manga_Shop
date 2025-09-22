@@ -16,6 +16,13 @@
   </div>
 
   <div class="menu-inner-shadow"></div>
+ <!-- User Greeting -->
+<li class="menu-item disabled" style="pointer-events: none;">
+  <a href="javascript:void(0);" class="menu-link">
+    <i class="menu-icon bx bx-user"></i>
+    <div>Xin chào <strong>{{ Auth::user()->name }}</strong></div>
+  </a>
+</li>
 
   <ul class="menu-inner py-1">
 
@@ -112,6 +119,7 @@
         </a>
       </li>
     @endif
+    
 
     <!-- Đăng xuất -->
     <li class="menu-item">

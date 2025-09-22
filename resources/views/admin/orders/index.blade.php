@@ -30,8 +30,8 @@
     </div>
     {{-- Bộ lọc --}}
     <form id="filter-form" class="row g-2 mb-3">
-        <div class="col-md-2">
-            <input type="text" name="customer_name" class="form-control" placeholder="Tên khách hàng">
+        <div class="col-md-3">
+            <input type="text" name="customer_name" class="form-control" placeholder="Mã đơn hoặc tên khách hàng">
         </div>
         <div class="col-md-2">
             <select name="status" class="form-select">
@@ -58,7 +58,7 @@
         <div class="col-md-2">
             <input type="date" name="order_date" class="form-control">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-1">
             <select id="per-page" class="form-select">
                 <option value="10" {{ request()->get('per_page') == 10 ? 'selected' : '' }}>10/trang</option>
                 <option value="20" {{ request()->get('per_page') == 20 ? 'selected' : '' }}>20/trang</option>
@@ -83,20 +83,29 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <script>
+    let currentPage = 1;
 document.addEventListener("DOMContentLoaded", function () {
     const wrapper = document.getElementById("orders-wrapper");
     const form = document.getElementById("filter-form");
 
     // Fetch dữ liệu
-    function fetchOrders(query = "") {
-        let url = `/admin/orders?ajax=1`;
-        if (query) url += "&" + query;
+ function fetchOrders(query = "") {
+    let url = `/admin/orders?ajax=1`;
+    if (query) url += "&" + query;
 
-        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
-            .then(res => res.text())
-            .then(html => { wrapper.innerHTML = html; initActions(); })
-            .catch(err => console.error(err));
-    }
+    // Cập nhật biến currentPage mỗi lần fetch
+    const urlObj = new URL(window.location.origin + url);
+    currentPage = urlObj.searchParams.get("page") || 1;
+
+    // Update URL trên trình duyệt
+    const cleanUrl = url.replace("&ajax=1", "").replace("?ajax=1", "");
+    window.history.pushState({}, "", cleanUrl);
+
+    fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(res => res.text())
+        .then(html => { wrapper.innerHTML = html; initActions(); })
+        .catch(err => console.error(err));
+}
     document.getElementById('per-page').addEventListener('change', function() {
         let params = new URLSearchParams(new FormData(form));
         params.set('per_page', this.value);
@@ -114,7 +123,20 @@ document.addEventListener("DOMContentLoaded", function () {
     //     e.preventDefault();
     //     fetchOrders(new URLSearchParams(new FormData(form)).toString());
     // });
-    
+   function reloadOrders(extra = {}) {
+    let params = new URLSearchParams(new FormData(form));
+
+    // Luôn giữ lại page đã lưu
+    if (currentPage) {
+        params.set("page", currentPage);
+    }
+
+    for (const [k, v] of Object.entries(extra)) {
+        params.set(k, v);
+    }
+
+    fetchOrders(params.toString());
+}
 
     // Reset filter
     document.getElementById("reset-filter").addEventListener("click", function () {
@@ -171,12 +193,10 @@ document.addEventListener("click", function (e) {
             if (statusCode === 1) {
                 btnHtml += `<button class="btn btn-primary btn-sm update-status" data-id="${row.dataset.id}" data-next="2">Xác nhận giao</button>`;
             }
-            if (statusCode === 2) {
-                btnHtml += `<button class="btn btn-success btn-sm update-status" data-id="${row.dataset.id}" data-next="3">Hoàn tất</button>`;
-            }
-            if (statusCode === 3) {
-                btnHtml += `<button class="btn btn-warning btn-sm update-status" data-id="${row.dataset.id}" data-next="4">Đổi trả</button>`;
-            }
+            // if (statusCode === 4) {
+            //     btnHtml += `<button class="btn btn-success btn-sm update-status" data-id="${row.dataset.id}" data-next="2">Hoàn tất đổi trả</button>`;
+            // }
+           
             row.querySelector(".action-cell").innerHTML = btnHtml;
         });
 
@@ -193,7 +213,10 @@ document.addEventListener("click", function (e) {
                         }
                     })
                     .then(res => res.json())
-                    .then(data => { alert(data.message); fetchOrders(); });
+                    .then(data => { 
+                        alert(data.message); 
+                        reloadOrders(); 
+                    });
                 }
             });
         });
@@ -214,7 +237,7 @@ document.addEventListener("click", function (e) {
                         body: JSON.stringify({ status_want: parseInt(next) })
                     })
                     .then(res => res.json())
-                    .then(data => { alert(data.message); fetchOrders(); });
+                    .then(data => { alert(data.message); reloadOrders(); });
                 }
             });
         });

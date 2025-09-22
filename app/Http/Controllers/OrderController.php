@@ -28,8 +28,15 @@ class OrderController extends Controller
         $perPage = $request->get('per_page', 10);
         // --- Bộ lọc ---
         if ($request->filled('customer_name')) {
-            $query->whereHas('account', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->customer_name . '%');
+            $search = $request->customer_name;
+
+            $query->where(function ($q) use ($search) {
+                // Tìm theo ID đơn
+                $q->where('id', $search)
+                // Hoặc theo tên khách
+                ->orWhereHas('account', function ($sub) use ($search) {
+                    $sub->where('name', 'like', '%' . $search . '%');
+                });
             });
         }
 
@@ -242,12 +249,12 @@ class OrderController extends Controller
     }
 
     // Chỉ cho phép chuyển từ current → current+1 (theo tuần tự)
-    if ($statusWant !== $currentStatus + 1) {
-        return response()->json([
-            'message' => "Không thể chuyển từ trạng thái {$currentStatus} sang {$statusWant}. 
-                          Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
-        ], 400);
-    }
+    // if ($statusWant !== $currentStatus + 1) {
+    //     return response()->json([
+    //         'message' => "Không thể chuyển từ trạng thái {$currentStatus} sang {$statusWant}. 
+    //                       Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
+    //     ], 400);
+    // }
 
     // 3. Cập nhật trạng thái
     $order->order_status = $statusWant;
@@ -582,12 +589,12 @@ $data['shipping_fee'] = $shipping_fee;
     }
 
     // Chỉ cho phép chuyển từ current → current+1 (theo tuần tự)
-    if ($statusWant !== $currentStatus + 1) {
-        return response()->json([
-            'message' => "Không thể chuyển từ trạng thái {$currentStatus} sang {$statusWant}. 
-                          Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
-        ], 400);
-    }
+    // if ($statusWant !== $currentStatus + 1) {
+    //     return response()->json([
+    //         'message' => "Không thể chuyển từ trạng thái {$currentStatus} sang {$statusWant}. 
+    //                       Chỉ có thể chuyển sang trạng thái " . ($currentStatus + 1)
+    //     ], 400);
+    // }
     Log::info('Update admin status', [
         'order_id' => $orderId,
         'current_status' => $currentStatus,

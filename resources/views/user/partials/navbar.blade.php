@@ -22,26 +22,30 @@
     <!-- Right -->
     <ul class="navbar-nav flex-row align-items-center ms-auto">
   {{-- Home / Product List / Liên hệ --}}
-  <li class="nav-item me-2"><a class="nav-link" href="{{ route('home') }}">Home</a></li>
-  <li class="nav-item me-2"><a class="nav-link" href="{{ route('user.products.list') }}">Danh sách sản phẩm</a></li>
+  <li class="nav-item me-2"><a class="nav-link" href="{{ route('home') }}">Trang chủ</a></li>
+  <li class="nav-item me-2"><a class="nav-link" href="{{ route('user.products.list') }}">Cửa hàng</a></li>
   <li class="nav-item me-2"><a class="nav-link" href="#">Liên hệ</a></li>
 
   {{-- Giỏ hàng --}}
   <li class="nav-item me-3 position-relative">
     <a class="nav-link p-0" href="{{ route('user.cart.list') }}" title="Giỏ hàng">
       <i class="bx bx-cart fs-4"></i>
+      @if($cartCount>0)
       <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
         {{ $cartCount }}
       </span>
+      @endif
     </a>
   </li>
 
   {{-- Notification --}}
   <li class="nav-item dropdown me-3" id="notification-app">
     <notification-dropdown></notification-dropdown>
+    @if($notificationCount>0)
     <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
         {{ $notificationCount }}
       </span>
+      @endif
   </li>
 
   {{-- User --}}

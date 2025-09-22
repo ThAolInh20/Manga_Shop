@@ -99,7 +99,14 @@
               class="btn btn-sm btn-success"
               @click="updateOrderStatus(order.id, 3)" 
             >
-              Đã nhận
+              Đã nhận hàng
+            </button>
+            <button 
+              v-if="order.order_status === 2"
+              class="btn btn-sm btn-warning"
+              @click="updateOrderStatus(order.id, 4)" 
+            >
+              Đổi trả
             </button>
           </div>
         </div>

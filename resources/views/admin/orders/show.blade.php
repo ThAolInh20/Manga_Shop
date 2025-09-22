@@ -30,7 +30,7 @@
                 </tr>
                 <tr>
                     <th>Tổng tiền</th>
-                    <td>{{ number_format($order->subtotal_price, 0, ',', '.') }} đ</td>
+                    <td>{{ number_format($order->total_price, 0, ',', '.') }} đ</td>
                 </tr>
                 <tr>
                     <th>Trạng thái</th>
@@ -56,6 +56,10 @@
                 <tr>
                     <th>Ngày đặt</th>
                     <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                </tr>
+                <tr>
+                    <th>Ngày cập nhật</th>
+                    <td>{{ $order->updated_at->format('d/m/Y H:i') }}</td>
                 </tr>
                 <tr>
                     <th>Địa chỉ giao</th>
@@ -92,7 +96,7 @@
         <tfoot>
             <tr>
                 <th colspan="4" class="text-end">Tổng cộng</th>
-                <th>{{ number_format($order->total_price, 0, ',', '.') }} đ</th>
+                <th>{{ number_format($order->subtotal_price, 0, ',', '.') }} đ</th>
             </tr>
         </tfoot>
     </table>

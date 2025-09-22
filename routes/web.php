@@ -24,6 +24,7 @@ use App\Http\Controllers\ChartController;
 use App\Services\GHNService;
 use App\Http\Controllers\NotificationController;
 use App\Exports\OrdersExport;
+use App\Models\Account;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -59,6 +60,9 @@ Route::middleware(['role:0,1'])->group(function () {
     
     Route::prefix('admin')->group(function () {
         Route::resource('accounts', AccountController::class)->middleware(['role:0']);
+        // Route::get('accounts/my_edit/{id}', [AccountController::class, 'edit'])->name('accounts.myedit');
+   
+        
         Route::resource('categories', CategoryController::class)->middleware(['role:0']);
         Route::resource('products', ProductController::class);
         // Route::get('products/import',[ProductController::class,'import'])->name('products.import');
@@ -110,7 +114,7 @@ Route::prefix('api')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
 
 
-    Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
+    
 
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
@@ -119,7 +123,8 @@ Route::prefix('api')->group(function () {
     Route::get('/boloc', [ProductController::class, 'filterField']);
     route::get('/products', [ProductController::class, 'getAllProducts']);
     Route::get('/products/{id}/related', [ProductController::class, 'related'])->name('products.related');
-
+    Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
+    
     route::get('/categories', [CategoryController::class, 'listCategories']);
 
     Route::post('/cart', [CartController::class, 'add']);
