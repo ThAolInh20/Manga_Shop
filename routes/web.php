@@ -26,7 +26,7 @@ use App\Http\Controllers\NotificationController;
 use App\Exports\OrdersExport;
 use App\Models\Account;
 use Maatwebsite\Excel\Facades\Excel;
-
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
 
 // User login
 Route::get('login', [AccountAuthController::class, 'showUserLoginForm'])->name('login');
@@ -69,17 +69,17 @@ Route::middleware(['role:0,1'])->group(function () {
         Route::get('products/{product}/import', [ProductController::class, 'import'])->name('products.import');
     // Lưu thông tin nhập kho
         Route::post('products/{product}/import', [ProductController::class, 'importStore'])->name('products.import.store');
+        Route::get('/suppliers/chart', [ChartController::class, 'chartForSuppliers'])->name('suppliers.chart');
          
         Route::resource('suppliers', SupplierController::class);
         Route::get('/suppliers/{supplier}/filter-products', [SupplierController::class, 'filterProducts'])->name('suppliers.filterProducts');
         Route::post('/{supplier}/active', [SupplierController::class, 'active'])->name('suppliers.active');
         
-         Route::resource('product_suppliers', ProductSupplierController::class);
+        Route::resource('product_suppliers', ProductSupplierController::class);
         Route::resource('vouchers', VoucherController::class);
         Route::resource('orders', OrderController::class)->only([
             'index', 'show', 'edit', 'update'
         ]);
-
         Route::get('/orders/chart', [OrderController::class, 'showChart'])->name('orders.chart');
 
         Route::post('logout', [AccountAuthController::class, 'logout'])->name('admin.logout');

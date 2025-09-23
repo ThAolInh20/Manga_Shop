@@ -88,12 +88,19 @@
             </table>
         </div>
     </div>
-</div>
-
-<!-- Chart -->
+    <!-- Chart -->
 <div class="row mt-3">
     <div class="col-12">
         @include('admin.orders.chart')
     </div>
 </div>
+<div class="row mt-3">
+    <div class="col-12">
+        @include('admin.suppliers.chart')
+    </div>
+</div>
+</div>
+
+
+
 @endsection

@@ -18,9 +18,10 @@ class ChartController extends Controller
     //     biểu đồ có thông tin số lượng đơn theo cột,
     //     ở dưới bảng tổng số lượng total_price, tổng số đơn hàng
     //   }
-   public function chartForOrder(Request $request)
+ public function chartForOrder(Request $request)
 {
-    $type = $request->query('type', 'week'); // 'week', 'month', 'year'
+    $type = $request->query('type', 'week');
+
     $labels = [];
     $series = [
         'pending'    => [],
@@ -30,249 +31,150 @@ class ChartController extends Controller
         'returned'   => [],
         'canceled'   => [],
     ];
+    $revenueSeries = [];
+
     $totalRevenue = 0;
     $totalOrders = 0;
 
-    $startDate = null;
-    $endDate = null;
+    $today = Carbon::today();
 
-    if ($type === 'week') {
-        $today = Carbon::today();
-        $start = $today->copy()->startOfWeek();
-        $end = $today->copy()->endOfWeek();
-        $startDate = $start;
-        $endDate = $end;
+    // Xác định khoảng thời gian
+    switch ($type) {
+        case 'week':
+            $startDate = $today->copy()->startOfWeek();
+            $endDate   = $today->copy()->endOfWeek();
+            $granularity = 'day';
+            break;
+        case 'lastWeek':
+            $startDate = $today->copy()->subWeek()->startOfWeek();
+            $endDate   = $today->copy()->subWeek()->endOfWeek();
+            $granularity = 'day';
+            break;
+        case 'month':
+            $startDate = $today->copy()->startOfMonth();
+            $endDate   = $today->copy()->endOfMonth();
+            $granularity = 'week';
+            break;
+        case 'lastMonth':
+            $lastMonth = $today->copy()->subMonth();
+            $startDate = $lastMonth->copy()->startOfMonth();
+            $endDate   = $lastMonth->copy()->endOfMonth();
+            $granularity = 'week';
+            break;
+        case 'year':
+            $year = $today->year;
+            $startDate = Carbon::createFromDate($year, 1, 1);
+            $endDate   = Carbon::createFromDate($year, 12, 31);
+            $granularity = 'month';
+            break;
+        case 'lastYear':
+            $year = $today->subYear()->year;
+            $startDate = Carbon::createFromDate($year, 1, 1);
+            $endDate   = Carbon::createFromDate($year, 12, 31);
+            $granularity = 'month';
+            break;
+        
+        default:
+            $startDate = $today->copy()->startOfWeek();
+            $endDate   = $today->copy()->endOfWeek();
+            $granularity = 'day';
+            break;
+    }
 
-        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+    // Map trạng thái
+    $statusMap = [
+        'pending' => 0,
+        'processing' => 1,
+        'shipping' => 2,
+        'completed' => 3,
+        'returned' => 4,
+        'canceled' => 5,
+    ];
+
+    // Loop dữ liệu theo granularity
+    if ($granularity === 'day') {
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             $labels[] = $date->format('d/m');
 
-            foreach ($series as $key => &$arr) {
-                $statusMap = [
-                    'pending' => 0,
-                    'processing' => 1,
-                    'shipping' => 2,
-                    'completed' => 3,
-                    'returned' => 4,
-                    'canceled' => 5,
-                ];
-                $status = $statusMap[$key];
+            // doanh thu trong ngày
+            $dailyRevenue = Order::where('order_status', 3)
+                ->whereDate('created_at', $date)
+                ->sum('total_price');
+            $revenueSeries[] = $dailyRevenue;
 
-                $count = Order::where('order_status', $status)
+            foreach ($series as $key => &$arr) {
+                $count = Order::where('order_status', $statusMap[$key])
                     ->whereDate('created_at', $date)
                     ->count();
 
                 $arr[] = $count;
 
-                if ($status == 3) { // tính revenue cho đơn hoàn tất
+                if ($statusMap[$key] == 3) {
                     $totalOrders += $count;
-                    $totalRevenue += Order::where('order_status', $status)
-                        ->whereDate('created_at', $date)
-                        ->sum('total_price');
+                    $totalRevenue += $dailyRevenue;
                 }
             }
         }
-    } elseif ($type === 'month') {
-        $today = Carbon::today();
-        $start = $today->copy()->startOfMonth();
-        $end = $today->copy()->endOfMonth();
-        $startDate = $start;
-        $endDate = $end;
-
-        $daysInMonth = $today->daysInMonth;
-        for ($i = 0; $i < $daysInMonth; $i += 7) {
-            $from = $start->copy()->addDays($i);
-            $to = $from->copy()->addDays(6);
-            if ($to->month != $start->month) $to = $from->copy()->endOfMonth();
+    } elseif ($granularity === 'week') {
+        $days = $startDate->diffInDays($endDate) + 1;
+        for ($i = 0; $i < $days; $i += 7) {
+            $from = $startDate->copy()->addDays($i);
+            $to   = $from->copy()->addDays(6);
+            if ($to->gt($endDate)) $to = $endDate;
 
             $labels[] = $from->format('d/m') . ' - ' . $to->format('d/m');
 
-            foreach ($series as $key => &$arr) {
-                $statusMap = [
-                    'pending' => 0,
-                    'processing' => 1,
-                    'shipping' => 2,
-                    'completed' => 3,
-                    'returned' => 4,
-                    'canceled' => 5,
-                ];
-                $status = $statusMap[$key];
+            $weeklyRevenue = Order::where('order_status', 3)
+                ->whereBetween('created_at', [$from, $to])
+                ->sum('total_price');
+            $revenueSeries[] = $weeklyRevenue;
 
-                $count = Order::where('order_status', $status)
+            foreach ($series as $key => &$arr) {
+                $count = Order::where('order_status', $statusMap[$key])
                     ->whereBetween('created_at', [$from, $to])
                     ->count();
 
                 $arr[] = $count;
 
-                if ($status == 3) {
+                if ($statusMap[$key] == 3) {
                     $totalOrders += $count;
-                    $totalRevenue += Order::where('order_status', $status)
-                        ->whereBetween('created_at', [$from, $to])
-                        ->sum('total_price');
+                    $totalRevenue += $weeklyRevenue;
                 }
             }
         }
-    } elseif ($type === 'year') {
-        $year = Carbon::today()->year;
-        $startDate = Carbon::createFromDate($year, 1, 1);
-        $endDate = Carbon::createFromDate($year, 12, 31);
-
+    } elseif ($granularity === 'month') {
+        $year = $startDate->year;
         for ($month = 1; $month <= 12; $month++) {
             $labels[] = Carbon::createFromDate($year, $month, 1)->format('M');
 
-            foreach ($series as $key => &$arr) {
-                $statusMap = [
-                    'pending' => 0,
-                    'processing' => 1,
-                    'shipping' => 2,
-                    'completed' => 3,
-                    'returned' => 4,
-                    'canceled' => 5,
-                ];
-                $status = $statusMap[$key];
+            $monthlyRevenue = Order::where('order_status', 3)
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->sum('total_price');
+            $revenueSeries[] = $monthlyRevenue;
 
-                $count = Order::where('order_status', $status)
-                    ->whereMonth('created_at', $month)
+            foreach ($series as $key => &$arr) {
+                $count = Order::where('order_status', $statusMap[$key])
                     ->whereYear('created_at', $year)
-                    ->count();
-
-                $arr[] = $count;
-
-                if ($status == 3) {
-                    $totalOrders += $count;
-                    $totalRevenue += Order::where('order_status', $status)
-                        ->whereMonth('created_at', $month)
-                        ->whereYear('created_at', $year)
-                        ->sum('total_price');
-                }
-            }
-        }
-    }
-    else if($type === 'lastWeek') {
-        $today = Carbon::today();
-        $start = $today->copy()->subWeek()->startOfWeek();
-        $end = $today->copy()->subWeek()->endOfWeek();
-        $startDate = $start;
-        $endDate = $end;
-
-        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-            $labels[] = $date->format('d/m');
-
-            foreach ($series as $key => &$arr) {
-                $statusMap = [
-                    'pending' => 0,
-                    'processing' => 1,
-                    'shipping' => 2,
-                    'completed' => 3,
-                    'returned' => 4,
-                    'canceled' => 5,
-                ];
-                $status = $statusMap[$key];
-
-                $count = Order::where('order_status', $status)
-                    ->whereDate('created_at', $date)
-                    ->count();
-
-                $arr[] = $count;
-
-                if ($status == 3) {
-                    $totalOrders += $count;
-                    $totalRevenue += Order::where('order_status', $status)
-                        ->whereDate('created_at', $date)
-                        ->sum('total_price');
-                }
-            }
-        }
-
-    } elseif ($type === 'lastMonth') {
-        $today = Carbon::today()->subMonth();
-        $start = $today->copy()->startOfMonth();
-        $end = $today->copy()->endOfMonth();
-        $startDate = $start;
-        $endDate = $end;
-
-        $daysInMonth = $today->daysInMonth;
-        for ($i = 0; $i < $daysInMonth; $i += 7) {
-            $from = $start->copy()->addDays($i);
-            $to = $from->copy()->addDays(6);
-            if ($to->month != $start->month) $to = $from->copy()->endOfMonth();
-
-            $labels[] = $from->format('d/m') . ' - ' . $to->format('d/m');
-
-            foreach ($series as $key => &$arr) {
-                $statusMap = [
-                    'pending' => 0,
-                    'processing' => 1,
-                    'shipping' => 2,
-                    'completed' => 3,
-                    'returned' => 4,
-                    'canceled' => 5,
-                ];
-                $status = $statusMap[$key];
-
-                $count = Order::where('order_status', $status)
-                    ->whereBetween('created_at', [$from, $to])
-                    ->count();
-
-                $arr[] = $count;
-
-                if ($status == 3) {
-                    $totalOrders += $count;
-                    $totalRevenue += Order::where('order_status', $status)
-                        ->whereBetween('created_at', [$from, $to])
-                        ->sum('total_price');
-                }
-            }
-        }
-
-    } elseif ($type === 'lastYear') {
-        $year = Carbon::today()->subYear()->year;
-        $startDate = Carbon::createFromDate($year, 1, 1);
-        $endDate = Carbon::createFromDate($year, 12, 31);
-
-        for ($month = 1; $month <= 12; $month++) {
-            $labels[] = Carbon::createFromDate($year, $month, 1)->format('M');
-
-            foreach ($series as $key => &$arr) {
-                $statusMap = [
-                    'pending' => 0,
-                    'processing' => 1,
-                    'shipping' => 2,
-                    'completed' => 3,
-                    'returned' => 4,
-                    'canceled' => 5,
-                ];
-                $status = $statusMap[$key];
-
-                $count = Order::where('order_status', $status)
                     ->whereMonth('created_at', $month)
-                    ->whereYear('created_at', $year)
                     ->count();
 
                 $arr[] = $count;
 
-                if ($status == 3) {
+                if ($statusMap[$key] == 3) {
                     $totalOrders += $count;
-                    $totalRevenue += Order::where('order_status', $status)
-                        ->whereMonth('created_at', $month)
-                        ->whereYear('created_at', $year)
-                        ->sum('total_price');
+                    $totalRevenue += $monthlyRevenue;
                 }
             }
         }
     }
 
-    // Tính tổng trạng thái
+    // Tổng trạng thái
     $statusQuery = Order::query()->select('order_status', DB::raw('count(*) as total'))
-        ->whereIn('order_status', [0,1,2,3,4,5]);
+        ->whereIn('order_status', array_values($statusMap))
+        ->whereBetween('created_at', [$startDate, $endDate]);
 
-    if ($startDate && $endDate) {
-        $statusQuery->whereBetween('created_at', [$startDate, $endDate]);
-    }
-
-    $statusCounts = $statusQuery
-        ->groupBy('order_status')
-        ->pluck('total', 'order_status')
-        ->toArray();
+    $statusCounts = $statusQuery->groupBy('order_status')->pluck('total', 'order_status')->toArray();
 
     $statusSummary = [
         'pending'    => $statusCounts[0] ?? 0,
@@ -285,13 +187,15 @@ class ChartController extends Controller
 
     return response()->json([
         'labels' => $labels,
-        'series' => $series, // 👈 dữ liệu cho từng trạng thái
+        'series' => $series,
+        'revenue_series' => $revenueSeries,
         'total_orders' => $totalOrders,
         'total_revenue' => $totalRevenue,
         'status_counts' => $statusSummary,
         'no_data' => ($totalRevenue == 0)
     ]);
 }
+
 
 
 
@@ -308,5 +212,42 @@ class ChartController extends Controller
         'labels' => ['Đã bán', 'Chưa bán'],
         'data' => [$totalSold, $totalStock]
     ]);
+}
+public function chartForSuppliers(Request $request)
+{
+    $filter = $request->get('filter', 'all');
+
+    $query = DB::table('product_suppliers as ps')
+        ->join('suppliers as s', 's.id', '=', 'ps.supplier_id')
+        ->where('s.is_active', 1);
+
+    if ($filter === 'week') {
+        $query->whereBetween('ps.created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+    } elseif ($filter === 'month') {
+        $query->whereMonth('ps.created_at', now()->month)
+              ->whereYear('ps.created_at', now()->year);
+    } elseif ($filter === 'year') {
+        $query->whereYear('ps.created_at', now()->year);
+    }
+
+    $data = $query->select(
+        's.name',
+        DB::raw('SUM(ps.quantity) as total_quantity'),
+        DB::raw('SUM(ps.import_price * ps.quantity) as total_cost')
+    )
+    ->groupBy('s.id', 's.name')
+    ->get();
+
+    // Nếu gọi AJAX -> trả JSON
+    if ($request->ajax()) {
+        return response()->json([
+            'labels' => $data->pluck('name'),
+            'quantities' => $data->pluck('total_quantity'),
+            'costs' => $data->pluck('total_cost'),
+        ]);
+    }
+
+    // Lần đầu vào page -> render blade
+    return view('admin.suppliers.chart');
 }
 }

@@ -186,6 +186,7 @@ const statuses = [
   { value: 3, text: "Hoàn tất" },
   { value: 4, text: "Đổi trả" },
   { value: 5, text: "Đã hủy" },
+  {value:6,text:"Hoàn tiền"}
   
 ]
 const reasons = [

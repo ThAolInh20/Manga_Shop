@@ -95,15 +95,28 @@ class OrderController extends Controller
             $query->orderBy($sortField, $sortOrder);
         }
 
-        $orders = $query->with('updatedBy')->paginate($perPage)->withQueryString();
-
+        $orders = $query->with('updatedBy','shipping','account')->paginate($perPage)->withQueryString();
+        $statuses = [
+            0 => ['label' => 'Chờ thanh toán', 'class' => 'secondary'],
+            1 => ['label' => 'Đang xử lý', 'class' => 'info'],
+            2 => ['label' => 'Đang giao', 'class' => 'primary'],
+            3 => ['label' => 'Hoàn tất', 'class' => 'success'],
+            4 => ['label' => 'Đổi trả', 'class' => 'warning'],
+            5 => ['label' => 'Đã hủy', 'class' => 'danger'],
+            6 => ['label' => 'Hoàn tiền', 'class' => 'dark'],
+        ];
+                
+        $stats = [];
+        foreach ($statuses as $code => $info) {
+            $stats[$code] = Order::where('order_status', $code)->count();
+        }
         // Nếu AJAX thì chỉ trả bảng (render partial view)
         if ($request->ajax()) {
-            return view('admin.orders.table', compact('orders'))->render();
+            return view('admin.orders.table', compact('orders', 'stats', 'statuses'))->render();
         }
 
         // Nếu load full page
-        return view('admin.orders.index', compact('orders'));
+        return view('admin.orders.index', compact('orders', 'stats', 'statuses'));
     }
 
     public function userOrdersPage()
@@ -169,7 +182,12 @@ class OrderController extends Controller
         //     }
 
         // 3. Cập nhật trạng thái hủy
-        $order->order_status = 5; // 5 = đã hủy
+        if($order->payment_status==1){
+            $order->order_status = 6;
+        }else{
+            $order->order_status = 5; 
+        }
+        // 5 = đã hủy
         // $order->updated_by = $user->id;
         $order->save();
 
@@ -549,7 +567,12 @@ $data['shipping_fee'] = $shipping_fee;
         //         }
         //     }
         // 3. Cập nhật trạng thái hủy
-        $order->order_status = 5; // 5 = đã hủy
+        if($order->payment_status==1){
+            $order->order_status = 6; //hoàn tiền
+        }else{
+            $order->order_status = 5;
+        }
+        // 5 = đã hủy
         // $order->updated_by = $user->id;
         $order->save();
 
@@ -562,7 +585,7 @@ $data['shipping_fee'] = $shipping_fee;
     public function updateAdminStatus(Request $request, $orderId)
 {
     $request->validate([
-        'status_want' => 'required|integer|min:0|max:4'
+        'status_want' => 'required|integer|min:0'
     ]);
 
    

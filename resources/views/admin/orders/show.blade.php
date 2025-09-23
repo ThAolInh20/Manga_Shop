@@ -43,6 +43,7 @@
                                 3 => ['Hoàn tất', 'success'],
                                 4 => ['Đổi trả', 'warning'],
                                 5 => ['Đã hủy', 'danger'],
+                                6 => ['Hoàn tiền','warning']
                             ];
                             $status = $statuses[$order->order_status] ?? ['Không xác định', 'dark'];
                         @endphp

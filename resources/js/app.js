@@ -21,6 +21,7 @@ import Profi from './components/Profi.vue';
 import OrderChart from './components/chart/OrderChart.vue';
 import NotificationDropdown from './components/NotificationDropdown.vue';
 import RelatedProducts from './components/RelatedProducts.vue';
+import ChatWidget from './components/ChatWidget.vue';
 
 const app = createApp({});
 
@@ -48,6 +49,7 @@ app.component('Profi',Profi)
 app.component('OrderChart',OrderChart);
 app.component('NotificationDropdown',NotificationDropdown)
 app.component('RelatedProducts',RelatedProducts)
+app.component('ChatWidget',ChatWidget)
 
 
 // Mount Vue vào #app (trong Blade)
