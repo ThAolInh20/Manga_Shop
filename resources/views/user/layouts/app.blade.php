@@ -45,7 +45,9 @@
 
     @yield('content')
     </div>
+    
   </div>
+  <chat-widget></chat-widget>
 
   <!-- Footer -->
   @include('user.partials.footer')

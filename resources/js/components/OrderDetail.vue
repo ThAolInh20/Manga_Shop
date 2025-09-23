@@ -254,7 +254,8 @@ const getStatusText = (status) => {
     2: "Đang giao",
     3: "Hoàn tất",
     4: "Đổi trả",
-    5: "Đã hủy"
+    5: "Đã hủy",
+    6: "Hoàn tiền"
   }
   return statuses[status] || "Không xác định"
 }

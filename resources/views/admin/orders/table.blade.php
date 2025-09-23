@@ -37,7 +37,13 @@
     </thead>
     <tbody>
          @forelse($orders as $order)
-        <tr data-id="{{ $order->id }}" data-status="{{ $order->order_status }}">
+        <tr data-id="{{ $order->id }}" data-status="{{ $order->order_status }}"  
+         data-customer-name="{{ $order->account->name ?? '' }}"
+  data-customer-phone="{{ $order->account->phone ?? '' }}"
+  data-receiver-name="{{ optional($order->shipping)->name_recipient ?? '' }}"
+  data-receiver-phone="{{ optional($order->shipping)->phone_recipient ?? '' }}"
+        
+        >
             <td>{{ $order->id }}</td>
             <td><a href="{{ route('accounts.show', $order->account ??0 ) }}">{{  $order->account->name ?? '' }}</a></td>
             <td>{{ number_format($order->total_price, 0, ',', '.') }}đ</td>

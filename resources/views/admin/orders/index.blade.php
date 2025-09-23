@@ -7,6 +7,20 @@
 
 <div class="container">
     <h2>Danh sách đơn hàng</h2>
+  <div class="card-group mb-3">
+    @foreach ($statuses as $code => $info)
+        <div class="card border-{{ $info['class'] }}">
+            <div class="card-body text-center">
+                <h6 class="card-title mb-1 text-{{ $info['class'] }}">
+                    {{ $info['label'] }}
+                </h6>
+                <div class="fs-4 fw-bold">
+                    {{ $stats[$code] ?? 0 }}
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
      @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -41,7 +55,9 @@
                 <option value="2">Đang giao</option>
                 <option value="3">Hoàn tất</option>
                 <option value="4">Đổi trả</option>
+
                 <option value="5">Đã hủy</option>
+                <option value="6">Hoàn tiền</option>
             </select>
         </div>
          <div class="col-md-2">
@@ -62,7 +78,7 @@
             <select id="per-page" class="form-select">
                 <option value="10" {{ request()->get('per_page') == 10 ? 'selected' : '' }}>10/trang</option>
                 <option value="20" {{ request()->get('per_page') == 20 ? 'selected' : '' }}>20/trang</option>
-                <option value="30" {{ request()->get('per_page') == 30 ? 'selected' : '' }}>30/trangư</option>
+                <option value="30" {{ request()->get('per_page') == 30 ? 'selected' : '' }}>30/trang</option>
             </select>
         </div>
         <div class="col-md-2">
@@ -78,6 +94,28 @@
 </div>
         @include('admin.orders.table', ['orders' => $orders])
     </div>
+</div>
+<!-- Modal Hủy Đơn -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Xác nhận hủy đơn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Yêu cầu gọi khách hoặc người nhận trước khi hủy đơn!!!</strong></p>
+        <p><strong>Tên khách hàng:</strong> <span id="modal-customer-name"></span></p>
+        <p><strong>SĐT khách:</strong> <span id="modal-customer-phone"></span></p>
+        <p><strong>Tên người nhận:</strong> <span id="modal-receiver-name"></span></p>
+        <p><strong>SĐT người nhận:</strong> <span id="modal-receiver-phone"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-danger" id="confirmCancel">Xác nhận hủy</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -178,7 +216,8 @@ document.addEventListener("click", function (e) {
                 2: { text: "Đang giao", class: "primary" },
                 3: { text: "Hoàn tất", class: "success" },
                 4: { text: "Đổi trả", class: "warning" },
-                5: { text: "Đã hủy", class: "danger" }
+                5: { text: "Đã hủy", class: "danger" },
+                6: {text:"Hoàn tiền",class:"warning"}
             };
 
             row.querySelector(".status-cell").innerHTML =
@@ -193,33 +232,51 @@ document.addEventListener("click", function (e) {
             if (statusCode === 1) {
                 btnHtml += `<button class="btn btn-primary btn-sm update-status" data-id="${row.dataset.id}" data-next="2">Xác nhận giao</button>`;
             }
-            // if (statusCode === 4) {
-            //     btnHtml += `<button class="btn btn-success btn-sm update-status" data-id="${row.dataset.id}" data-next="2">Hoàn tất đổi trả</button>`;
-            // }
+            if (statusCode === 6) {
+                btnHtml += `<button class="btn btn-success btn-sm update-status" data-id="${row.dataset.id}" data-next="5">Hoàn tiền khách</button>`;
+            }
            
             row.querySelector(".action-cell").innerHTML = btnHtml;
         });
 
         // Hủy đơn
-        document.querySelectorAll(".cancel_order").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const id = this.dataset.id;
-                if (confirm("Bạn có chắc muốn hủy đơn này không?")) {
-                    fetch(`/admin/orders/${id}/cancel`, {
-                        method: "POST",
-                        headers: {
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-                            "Accept": "application/json"
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => { 
-                        alert(data.message); 
-                        reloadOrders(); 
-                    });
-                }
-            });
-        });
+        // Hủy đơn
+document.querySelectorAll(".cancel_order").forEach(btn => {
+    btn.addEventListener("click", function () {
+        const row = this.closest("tr");
+        const id = row.dataset.id;
+
+        // Điền dữ liệu vào modal
+        document.getElementById("modal-customer-name").textContent = row.dataset.customerName || "-";
+        document.getElementById("modal-customer-phone").textContent = row.dataset.customerPhone || "-";
+        document.getElementById("modal-receiver-name").textContent = row.dataset.receiverName || "-";
+        document.getElementById("modal-receiver-phone").textContent = row.dataset.receiverPhone || "-";
+
+        // Lưu id đơn hàng vào button confirm
+        document.getElementById("confirmCancel").setAttribute("data-id", id);
+
+        // Hiển thị modal
+        new bootstrap.Modal(document.getElementById("cancelModal")).show();
+    });
+});
+
+// Khi nhấn Xác nhận hủy trong modal
+document.getElementById("confirmCancel").addEventListener("click", function () {
+    const id = this.dataset.id;
+    fetch(`/admin/orders/${id}/cancel`, {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+            "Accept": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(data => { 
+        alert(data.message); 
+        reloadOrders(); 
+        bootstrap.Modal.getInstance(document.getElementById("cancelModal")).hide();
+    });
+});
 
         // Cập nhật trạng thái
         document.querySelectorAll(".update-status").forEach(btn => {

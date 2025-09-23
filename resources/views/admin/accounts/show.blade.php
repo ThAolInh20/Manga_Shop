@@ -65,7 +65,7 @@
     </div>
 
     <div class="mt-3">
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">Quay lại</a>
+        <a href="{{ route('accounts.index') }}" class="btn btn-secondary">Danh sách tài khoản</a>
         @if($account->role!=2)
         <a href="{{ route('accounts.edit', $account->id) }}" class="btn btn-warning">Sửa</a>
         @endif

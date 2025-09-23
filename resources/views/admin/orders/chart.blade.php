@@ -6,12 +6,13 @@
     <!-- Các button -->
     <div class="row mb-3">
         <div class="col-md-12">
-            <button class="btn btn-outline-secondary me-2 active-btn" onclick="setActive(this); loadData('week')">Tuần này</button>
-            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadData('lastWeek')">Tuần trước</button>
-            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadData('month')">Tháng này</button>
-            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadData('lastMonth')">Tháng trước</button>
-            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadData('year')">Năm nay</button>
-            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadData('lastYear')">Năm trước</button>
+            <button class="btn btn-outline-secondary me-2 active-btn" onclick="setActive(this); loadOrderData('week')">Tuần này</button>
+            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('lastWeek')">Tuần trước</button>
+            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('month')">Tháng này</button>
+            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('lastMonth')">Tháng trước</button>
+            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('year')">Năm nay</button>
+            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('lastYear')">Năm trước</button>
+            <!-- <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('all')">Tất cả</button> -->
         </div>
     </div>
 
@@ -79,10 +80,17 @@
         </div>
     </div>
 
-    <!-- Biểu đồ cột -->
+    <!-- Biểu đồ đường đơn hàng -->
     <div class="card-body position-relative">
         <canvas id="orderChart" height="250"></canvas>
         <div id="orderChartEmpty" class="text-center text-muted position-absolute top-50 start-50 translate-middle d-none">
+            Không có dữ liệu
+        </div>
+    </div>
+    <!-- Biểu đồ cột doanh thu -->
+    <div class="card-body position-relative mt-3">
+        <canvas id="revenueChart" height="250"></canvas>
+        <div id="revenueChartEmpty" class="text-center text-muted position-absolute top-50 start-50 translate-middle d-none">
             Không có dữ liệu
         </div>
     </div>
@@ -90,11 +98,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let orderChart, statusChart;
 
-function initCharts() {
+let orderChart, statusChart,revenueChart;
+
+function initOrderCharts() {
     const ctx1 = document.getElementById('orderChart');
     const ctx2 = document.getElementById('statusChart');
+    const ctx3 = document.getElementById('revenueChart');
 
     // Biểu đồ đường
     orderChart = new Chart(ctx1, {
@@ -133,9 +143,30 @@ function initCharts() {
         },
         options: { responsive: true, maintainAspectRatio: false }
     });
+    //biểu đồ cột
+    revenueChart = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Doanh thu',
+                data: [],
+                backgroundColor: '#2ecc71'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: 'Thời gian' } },
+                y: { beginAtZero: true, title: { display: true, text: 'Doanh thu (VNĐ)' } }
+            }
+        }
+    });
 }
 
-function loadData(type) {
+function loadOrderData(type) {
     fetch(`/admin/api/chart/orders?type=${type}`)
         .then(res => res.json())
         .then(data => {
@@ -165,6 +196,12 @@ function loadData(type) {
             ];
             statusChart.update();
 
+            // update bar chart (doanh thu)
+            revenueChart.data.labels = data.labels;
+            revenueChart.data.datasets[0].data = data.revenue_series || [];
+            revenueChart.update();
+
+
             // update số liệu text
             document.getElementById("completed-orders").innerText = data.status_counts.completed || 0;
             document.getElementById("total-revenue").innerText = data.total_revenue.toLocaleString();
@@ -184,15 +221,23 @@ function resetUI() {
     ["completed-orders","total-revenue","pending-orders","processing-orders","shipping-orders","returned-orders","canceled-orders"]
         .forEach(id => document.getElementById(id).innerText = 0);
 
+    // reset line chart
     orderChart.data.labels = [];
     orderChart.data.datasets.forEach(ds => ds.data = []);
     orderChart.update();
 
+    // reset pie chart
     statusChart.data.datasets[0].data = [];
     statusChart.update();
 
-    document.getElementById("orderChartEmpty").classList.remove("d-none");
-    document.getElementById("statusChartEmpty").classList.remove("d-none");
+    // reset bar chart
+    revenueChart.data.labels = [];
+    revenueChart.data.datasets[0].data = [];
+    revenueChart.update();
+
+    ["orderChartEmpty", "statusChartEmpty", "revenueChartEmpty"].forEach(id => {
+        document.getElementById(id).classList.remove("d-none");
+    });
 }
 
 function setActive(button) {
@@ -200,8 +245,8 @@ function setActive(button) {
     button.classList.add("active-btn");
 }
 
-initCharts();
-loadData('week');
+initOrderCharts();
+loadOrderData('week');
 </script>
 <style>
     .active-btn {
