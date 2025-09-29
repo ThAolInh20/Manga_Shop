@@ -15,7 +15,7 @@ class Product extends Model
     public $timestamps = true;
 
     protected $fillable = [
-         'category_id',
+        'category_id',
         'name',
         'age',
         'author',
@@ -35,6 +35,7 @@ class Product extends Model
         'size',
         'quantity_buy',
     ];
+    protected $guarded = [];
 
      public static function countLowStock($threshold = 50)
     {

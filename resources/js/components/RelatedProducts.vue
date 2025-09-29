@@ -11,8 +11,12 @@
     </div>
 
     <!-- Danh sách -->
-    <div v-else class="row g-2">
-  <div v-for="p in products" :key="p.id" class="col-6 col-md-2">
+<div 
+  v-else 
+  class="d-flex overflow-auto gap-2 pb-2 related-scroll"
+  ref="scrollContainer"
+>
+  <div v-for="p in products" :key="p.id" class="flex-shrink-0" style="width: 160px;">
     <div class="card h-100 shadow-sm text-center">
       <img
         v-if="p.images"
@@ -22,9 +26,6 @@
       />
       <div class="card-body p-2">
         <h6 class="card-title small mb-1">{{ p.name }}</h6>
-        <!-- <p class="card-text text-muted mb-2 small">
-          {{ formatPrice(p.price) }} đ
-        </p> -->
         <a
           :href="`/products/${p.id}`"
           class="btn btn-sm btn-outline-primary"
@@ -86,6 +87,16 @@ export default {
   },
   mounted() {
     this.fetchRelated();
+     // chuyển wheel dọc thành cuộn ngang
+    const el = this.$refs.scrollContainer;
+    if (el) {
+      el.addEventListener("wheel", (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY;
+        }
+      });
+    }
   },
 };
 </script>
@@ -107,5 +118,17 @@ export default {
 .related-products {
   margin-top: 20px; /* hoặc 2rem cho thoáng */
 }
+.related-scroll {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+.related-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.related-scroll::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
 
 </style>

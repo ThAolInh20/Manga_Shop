@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
+use App\Exports\ProductsSampleExport;
+
 use Maatwebsite\Excel\Facades\Excel;
 
 // use App\Models\Category;
@@ -449,6 +452,9 @@ class ProductController extends Controller
             'related' => $related
         ]);
     }
+    public function show(){
+
+    }
     public function export($categoryId = null)
     {
         $cate = Category::findOrFail($categoryId);
@@ -457,6 +463,24 @@ class ProductController extends Controller
 
         }
         return redirect()->back()->with('error','Không tìm thấy danh mục');
+    }
+    public function sample()
+    {
+        return Excel::download(new ProductsSampleExport, 'file_mau_san_pham.xlsx');
+    }
+    
+    public function importFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,xls'
+        ]);
+
+        try {
+            Excel::import(new ProductsImport, $request->file('file'));
+            return redirect()->route('products.index')->with('success', 'Import sản phẩm thành công!');
+        } catch (\Exception $e) {
+            return redirect()->route('products.index')->with('error', 'Lỗi khi import: '.$e->getMessage());
+        }
     }
 
 }

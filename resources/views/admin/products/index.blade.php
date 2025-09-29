@@ -13,6 +13,13 @@
     <div class="mb-3">
         <a href="{{ route('products.create') }}" class="btn btn-primary">+ Thêm sản phẩm</a>
     </div>
+     {{-- Nút mở modal upload --}}
+    <div>
+        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#importModal">
+            + Thêm nhiều sản phẩm
+        </button>
+    </div>
+    {{-- -Nút này xuất danh sách --}}
     <div class="dropdown d-inline">
         <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             Xuất danh sách
@@ -122,6 +129,34 @@
             {{ $products->links('pagination::bootstrap-5') }}
         </div>
     </div>
+</div>
+<!-- Modal Import -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="{{ route('products.importFile') }}" method="POST" enctype="multipart/form-data" class="modal-content">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title" id="importModalLabel">Import sản phẩm từ file Excel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="file" class="form-label">Chọn file Excel/CSV</label>
+          <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+        </div>
+        <div class="text-muted small">
+          ⚠️ File phải đúng định dạng cột: ID, Danh mục, Tên, Tuổi, Tác giả, Nhà xuất bản, Số lượng, Giá gốc, Sale (%), Giá sau sale, Chi tiết, Categ, Trạng thái, Ngôn ngữ, Trọng lượng, Kích thước, Số lượng đã bán...
+        </div>
+      </div>
+      <div class="modal-footer">
+         <a href="{{ route('products.sample') }}" class="btn btn-secondary">
+            📥 Tải file mẫu
+        </a>
+        <button type="submit" class="btn btn-primary">Upload & Import</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 {{-- JS AJAX --}}
