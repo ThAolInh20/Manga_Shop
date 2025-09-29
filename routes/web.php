@@ -64,10 +64,16 @@ Route::middleware(['role:0,1'])->group(function () {
    
         
         Route::resource('categories', CategoryController::class)->middleware(['role:0']);
-        Route::resource('products', ProductController::class);
+       
+        Route::resource('products', ProductController::class)->except('show');
         // Route::get('products/import',[ProductController::class,'import'])->name('products.import');
         Route::get('products/{product}/import', [ProductController::class, 'import'])->name('products.import');
-    // Lưu thông tin nhập kho
+      
+        //này import nhiều sản phẩm
+        Route::post('/products/import', [ProductController::class, 'importFile'])->name('products.importFile');
+        Route::get('/products/sample-file', [ProductController::class, 'sample'])->name('products.sample');
+       
+        // Lưu thông tin nhập kho
         Route::post('products/{product}/import', [ProductController::class, 'importStore'])->name('products.import.store');
         Route::get('/suppliers/chart', [ChartController::class, 'chartForSuppliers'])->name('suppliers.chart');
          
