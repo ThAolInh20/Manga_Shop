@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use Carbon\Carbon;
 use App\Models\Product;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;   
+use Illuminate\Http\JsonResponse;
 
 
 class ChartController extends Controller
@@ -196,9 +198,6 @@ class ChartController extends Controller
     ]);
 }
 
-
-
-
      
     public function productPieChart(Request $request)
 {
@@ -250,4 +249,59 @@ public function chartForSuppliers(Request $request)
     // Lần đầu vào page -> render blade
     return view('admin.suppliers.chart');
 }
+ public function ChartForAccount(): JsonResponse
+    {
+        $users = Account::all();
+
+        $totalUsers = $users->count();
+
+        // Giới tính
+        $genderCounts = [
+            'male'   => $users->filter(fn($u) => strtolower($u->gender) === 'male')->count(),
+            'female' => $users->filter(fn($u) => strtolower($u->gender) === 'female')->count(),
+            'other'  => $users->filter(fn($u) => !in_array(strtolower($u->gender), ['male','female']))->count(),
+        ];
+
+        // Đang hoạt động
+        $activeUsers = $users->where('is_active', 1)->count();
+
+        // Phân bổ độ tuổi
+        $ageDistribution = [
+            '10-17' =>0 ,
+            '18-24' => 0,
+            '25-34' => 0,
+            '35-44' => 0,
+            '45+'   => 0,
+        ];
+
+        foreach ($users as $user) {
+            if (!$user->birth) continue;
+
+            $age = Carbon::parse($user->birth)->age;
+            if($age >= 10 && $age <= 17) $ageDistribution['10-17']++;
+            elseif ($age >= 18 && $age <= 24) $ageDistribution['18-24']++;
+            elseif ($age >= 25 && $age <= 34) $ageDistribution['25-34']++;
+            elseif ($age >= 35 && $age <= 44) $ageDistribution['35-44']++;
+            elseif ($age >= 45) $ageDistribution['45+']++;
+        }
+
+        // Series user đăng ký theo tháng (12 tháng gần nhất)
+        $labels = [];
+        $registerSeries = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $labels[] = Carbon::create()->month($i)->format('M');
+            $registerSeries[] = $users->filter(function ($u) use ($i) {
+                return Carbon::parse($u->created_at)->month == $i;
+            })->count();
+        }
+
+        return response()->json([
+            'total_users'    => $totalUsers,
+            'gender_counts'  => $genderCounts,
+            'active_users'   => $activeUsers,
+            'age_distribution' => $ageDistribution,
+            'register_series'  => $registerSeries,
+            'labels'           => $labels,
+        ]);
+    }
 }

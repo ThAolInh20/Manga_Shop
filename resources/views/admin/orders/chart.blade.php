@@ -6,11 +6,11 @@
     <!-- Các button -->
     <div class="row mb-3">
         <div class="col-md-12">
-            <button class="btn btn-outline-secondary me-2 active-btn" onclick="setActive(this); loadOrderData('week')">Tuần này</button>
+            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('week')">Tuần này</button>
             <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('lastWeek')">Tuần trước</button>
             <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('month')">Tháng này</button>
             <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('lastMonth')">Tháng trước</button>
-            <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('year')">Năm nay</button>
+            <button class="btn btn-outline-secondary me-2  active-btn" onclick="setActive(this); loadOrderData('year')">Năm nay</button>
             <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('lastYear')">Năm trước</button>
             <!-- <button class="btn btn-outline-secondary me-2" onclick="setActive(this); loadOrderData('all')">Tất cả</button> -->
         </div>
@@ -214,6 +214,9 @@ function loadOrderData(type) {
             // ẩn overlay
             document.getElementById("orderChartEmpty").classList.add("d-none");
             document.getElementById("statusChartEmpty").classList.add("d-none");
+             ["orderChartEmpty", "statusChartEmpty", "revenueChartEmpty"].forEach(id => {
+                document.getElementById(id).classList.add("d-none");
+            });
         });
 }
 
@@ -246,7 +249,7 @@ function setActive(button) {
 }
 
 initOrderCharts();
-loadOrderData('week');
+loadOrderData('year');
 </script>
 <style>
     .active-btn {

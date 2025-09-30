@@ -95,6 +95,8 @@ Route::middleware(['role:0,1'])->group(function () {
         Route::prefix('/api/chart')->group(function () {
             Route::get('/orders', [ChartController::class, 'chartForOrder'])->name('admin.chart.orders');
             Route::get('/productbuy', [ChartController::class, 'productPieChart'])->name('admin.chart.products.pie');
+            Route::get('/chartAccount', [ChartController::class, 'ChartForAccount'])->name('admin.chart.accounts');
+        
         });
 
         Route::get('/website-custom/edit', [WebsiteCustomController::class, 'edit'])->name('website_custom.edit')->middleware(['role:0']);;
