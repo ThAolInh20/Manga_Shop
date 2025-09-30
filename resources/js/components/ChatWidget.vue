@@ -19,19 +19,6 @@
              :class="msg.sender">
           {{ msg.text }}
         </div>
-         <!-- Gợi ý lựa chọn -->
-        <div v-if="showChoices" class="choices">
-          <button @click="handleChoice('Tìm hiểu về trang web MangaShop')">
-            📖 Tìm hiểu về trang web
-          </button>
-          <button @click="handleChoice('Tôi muốn kiểm tra đơn hàng')">
-            📦 Kiểm tra đơn hàng
-          </button>
-          <button @click="handleChoice('Tôi muốn tìm sản phẩm')">
-            🔎 Tìm sản phẩm
-          </button>
-        </div>
-    
       </div>
 
       <div class="chat-footer">
@@ -60,19 +47,46 @@ export default {
     toggleChat() {
       this.isOpen = !this.isOpen;
     },
-    sendMessage() {
+    async sendMessage() {
       if (!this.newMessage.trim()) return;
-      // Thêm message user
-      this.messages.push({ text: this.newMessage, sender: "user" });
 
-      // Giả lập bot trả lời
-      setTimeout(() => {
-        this.messages.push({ text: "Mình đang phân tích và sẽ gợi ý cho bạn 📚", sender: "bot" });
-      }, 800);
+      // Lấy tin nhắn user
+      const userMessage = this.newMessage;
 
+      // Push tin nhắn user vào khung chat
+      this.messages.push({ text: userMessage, sender: "user" });
       this.newMessage = "";
-    },
-  },
+
+      try {
+        // Gọi Ollama API
+        const response = await fetch("http://localhost:11434/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "llama3.1", // đổi thành model bạn đang chạy
+            messages: [
+              { role: "system", content: "Bạn là AI tư vấn sản phẩm manga." },
+              ...this.messages.map(msg => ({
+                role: msg.sender === "user" ? "user" : "assistant",
+                content: msg.text
+              }))
+            ],
+            stream: false
+          })
+        });
+
+        const data = await response.json();
+        const aiReply = data.message?.content || "⚠️ Không có phản hồi từ AI.";
+
+        // Push tin nhắn AI vào khung chat
+        this.messages.push({ text: aiReply, sender: "bot" });
+
+      } catch (error) {
+        console.error(error);
+        this.messages.push({ text: "⚠️ Không kết nối được Ollama.", sender: "bot" });
+      }
+    }
+  }
 };
 </script>
 

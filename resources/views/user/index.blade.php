@@ -25,7 +25,7 @@
         Từ những bộ <strong>shounen đầy nhiệt huyết</strong>, <strong>shoujo ngọt ngào</strong> cho đến 
         <strong>seinen sâu lắng</strong> – tất cả đều đang chờ bạn tại MangaShop! 💫
       </p>
-      <a href="{{ route('user.products.list') }}" class="btn btn-danger btn-lg rounded-pill">
+      <a href="{{ route('user.products.list') }}" class="btn btn-primary btn-lg rounded-pill">
         📚 Bắt đầu hành trình mua sắm
       </a>
     </div>

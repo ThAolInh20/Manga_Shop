@@ -213,5 +213,26 @@ Route::put('/order/checkout/{orderId}', [OrderController::class, 'updateUserOrde
 Route::get('/order/{order}/payos-return', [PayOSController::class, 'return'])->name('payos.return');
 route::get('/order/{order}/payos-cancel', [PayOSController::class, 'cancel'])->name('payos.cancel');
 
+Route::prefix('policy')->group(function () {
+    // Trang điều khoản sử dụng
+    Route::get('/terms', function () {
+        return view('user.policy.term');
+    })->name('policy.terms');
+
+    // Trang phương thức thanh toán
+    Route::get('/payment', function () {
+        return view('user.policy.payment');
+    })->name('policy.payment');
+
+    // Trang chính sách bảo mật
+    Route::get('/privacy', function () {
+        return view('user.policy.privacy');
+    })->name('policy.privacy');
+
+    Route::get('/return', function () {
+        return view('user.policy.return');
+    })->name('policy.return');
+});
+
 
 
