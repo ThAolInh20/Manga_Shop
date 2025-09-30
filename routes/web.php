@@ -27,6 +27,7 @@ use App\Exports\OrdersExport;
 use App\Models\Account;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use App\Http\Controllers\ChatAIController;
 
 // User login
 Route::get('login', [AccountAuthController::class, 'showUserLoginForm'])->name('login');
@@ -118,23 +119,15 @@ Route::prefix('api')->group(function () {
      Route::get('/user/profi', [AccountController::class, 'show2']);
     Route::put('/user/profi/{id}', [AccountController::class, 'update2']);
     Route::put('/user/deactivate', [AccountController::class, 'deactivate']);
-
     Route::get('/notifications', [NotificationController::class, 'index']);
-
-
-    
-
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);;
-    
     Route::get('/boloc', [ProductController::class, 'filterField']);
     route::get('/products', [ProductController::class, 'getAllProducts']);
     Route::get('/products/{id}/related', [ProductController::class, 'related'])->name('products.related');
     Route::get('/suggest-products', [WishlistController::class, 'suggestProducts']);
-    
     route::get('/categories', [CategoryController::class, 'listCategories']);
-
     Route::post('/cart', [CartController::class, 'add']);
     Route::put('/cart/{productId}', [CartController::class, 'update']);
     Route::delete('/cart/{productId}', [CartController::class, 'remove']);
@@ -152,9 +145,7 @@ Route::prefix('api')->group(function () {
     Route::post('/order/momo-dev/confirm', [OrderController::class, 'momoDevConfirm']);
     Route::post('/order/{order}/apply-voucher', [OrderController::class, 'applyVoucher'])->name('order.apply-voucher');
    
-   
     Route::get('/orders/stats', [OrderController::class, 'countStatus']);
-
 
     Route::post('/order/payos/create', [PayOSController::class, 'create']);
     Route::post('/order/payos/webhook', [PayOSController::class, 'webhook']);
@@ -192,6 +183,9 @@ Route::prefix('api')->group(function () {
     Route::get('/wards/{districtId}', function ($districtId, GHNService $ghn) {
         return response()->json($ghn->getWards((int)$districtId));
     });
+
+    Route::post('/chat-ai/handle', [ChatAIController::class, 'handle'])->name('chat.ai.handle');
+    Route::post('/chat-ai/smart-choose', [ChatAIController::class, 'smartChoose'])->name('chat.ai.smartchoose');
 
 
 });

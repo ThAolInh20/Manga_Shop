@@ -28,11 +28,14 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <!-- Helpers -->
   <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
-  <!-- <meta name="csrf-token" content="{{ csrf_token() }}"> -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
 
 </head>
-<body id="app"> 
+<body > 
+  <div id="app">
+
+ 
 
   <!-- Navbar -->
   @include('user.partials.navbar')
@@ -51,7 +54,7 @@
 
   <!-- Footer -->
   @include('user.partials.footer')
-
+ </div>
   <!-- Core JS -->
   <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
   <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>

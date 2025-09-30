@@ -20,7 +20,7 @@ class ChartController extends Controller
     //     biểu đồ có thông tin số lượng đơn theo cột,
     //     ở dưới bảng tổng số lượng total_price, tổng số đơn hàng
     //   }
- public function chartForOrder(Request $request)
+public function chartForOrder(Request $request)
 {
     $type = $request->query('type', 'week');
 
@@ -93,83 +93,93 @@ class ChartController extends Controller
         'canceled' => 5,
     ];
 
-    // Loop dữ liệu theo granularity
     if ($granularity === 'day') {
-        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-            $labels[] = $date->format('d/m');
+     for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+        $labels[] = $date->format('d/m');
 
-            // doanh thu trong ngày
-            $dailyRevenue = Order::where('order_status', 3)
-                ->whereDate('created_at', $date)
-                ->sum('total_price');
-            $revenueSeries[] = $dailyRevenue;
+        $dailyRevenue = Order::where('order_status', 3)
+            ->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()])
+            ->sum('total_price');
+        $revenueSeries[] = $dailyRevenue;
 
-            foreach ($series as $key => &$arr) {
-                $count = Order::where('order_status', $statusMap[$key])
-                    ->whereDate('created_at', $date)
-                    ->count();
+        foreach ($series as $key => &$arr) {
+            $count = Order::where('order_status', $statusMap[$key])
+                ->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()])
+                ->count();
+            $arr[] = $count;
 
-                $arr[] = $count;
-
-                if ($statusMap[$key] == 3) {
-                    $totalOrders += $count;
-                    $totalRevenue += $dailyRevenue;
-                }
+            if ($statusMap[$key] == 3) {
+                $totalOrders += $count;
             }
         }
-    } elseif ($granularity === 'week') {
-        $days = $startDate->diffInDays($endDate) + 1;
-        for ($i = 0; $i < $days; $i += 7) {
-            $from = $startDate->copy()->addDays($i);
-            $to   = $from->copy()->addDays(6);
-            if ($to->gt($endDate)) $to = $endDate;
 
-            $labels[] = $from->format('d/m') . ' - ' . $to->format('d/m');
+        $totalRevenue += $dailyRevenue;
+         // ======= LOG DEBUG =======
+        Log::info('Chart Day Debug', [
+            'date' => $date->format('Y-m-d'),
+            'dailyRevenue' => $dailyRevenue,
+            'totalOrders' => $totalOrders,
+            'totalRevenue' => $totalRevenue,
+            'series_counts' => array_map(fn($s) => end($s), $series) // số lượng đơn mỗi status của ngày này
+        ]);
+    }
+} elseif ($granularity === 'week') {
+$current = $startDate->copy();
+while ($current->lte($endDate)) {
+    $weekStart = $current->copy()->startOfDay();
+    $weekEnd = $current->copy()->addDays(6)->endOfDay();
+    if ($weekEnd->gt($endDate)) $weekEnd = $endDate->copy()->endOfDay();
 
-            $weeklyRevenue = Order::where('order_status', 3)
-                ->whereBetween('created_at', [$from, $to])
-                ->sum('total_price');
-            $revenueSeries[] = $weeklyRevenue;
+    $labels[] = $weekStart->format('d/m') . ' - ' . $weekEnd->format('d/m');
 
-            foreach ($series as $key => &$arr) {
-                $count = Order::where('order_status', $statusMap[$key])
-                    ->whereBetween('created_at', [$from, $to])
-                    ->count();
+    // doanh thu completed
+    $weeklyRevenue = Order::where('order_status', 3)
+        ->whereBetween('created_at', [$weekStart, $weekEnd])
+        ->sum('total_price');
+    $revenueSeries[] = $weeklyRevenue;
 
-                $arr[] = $count;
+    foreach ($series as $key => &$arr) {
+        $count = Order::where('order_status', $statusMap[$key])
+            ->whereBetween('created_at', [$weekStart, $weekEnd])
+            ->count();
+        $arr[] = $count;
 
-                if ($statusMap[$key] == 3) {
-                    $totalOrders += $count;
-                    $totalRevenue += $weeklyRevenue;
-                }
-            }
-        }
-    } elseif ($granularity === 'month') {
-        $year = $startDate->year;
-        for ($month = 1; $month <= 12; $month++) {
-            $labels[] = Carbon::createFromDate($year, $month, 1)->format('M');
-
-            $monthlyRevenue = Order::where('order_status', 3)
-                ->whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->sum('total_price');
-            $revenueSeries[] = $monthlyRevenue;
-
-            foreach ($series as $key => &$arr) {
-                $count = Order::where('order_status', $statusMap[$key])
-                    ->whereYear('created_at', $year)
-                    ->whereMonth('created_at', $month)
-                    ->count();
-
-                $arr[] = $count;
-
-                if ($statusMap[$key] == 3) {
-                    $totalOrders += $count;
-                    $totalRevenue += $monthlyRevenue;
-                }
-            }
+        if ($statusMap[$key] == 3) {
+            $totalOrders += $count;
         }
     }
+
+    $totalRevenue += $weeklyRevenue;
+    $current->addWeek();
+}
+} elseif ($granularity === 'month') {
+    $current = $startDate->copy();
+    while ($current->lte($endDate)) {
+        $labels[] = $current->format('M');
+
+        $monthlyRevenue = Order::where('order_status', 3)
+            ->whereYear('created_at', $current->year)
+            ->whereMonth('created_at', $current->month)
+            ->sum('total_price');
+        $revenueSeries[] = $monthlyRevenue;
+
+        foreach ($series as $key => &$arr) {
+            $count = Order::where('order_status', $statusMap[$key])
+                ->whereYear('created_at', $current->year)
+                ->whereMonth('created_at', $current->month)
+                ->count();
+
+            $arr[] = $count;
+
+            if ($statusMap[$key] == 3) {
+                $totalOrders += $count;
+                $totalRevenue += $monthlyRevenue;
+            }
+        }
+
+        $current->addMonth(); // nhảy sang tháng tiếp theo
+    }
+}
 
     // Tổng trạng thái
     $statusQuery = Order::query()->select('order_status', DB::raw('count(*) as total'))
@@ -194,7 +204,7 @@ class ChartController extends Controller
         'total_orders' => $totalOrders,
         'total_revenue' => $totalRevenue,
         'status_counts' => $statusSummary,
-        'no_data' => ($totalRevenue == 0)
+        'no_data' => false
     ]);
 }
 
