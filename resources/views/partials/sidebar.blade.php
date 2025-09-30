@@ -47,25 +47,12 @@
     </li>
 
     <!-- Quản lý sản phẩm -->
-    <li class="menu-item {{ request()->routeIs('products.*') ? 'active open' : '' }}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle">
+    <li class="menu-item {{ request()->routeIs('products.index') ? 'active' : '' }}">
+      <a href="{{ route('products.index') }}" class="menu-link ">
         <i class="menu-icon bx bx-package"></i>
         <div>Quản lý sản phẩm</div>
       </a>
-      <ul class="menu-sub">
-        <li class="menu-item {{ request()->routeIs('products.index') ? 'active' : '' }}">
-          <a href="{{ route('products.index') }}" class="menu-link">
-            <i class="bx bx-list-ul"></i>
-            <div>Danh sách sản phẩm</div>
-          </a>
-        </li>
-        <li class="menu-item {{ request()->routeIs('products.create') ? 'active' : '' }}">
-          <a href="{{ route('products.create') }}" class="menu-link">
-            <i class="bx bx-plus-circle"></i>
-            <div>Thêm sản phẩm</div>
-          </a>
-        </li>
-      </ul>
+    
     </li>
 
     @if(Auth::user()->role == 0)
@@ -86,25 +73,12 @@
       </li>
 
       <!-- Quản lý tài khoản -->
-      <li class="menu-item {{ request()->routeIs('accounts.*') ? 'active open' : '' }}">
-        <a href="javascript:void(0);" class="menu-link menu-toggle">
+      <li class="menu-item {{ request()->routeIs('accounts.index') ? 'active open' : '' }}">
+        <a href="{{ route('accounts.index') }}" class="menu-link ">
           <i class="menu-icon bx bx-user"></i>
           <div>Quản lý tài khoản</div>
         </a>
-        <ul class="menu-sub">
-          <li class="menu-item {{ request()->routeIs('accounts.index') ? 'active' : '' }}">
-            <a href="{{ route('accounts.index') }}" class="menu-link">
-              <i class="bx bx-list-ul"></i>
-              <div>Danh sách tài khoản</div>
-            </a>
-          </li>
-          <li class="menu-item {{ request()->routeIs('accounts.create') ? 'active' : '' }}">
-            <a href="{{ route('accounts.create') }}" class="menu-link">
-              <i class="bx bx-plus-circle"></i>
-              <div>Thêm tài khoản</div>
-            </a>
-          </li>
-        </ul>
+        
       </li>
 
       <!-- Cấu hình website -->

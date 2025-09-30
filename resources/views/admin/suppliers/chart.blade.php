@@ -1,6 +1,6 @@
 
 <div class="container card">
-    <h2 class="mb-3">Biểu đồ Nhà cung cấp</h2>
+    <h2 class="mb-3">Thống kê cung cấp</h2>
 
     <!-- Bộ lọc -->
     <div class="mb-3">
