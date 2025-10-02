@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-
+<div id="print-area">
 <div class="row g-3"> <!-- g-3 = khoảng cách giữa các col -->
     <!-- Bên trái -->
     <div class="col-md-6">
@@ -106,8 +106,89 @@
     </div>
 </div>
 </div>
+</div>
+<button onclick="window.print()">🖨 In / Lưu PDF</button>
+ <!-- <button onclick="downloadPDF()">📥 Xuất PDF</button> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 
 
+<style>
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-family: DejaVu Sans, sans-serif;
+    font-size: 12pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ẩn tất cả ngoài vùng in */
+  body * {
+    visibility: hidden;
+  }
+  #print-area, #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ẩn riêng những thứ không cần */
+  .navbar,
+  .no-print,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Giữ lại button lọc */
+  .filter-btn {
+    display: inline-block !important;
+    visibility: visible !important;
+    border: 1px solid #333 !important;
+    padding: 4px 8px !important;
+    font-size: 11pt !important;
+  }
+
+  /* Card in gọn */
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+
+  /* Bảng rõ ràng */
+  table {
+    border-collapse: collapse;
+    width: 100% !important;
+  }
+  th, td {
+    border: 1px solid #000 !important;
+    padding: 6px;
+  }
+  th {
+    background: #f3f4f6 !important;
+  }
+
+  /* Chart fit gọn */
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Nếu muốn chart mỗi trang riêng */
+  .chart {
+    page-break-before: always;
+  }
+}
+
+</style>
 
 @endsection
