@@ -63,7 +63,7 @@
                 👋 Xin chào, <strong>{{ Auth::user()->name }}</strong>
               </h6>
             </li>
-            <li><a class="dropdown-item" href="{{ route('user.profi') }}" title="Thông tin cá nhân"><i class="bx bx-user me-2"></i> Hồ sơ cá nhân</a></li>
+            <li><a class="dropdown-item" href="{{ route('user.profi') }}" title="Thông tin cá nhân"><i class="bx bx-user me-2"></i> Thông tin cá nhân</a></li>
             <li><a class="dropdown-item" href="{{ route('user.order.list') }}" title="Danh sách đơn hàng"><i class="bx bx-shopping-bag me-2"></i> Đơn hàng của tôi</a></li>
           @endauth
           <li><a class="dropdown-item" href="{{ route('user.wishlist.list') }}" title="Sách yêu thích"><i class="bx bx-heart me-2"></i> Danh sách yêu thích</a></li>

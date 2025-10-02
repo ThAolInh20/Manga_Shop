@@ -93,6 +93,7 @@
                     <label>Ngôn ngữ</label>
                     <input type="text" name="language" class="form-control" value="">
                 </div>
+
                
 
 
@@ -123,6 +124,11 @@
             <label>Ảnh phụ</label>
             <input type="file" name="images_sup[]" class="form-control" multiple accept="image/*" onchange="previewSup(this)">
             <div id="preview-sup" class="d-flex flex-wrap mt-2"></div>
+        </div>
+       <div class="mb-3">
+            <label>Mô tả</label>
+            <textarea name="detail" rows="4" class="form-control"></textarea>
+           
         </div>
 
         <button type="submit" class="btn btn-success">Lưu</button>

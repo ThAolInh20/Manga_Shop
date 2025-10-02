@@ -3,6 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
+
 <div class="row g-3"> <!-- g-3 = khoảng cách giữa các col -->
     <!-- Bên trái -->
     <div class="col-md-6">
@@ -105,6 +106,7 @@
     </div>
 </div>
 </div>
+
 
 
 
