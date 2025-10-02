@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
 use App\Exports\ProductsSampleExport;
+use Illuminate\Support\Facades\DB;
 
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -327,10 +328,16 @@ class ProductController extends Controller
         }
 
         // Lấy giá trị duy nhất dùng Eloquent
+        // $values = Product::query()
+        //  ->whereNotNull($field)
+        //     ->distinct()
+        //     ->pluck($field);
         $values = Product::query()
-         ->whereNotNull($field)
-            ->distinct()
-            ->pluck($field);
+    ->select($field, DB::raw('COUNT(*) as total'))
+    ->whereNotNull($field)
+    ->groupBy($field)
+    ->orderByDesc('total') // sắp xếp giảm dần theo số lượng
+    ->pluck($field);
 
       
         return response()->json($values);

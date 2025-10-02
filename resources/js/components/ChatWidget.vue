@@ -39,13 +39,22 @@ export default {
       ],
     };
   },
+  mounted() {
+    // Load tin nhắn từ localStorage khi mở lại trang
+    const saved = localStorage.getItem("chatMessages");
+    if (saved) {
+      this.messages = JSON.parse(saved);
+    }
+  },
   methods: {
-    toggleChat() { this.isOpen = !this.isOpen; },
-    
+    toggleChat() { 
+      this.isOpen = !this.isOpen; 
+    },
+
     scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.chatBody;
-        container.scrollTop = container.scrollHeight;
+        if (container) container.scrollTop = container.scrollHeight;
       });
     },
 
@@ -81,16 +90,20 @@ export default {
         this.messages.push({ text: "⚠️ Không kết nối được server.", sender: "bot" });
         this.scrollToBottom();
       }
+
+      // 🔹 Lưu lại lịch sử chat
+      localStorage.setItem("chatMessages", JSON.stringify(this.messages));
     },
 
     async clearHistory() {
-      // Reset messages về mặc định
       this.messages = [
         { text: "Xin chào 👋, bạn muốn mình gợi ý truyện gì không?", sender: "bot" }
       ];
       this.scrollToBottom();
 
-      // Gửi thông báo xóa lịch sử tới backend (nếu muốn)
+      // Xóa localStorage luôn
+      localStorage.removeItem("chatMessages");
+
       try {
         await fetch("/api/chat-ai/handle", {
           method: "POST",
