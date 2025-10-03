@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('product_suppliers', function (Blueprint $table) {
-            
+        Schema::table('website_customs', function (Blueprint $table) {
+            $table->json('sub_banners')->nullable()->after('banner_main');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('product_suppliers', function (Blueprint $table) {
-           
+        Schema::table('website_customs', function (Blueprint $table) {
+            $table->json('sub_banners')->nullable()->after('banner_main');
         });
     }
 };

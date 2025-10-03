@@ -268,30 +268,34 @@ class ProductController extends Controller
     }
     
 
-    // Lấy danh sách ảnh phụ hiện tại
-    $supImages = $product->images_sup ? json_decode($product->images_sup, true) : [];
+    // Lấy danh sách ảnh phụ hiện tại từ DB
+$supImages = $product->images_sup ? json_decode($product->images_sup, true) : [];
 
-    // Nếu có request xoá ảnh phụ
-    if ($request->has('remove_images_sup')) {
-        foreach ($request->remove_images_sup as $img) {
-            if (($key = array_search($img, $supImages)) !== false) {
-                unset($supImages[$key]);
-                if (Storage::disk('public')->exists($img)) {
-                    Storage::disk('public')->delete($img);
-                }
+// === B1: Xóa ảnh cũ nếu có yêu cầu ===
+if ($request->filled('remove_images_sup')) {
+    foreach ($request->remove_images_sup as $img) {
+        if (($key = array_search($img, $supImages)) !== false) {
+            unset($supImages[$key]);
+
+            // Xóa file vật lý luôn
+            if (Storage::disk('public')->exists($img)) {
+                Storage::disk('public')->delete($img);
             }
         }
     }
+    // Re-index lại mảng sau khi unset
+    $supImages = array_values($supImages);
+}
 
-    // Nếu có upload thêm ảnh phụ mới
+    // === B2: Thêm ảnh mới nếu có upload ===
     if ($request->hasFile('images_sup')) {
         foreach ($request->file('images_sup') as $file) {
             $supImages[] = $file->store('products', 'public');
         }
     }
 
-    // Lưu lại danh sách ảnh phụ
-    $validated['images_sup'] = json_encode(array_values($supImages));
+    // === B3: Lưu vào validated để update DB ===
+    $validated['images_sup'] = json_encode($supImages);
 
     // Update sản phẩm
     $product->update($validated);

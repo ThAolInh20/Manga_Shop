@@ -3,38 +3,70 @@
 @section('title', 'Trang chủ - MangaShop')
 
 @section('content')
- <!-- Alerts nổi lên dưới navbar -->
-  <div id="alerts-container" 
-       class="position-fixed top-0 end-0 mt-5 me-3"
-       style="z-index: 2000; max-width: 400px;">
-    @if (session('status'))
-      <div class="alert alert-success alert-dismissible fade show shadow" role="alert">
-        {{ session('status') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    @endif
-  
+<!-- Alerts nổi lên dưới navbar -->
+<div id="alerts-container" 
+     class="position-fixed top-0 end-0 mt-5 me-3"
+     style="z-index: 2000; max-width: 400px;">
+  @if (session('status'))
+    <div class="alert alert-success alert-dismissible fade show shadow" role="alert">
+      {{ session('status') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  @endif
 </div>
-<div class="row">
-  <div class="col-lg-12 mb-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-body text-center">
-      <h4 class="card-title mb-3">🎉 Chào mừng đến với <strong>MangaShop</strong></h4>
-      <p class="text-muted">
-        Khám phá <em>thế giới manga bất tận</em> với hàng ngàn tựa truyện hot nhất từ Nhật Bản.  
-        Từ những bộ <strong>shounen đầy nhiệt huyết</strong>, <strong>shoujo ngọt ngào</strong> cho đến 
-        <strong>seinen sâu lắng</strong> – tất cả đều đang chờ bạn tại MangaShop! 💫
-      </p>
-      <a href="{{ route('user.products.list') }}" class="btn btn-primary btn-lg rounded-pill">
-        📚 Bắt đầu hành trình mua sắm
-      </a>
+
+<!-- Banner -->
+<div class="row mb-4">
+  <!-- Cột trái: Banner chính -->
+  <div class="col-lg-8 mb-3 mb-lg-0">
+    <div class="card shadow-sm border-0 h-100">
+      <img src="{{ asset('storage/banner/main_banner.png') }}" 
+           alt="Main Banner" 
+           class="img-fluid rounded h-100 w-100"
+           style="object-fit: cover;">
     </div>
   </div>
-</div>
-      
 
+  <!-- Cột phải: 2 banner phụ -->
+  <div class="col-lg-4 d-flex flex-column gap-3">
+    <div class="card shadow-sm border-0 flex-fill">
+      <img src="{{ asset('storage/banner/sub/sub_banner_0.png') }}" 
+           alt="Sub Banner 1" 
+           class="img-fluid rounded h-100 w-100"
+           style="object-fit: contain;">
+    </div>
+    <div id="subBannerCarousel" class="carousel slide card shadow-sm border-0 flex-fill" data-bs-ride="carousel">
+  <div class="carousel-inner">
+@php
+  $subBanners = json_decode($websiteConfig->sub_banners ?? '[]', true);
+@endphp
+    @foreach ($subBanners as $i => $sb)
+  <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
+    <img src="{{ asset('storage/' . $sb) }}" 
+         alt="Sub Banner {{ $i + 1 }}" 
+         class="d-block w-100 rounded"
+         style="height: 200px; object-fit: cover; object-position: center;">
+  </div>
+@endforeach
+  </div>
+
+  <!-- Nút mũi tên -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#subBannerCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Trước</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#subBannerCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Sau</span>
+  </button>
 </div>
- <suggest-products></suggest-products>  
+  </div>
+</div>
+
+
+<!-- Sản phẩm gợi ý -->
+<suggest-products></suggest-products>  
+
 <script>
   setTimeout(() => {
     const alertEl = document.querySelector('#alerts-container .alert');
@@ -44,5 +76,4 @@
     }
   }, 3000);
 </script>
-
 @endsection

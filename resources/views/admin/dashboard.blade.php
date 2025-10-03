@@ -107,7 +107,9 @@
 </div>
 </div>
 </div>
-<button onclick="window.print()">🖨 In / Lưu PDF</button>
+<button onclick="window.print()" class="btn btn-primary">
+    🖨 In / Lưu PDF
+</button>
  <!-- <button onclick="downloadPDF()">📥 Xuất PDF</button> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -188,7 +190,25 @@
     page-break-before: always;
   }
 }
-
+.btn-print {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+.btn-print:hover {
+    background: linear-gradient(135deg, #4338ca, #4f46e5);
+    transform: translateY(-2px);
+}
+.btn-print:active {
+    transform: scale(0.96);
+}
 </style>
 
 @endsection
