@@ -74,7 +74,7 @@
         <div class="col-md-2">
             <input type="date" name="order_date" class="form-control">
         </div>
-        <div class="col-md-1">
+        <div class="col-md-1 d-none" >
             <select id="per-page" class="form-select">
                 <option value="10" {{ request()->get('per_page') == 10 ? 'selected' : '' }}>10/trang</option>
                 <option value="20" {{ request()->get('per_page') == 20 ? 'selected' : '' }}>20/trang</option>

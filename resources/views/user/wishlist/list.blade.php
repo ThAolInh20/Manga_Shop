@@ -4,6 +4,6 @@
 @section('content')
 
 <wishlist-product></wishlist-product>
-<suggest-products></suggest-products>  
+<!-- <suggest-products></suggest-products>   -->
 
 @endsection
