@@ -1,7 +1,8 @@
+
 <table class="table table-bordered" id="orders-table">
-    <div class="mb-2">
-        Tổng số: {{ $orders->total() }} đơn
-    </div>
+   <div id="pagination-links">
+    {{ $orders->appends(request()->query())->links('pagination::bootstrap-5') }}
+</div>
     <thead>
         <tr>
             <th>
@@ -24,6 +25,10 @@
                     Trạng thái
                 </a>
             </th>
+            <th>
+                Thanh toán
+            </th>
+
             <th>
                 <a href="#" class="sort-link" data-field="created_at" data-order="{{ request('sort_field') === 'created_at' && request('sort_order') === 'asc' ? 'desc' : 'asc' }}">
                     Ngày đặt
@@ -48,6 +53,19 @@
             <td><a href="{{ route('accounts.show', $order->account ??0 ) }}">{{  $order->account->name ?? '' }}</a></td>
             <td>{{ number_format($order->total_price, 0, ',', '.') }}đ</td>
             <td class="status-cell"></td>
+            <td>
+               @if($order->order_status == 0)
+                    <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                @else
+                    @if($order->payment_status == 0)
+                        <span class="badge bg-secondary">COD</span>
+                    @else 
+                        <span class="badge bg-success">Online</span>
+                    @endif
+                @endif
+
+                
+            </td>
             <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
             <td><a href="{{ route('accounts.show',$order->updatedBy??0) }}">{{ $order->updatedBy->name??'' }}</a>
             </td>
@@ -61,6 +79,4 @@
     </tbody>
 </table>
 
-<div id="pagination-links">
-    {{ $orders->appends(request()->query())->links('pagination::bootstrap-5') }}
-</div>
+
