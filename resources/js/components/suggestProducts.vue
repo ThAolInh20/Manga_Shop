@@ -1,6 +1,6 @@
 <template>
   
-  <div class="card p-3 mb-4 mt-3 shadow-sm ">
+  <div class="card p-3 mb-4 mt-3 shadow-sm product-hot-section">
     <h4 class="mb-3">📖 Sản phẩm hot</h4>
     <div v-if="loading" class="text-center my-5">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
@@ -313,5 +313,11 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.product-hot-section {
+  background: url('/storage/banner/main_banner2.png') no-repeat center center;
+  background-size: cover;   /* ảnh luôn phủ full */
+  border-radius: 0.5rem;
+  color: #fff; /* chữ nổi bật hơn */
 }
 </style>

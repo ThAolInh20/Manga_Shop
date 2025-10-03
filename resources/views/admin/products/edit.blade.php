@@ -178,7 +178,7 @@
                     @endforeach
                 </div>
             @endif
-
+            <div id="remove-images-container"></div>
             <input type="file" name="images_sup[]" class="form-control @error('images_sup') is-invalid @enderror" multiple accept="image/*" onchange="previewSup(this)">
             @error('images_sup')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -253,11 +253,11 @@ function previewSup(input) {
     });
 }
 function removeSupImage(button, filename) {
-    // Xoá khỏi giao diện
+    // Xoá ảnh khỏi giao diện
     button.parentElement.remove();
 
-    // Nếu cần xoá luôn trong DB thì thêm 1 input hidden
-    let container = document.getElementById('preview-sup');
+    // Thêm input hidden vào form
+    let container = document.getElementById('remove-images-container');
     let input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'remove_images_sup[]';
