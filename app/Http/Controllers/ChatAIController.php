@@ -5,55 +5,77 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\Product;
+use App\Models\Product; // Giả sử model Product đã tồn tại
 
 class ChatAIController extends Controller
 {
+    /**
+     * Xử lý tin nhắn chat từ người dùng, tích hợp dữ liệu sản phẩm.
+     */
     public function handle(Request $request)
     {
         $userMessage = $request->input('message');
         Log::info("ChatAI handle() - userMessage: $userMessage");
 
-        // === Lưu lịch sử chat trong session ===
+        // === 1. Lấy lịch sử chat và chuyển đổi sang cấu trúc Contents ===
         $chatHistory = $request->session()->get('chat_history', []);
-        $chatHistory[] = ['sender'=>'user','text'=>$userMessage];
+        
+        $contents = [];
+        // Chuyển đổi lịch sử chat sang định dạng Gemini API
+        foreach ($chatHistory as $m) {
+            $role = $m['sender'] === 'user' ? 'user' : 'model';
+            $contents[] = [
+                'role' => $role,
+                'parts' => [['text' => $m['text']]]
+            ];
+        }
 
-        // Giới hạn lịch sử chat chỉ 10 tin nhắn cuối
-        if(count($chatHistory) > 10) $chatHistory = array_slice($chatHistory, -10);
-        $request->session()->put('chat_history', $chatHistory);
-
-        // === Lấy top product bán chạy ===
+        // === 2. Lấy dữ liệu sản phẩm (RAG Data) ===
         $products = Product::orderBy('quantity_buy', 'desc')->take(10)->get();
         $productText = $this->formatProducts($products);
 
-        // === Format lịch sử chat rút gọn ===
-        $historyText = "";
-        foreach($chatHistory as $m){
-            $sender = $m['sender'] === 'user' ? "Người dùng" : "Trợ lý";
-            $historyText .= "$sender: {$m['text']}\n";
-        }
+        // === 3. Chuẩn bị System Instruction (Vai trò và Dữ liệu tĩnh) ===
+        // Nội dung này sẽ được sử dụng để tạo tin nhắn ngữ cảnh (primer)
+        $systemInstructionText = <<<INSTRUCTION
+Bạn là trợ lý thông minh và chuyên nghiệp (KHÔNG sử dụng emoji) cho shop manga. 
+Phong cách giao tiếp: Nhiệt tình, sử dụng từ ngữ tôn trọng (dùng "bạn" / "chúng tôi"), luôn bắt đầu câu trả lời bằng lời chào hoặc xác nhận yêu cầu.
+Nhiệm vụ:
+1. Trả lời các câu hỏi về sản phẩm dựa trên Dữ liệu RAG được cung cấp (top 10 sản phẩm bán chạy).
+2. Duy trì ngữ cảnh hội thoại dựa trên lịch sử chat.
+3. Tuyệt đối không tiết lộ thông tin nội bộ (như số lượng mua, giá trị sale tuyệt đối).
+4. Luôn gợi ý mua hàng một cách nhẹ nhàng.
 
-        // === Tạo prompt ngắn gọn ===
-        $prompt = <<<PROMPT
-Bạn là trợ lý thông minh cho shop manga.
-Dưới đây là lịch sử trò chuyện gần đây:
-$historyText
-Danh sách sản phẩm hiện có (không để lộ số lượng):
+Dưới đây là danh sách 10 sản phẩm bán chạy nhất hiện có của shop:
 $productText
+INSTRUCTION;
+        
+        // === 4. Gắn System Instruction vào đầu Contents (Primer Message) ===
+        $primerMessage = [
+            'role' => 'user', 
+            'parts' => [['text' => $systemInstructionText]]
+        ];
+        
+        // Chèn Primer Message vào đầu mảng contents
+        array_unshift($contents, $primerMessage);
 
-Người dùng vừa hỏi: "$userMessage"
-Hãy trả lời thân thiện, tự nhiên, gợi ý sản phẩm dựa trên danh sách hiện có hoặc lịch sử trò chuyện.
-PROMPT;
+        // Thêm nội dung của lượt chat hiện tại vào Contents
+        $contents[] = ['role' => 'user', 'parts' => [['text' => $userMessage]]];
 
         try {
-            $aiReply = $this->callAI($prompt);
+            // Gọi hàm API (không truyền systemInstruction riêng nữa)
+            $aiReply = $this->callAIGemini($contents);
         } catch (\Throwable $e) {
-            Log::error("ChatAI handle - Lỗi khi gọi AI: ".$e->getMessage());
-            $aiReply = "⚠️ Có lỗi xảy ra, vui lòng thử lại sau.";
+            Log::error("ChatAI handle - Lỗi khi gọi AI: " . $e->getMessage());
+            $aiReply = "⚠️ Có lỗi xảy ra trong quá trình gọi AI, vui lòng thử lại sau.";
         }
 
-        // Thêm câu trả lời bot vào lịch sử
-        $chatHistory[] = ['sender'=>'bot','text'=>$aiReply];
+        // === 5. Lưu lịch sử chat (cho session) ===
+        $chatHistory[] = ['sender' => 'user', 'text' => $userMessage];
+        $chatHistory[] = ['sender' => 'bot', 'text' => $aiReply];
+        
+        // Loại bỏ Primer Message (chỉ dùng cho API call, không lưu vào session)
+        if (count($chatHistory) > 10) $chatHistory = array_slice($chatHistory, -10);
+        
         $request->session()->put('chat_history', $chatHistory);
 
         return response()->json([
@@ -62,6 +84,9 @@ PROMPT;
         ]);
     }
 
+    /**
+     * Định dạng dữ liệu sản phẩm thành chuỗi văn bản cho AI.
+     */
     protected function formatProducts($products)
     {
         $items = [];
@@ -77,23 +102,50 @@ PROMPT;
         return implode("\n", $items);
     }
 
-    protected function callAI($prompt)
+    /**
+     * Hàm gọi API chính đến Gemini. Đảm bảo cấu trúc JSON đúng.
+     */
+    protected function callAIGemini($contents)
     {
-        $response = Http::timeout(120)->post("http://localhost:11434/api/generate", [
-            'model' => 'llama3.1',
-            'prompt'=> $prompt,
-            'stream'=> false,
-            'max_tokens'=> 300 // hạn chế token trả về
-        ]);
+        $apiKey = env('GEMINI_API_KEY');
+        // Sử dụng v1 endpoint mới nhất
+        $url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=$apiKey";
 
-        $text = $response->json('response');
-        return $text ?: "⚠️ Không có phản hồi từ AI.";
+        $data = [
+            // Đã gỡ bỏ 'systemInstruction' để tránh lỗi 400
+            'contents' => $contents,
+            
+            // generationConfig được dùng thay cho 'config' cũ
+            'generationConfig' => [
+                'maxOutputTokens' => 300, 
+            ],
+        ];
+
+        try {
+            $response = Http::timeout(120)->post($url, $data);
+            
+            if ($response->failed()) {
+                Log::error("Gemini API Error: " . $response->body()); 
+                throw new \Exception("Lỗi API Gemini: " . $response->body());
+            }
+
+            $jsonResponse = $response->json();
+            $text = $jsonResponse['candidates'][0]['content']['parts'][0]['text'] ?? "⚠️ Không có phản hồi từ AI.";
+
+            return $text;
+
+        } catch (\Throwable $e) {
+            Log::error("ChatAI callAIGemini - Lỗi: ".$e->getMessage());
+            throw new \Exception("Lỗi kết nối hoặc xử lý API.");
+        }
     }
 
-    // === Hàm xóa lịch sử chat ===
+    /**
+     * Xóa lịch sử chat.
+     */
     public function clearHistory(Request $request)
     {
         $request->session()->forget('chat_history');
-        return response()->json(['message'=>"Đã xóa lịch sử trò chuyện."]);
+        return response()->json(['message' => "Đã xóa lịch sử trò chuyện."]);
     }
 }

@@ -43,6 +43,9 @@ return [
         'token' => env('GHN_TOKEN'),
         'shop_id' => env('GHN_SHOP_ID'),
         'my_address_id'=>env('MY_ADDRESS_ID')
+    ],
+    'gemeni'=>[
+        'key' => env('GEMINI_API_KEY'),
     ]
 
 ];

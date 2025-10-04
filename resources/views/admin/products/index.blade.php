@@ -86,10 +86,7 @@
     {{-- Table --}}
     <div id="product-container">
         <table class="table table-bordered table-striped">
-             {{-- Pagination --}}
-        <div id="pagination-links">
-            {{ $products->links('pagination::bootstrap-5') }}
-        </div>
+            
             <thead class="table-dark">
                 <tr>
                     <th><a href="#" class="sort" data-sort="id">ID</a></th>
@@ -127,6 +124,10 @@
     @endforelse
 </tbody>
         </table>
+         {{-- Pagination --}}
+        <div id="pagination-links">
+            {{ $products->links('pagination::bootstrap-5') }}
+        </div>
 
        
     </div>
