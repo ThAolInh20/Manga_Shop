@@ -1,8 +1,6 @@
 
 <table class="table table-bordered" id="orders-table">
-   <div id="pagination-links">
-    {{ $orders->appends(request()->query())->links('pagination::bootstrap-5') }}
-</div>
+ 
     <thead>
         <tr>
             <th>
@@ -78,5 +76,8 @@
         @endforelse
     </tbody>
 </table>
+  <div id="pagination-links">
+    {{ $orders->appends(request()->query())->links('pagination::bootstrap-5') }}
+</div>
 
 

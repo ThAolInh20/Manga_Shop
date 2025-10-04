@@ -1,5 +1,5 @@
 <div class="container mt-4 card mb-4">
-    <h2>📊 Thống kê tài khoản</h2>
+    <h2>Thống kê tài khoản</h2>
 
     <div class="row">
         {{-- Tổng quan --}}

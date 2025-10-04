@@ -48,10 +48,7 @@
     {{-- Table --}}
     <div id="account-container" class="table-responsive">
         <table class="table table-bordered table-striped align-middle text-center">
-            {{-- Pagination --}}
-        <div id="pagination-links" class="">
-            {{ $accounts->links('pagination::bootstrap-5') }}
-        </div>
+          
             <thead class="table-dark">
                 <tr>
                     <th><a href="#" class="sort text-white" data-sort="id">ID</a></th>
@@ -109,7 +106,10 @@
                 @endforelse
             </tbody>
         </table>
-
+  {{-- Pagination --}}
+        <div id="pagination-links" class="">
+            {{ $accounts->links('pagination::bootstrap-5') }}
+        </div>
         
     </div>
 </div>
