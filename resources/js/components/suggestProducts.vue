@@ -1,7 +1,7 @@
 <template>
   
   <div class="card p-3 mb-4 mt-3 shadow-sm product-hot-section">
-    <h4 class="mb-3">📖 Sản phẩm hot</h4>
+    <h4 class="mb-3 blink-text">🔥 Sản phẩm bán chạy 🔥</h4>
     <div v-if="loading" class="text-center my-5">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
       <span class="visually-hidden">Đang tải...</span>
@@ -316,6 +316,21 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.blink-text {
+  text-align: center;
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: red;
+  animation: blinkColor 1s infinite;
+}
+
+@keyframes blinkColor {
+  0%, 100% { color: red; }
+  50% { color: black; }
 }
 .product-hot-section {
   background: url('/storage/banner/main_banner2.png') no-repeat center center;
