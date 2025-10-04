@@ -109,7 +109,7 @@ INSTRUCTION;
     {
         $apiKey = env('GEMINI_API_KEY');
         // Sử dụng v1 endpoint mới nhất
-        $url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=$apiKey";
+        $url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent";
 
         $data = [
             // Đã gỡ bỏ 'systemInstruction' để tránh lỗi 400
@@ -122,7 +122,10 @@ INSTRUCTION;
         ];
 
         try {
-            $response = Http::timeout(120)->post($url, $data);
+           $response = Http::withHeaders([
+                'Authorization' => "Bearer {$apiKey}",
+                'Content-Type' => 'application/json',
+            ])->timeout(120)->post($url, $data);
             
             if ($response->failed()) {
                 Log::error("Gemini API Error: " . $response->body()); 
