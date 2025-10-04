@@ -174,7 +174,9 @@ import { eventBus } from '../eventBus'
 const products = ref([])
 const page = ref(1)
 const lastPage = ref(1)
-const perPage = ref(12)
+
+const perPage = ref(12) //này là sản phẩm trên 1 trang
+
 const minPriceInput = ref('')
 const maxPriceInput = ref('')
 const sortBy = ref('name')

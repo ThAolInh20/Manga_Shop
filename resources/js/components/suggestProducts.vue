@@ -106,8 +106,11 @@ import { eventBus } from '../eventBus'
 
 const products = ref([])
 const page = ref(1)
-const perPage = 6
+
+const perPage = 6 //số sản phẩm 1 page
+
 const loading = ref(false)
+
 
 const isLoggedIn=ref(false)
 
