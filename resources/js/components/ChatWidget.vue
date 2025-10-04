@@ -143,7 +143,7 @@ export default {
 }
 .chat-body{flex:1; padding:10px; overflow-y:auto; background:#f5f5f5;}
 .chat-body .user{text-align:right; margin:5px 0; color:#333;}
-.chat-body .bot{text-align:left; margin:5px 0; color:#0084ff;}
+.chat-body .bot{text-align:left; margin:5px 0; color:#809bf4;}
 .chat-body .bot.typing{
   font-style: italic;
   color: #aaa;
