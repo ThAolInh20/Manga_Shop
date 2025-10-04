@@ -20,10 +20,12 @@
   <!-- Cột trái: Banner chính -->
   <div class="col-lg-8 mb-3 mb-lg-0">
     <div class="card shadow-sm border-0 h-100">
+      <a href="{{ route('user.products.list') }}">
       <img src="{{ asset('storage/banner/main_banner.png') }}" 
            alt="Main Banner" 
            class="img-fluid rounded h-100 w-100"
            style="object-fit: cover;">
+           </a>
     </div>
   </div>
 
