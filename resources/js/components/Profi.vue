@@ -37,7 +37,7 @@
 
           <!-- Giới tính -->
           <div class="mb-3">
-            <label class="form-label" >Giới tính</label>
+            <label class="form-label">Giới tính</label>
             <select name="gender" v-model="form.gender" class="form-select">
               <option value="">Chọn giới tính</option>
               <option value="male">Nam</option>
@@ -60,12 +60,25 @@
           <span v-if="!account.is_active" class="text-danger d-block mb-2">
             ⚠️ Tài khoản đang chờ xóa
           </span>
-          <button
-            :class="['btn', account.is_active ? 'btn-danger' : 'btn-success']"
-            @click="toggleAccount"
-          >
-            {{ account.is_active ? 'Yêu cầu hủy tài khoản' : 'Khôi phục tài khoản' }}
-          </button>
+
+          <!-- Hai nút riêng biệt -->
+          <div class="d-flex gap-2">
+            <button
+              v-if="account.is_active"
+              class="btn btn-danger"
+              @click="showDeactivateModal = true"
+            >
+              🧨 Yêu cầu hủy tài khoản
+            </button>
+
+            <button
+              v-else
+              class="btn btn-success"
+              @click="showReactivateModal = true"
+            >
+              🔄 Khôi phục tài khoản
+            </button>
+          </div>
         </div>
       </div>
 
@@ -81,19 +94,78 @@
         </div>
       </div>
     </div>
+
+    <!-- 🧩 Modal xác nhận HỦY tài khoản -->
+    <div
+      v-if="showDeactivateModal"
+      class="modal fade show d-block"
+      tabindex="-1"
+      style="background-color: rgba(0,0,0,0.5);"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">⚠️ Xác nhận hủy tài khoản</h5>
+            <button type="button" class="btn-close" @click="showDeactivateModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <p>🕒 Sau khi gửi yêu cầu, bạn sẽ được <strong>gọi xác nhận trong vòng 7 ngày</strong>.</p>
+            <p>❌ Khi tài khoản bị xóa:</p>
+            <ul>
+              <li>Tất cả đơn hàng của bạn sẽ bị xóa.</li>
+              <li>Mọi thông tin cá nhân sẽ bị xóa <strong>vĩnh viễn và không thể khôi phục</strong>.</li>
+            </ul>
+            <p class="text-secondary fst-italic">
+              💡 Bạn có thể <strong>hủy yêu cầu xóa tài khoản</strong> bất cứ khi nào bạn vẫn còn đăng nhập được vào trang web.
+            </p>
+            <p class="fw-bold text-danger mt-3">Bạn có chắc chắn muốn tiếp tục?</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="showDeactivateModal = false">Hủy</button>
+            <button class="btn btn-danger" @click="confirmDeactivate">Xác nhận hủy tài khoản</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🧩 Modal xác nhận KHÔI PHỤC tài khoản -->
+    <div
+      v-if="showReactivateModal"
+      class="modal fade show d-block"
+      tabindex="-1"
+      style="background-color: rgba(0,0,0,0.5);"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-success">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">🔄 Khôi phục tài khoản</h5>
+            <button type="button" class="btn-close" @click="showReactivateModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <p>Bạn có muốn <strong>hủy yêu cầu xóa</strong> và khôi phục lại tài khoản của mình không?</p>
+            <p class="text-secondary fst-italic">Sau khi khôi phục, bạn có thể sử dụng lại tài khoản như bình thường.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="showReactivateModal = false">Đóng</button>
+            <button class="btn btn-success" @click="confirmReactivate">Khôi phục</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from "vue"
 import axios from "axios"
-// import router from "@/router" // nếu dùng vue-router để redirect sau khi hủy
 
 const account = ref(null)
 const loading = ref(false)
 const error = ref(null)
 const success = ref(null)
+
+const showDeactivateModal = ref(false)
+const showReactivateModal = ref(false)
 
 const form = ref({
   name: "",
@@ -105,16 +177,16 @@ const form = ref({
 
 const fetchProfile = async () => {
   loading.value = true
-  error.value = null
   try {
     const res = await axios.get("/api/user/profi")
     account.value = res.data.account
-    
-    form.value.name = account.value.name || ""
-    form.value.phone = account.value.phone || ""
-    form.value.address = account.value.address || ""
-    form.value.gender = account.value.gender || ""
-    form.value.birth = account.value.birth || ""
+    form.value = {
+      name: account.value.name || "",
+      phone: account.value.phone || "",
+      address: account.value.address || "",
+      gender: account.value.gender || "",
+      birth: account.value.birth || ""
+    }
   } catch (err) {
     error.value = err.response?.data?.message || err.message
   } finally {
@@ -124,17 +196,7 @@ const fetchProfile = async () => {
 
 const updateProfile = async () => {
   try {
-    const payload = {
-      name: form.value.name,
-      phone: form.value.phone,
-      address: form.value.address,
-      gender: form.value.gender,
-      birth: form.value.birth
-    }
-    console.log('account',account.value.id)
-        console.log('account',payload)
-
-    await axios.put(`/api/user/profi/${account.value.id}`, payload)
+    await axios.put(`/api/user/profi/${account.value.id}`, form.value)
     success.value = "Cập nhật thông tin thành công!"
     fetchProfile()
   } catch (err) {
@@ -142,35 +204,31 @@ const updateProfile = async () => {
   }
 }
 
-// Nút hủy tài khoản
 const deactivateAccount = async () => {
-  if (!confirm("Bạn có chắc muốn hủy tài khoản?")) return
   try {
     await axios.put("/api/user/deactivate")
     success.value = "Tài khoản đã yêu cầu hủy thành công"
-    // Tùy chọn: logout và redirect về login
+    showDeactivateModal.value = false
     fetchProfile()
   } catch (err) {
     error.value = err.response?.data?.message || err.message
   }
 }
+
 const reactivateAccount = async () => {
-  if (!confirm("Bạn có chắc muốn khôi phục tài khoản?")) return
   try {
     await axios.put("/api/user/deactivate")
     success.value = "Tài khoản đã được khôi phục"
-    fetchProfile() // load lại dữ liệu
+    showReactivateModal.value = false
+    fetchProfile()
   } catch (err) {
     error.value = err.response?.data?.message || err.message
   }
 }
-const toggleAccount = () => {
-  if (account.value.is_active) {
-    deactivateAccount()
-  } else {
-    reactivateAccount()
-  }
-}
+
+const confirmDeactivate = () => deactivateAccount()
+const confirmReactivate = () => reactivateAccount()
+
 onMounted(() => {
   fetchProfile()
 })
@@ -180,5 +238,9 @@ onMounted(() => {
 .profile-container {
   max-width: 1200px;
   margin: auto;
+}
+
+.modal-content {
+  border-radius: 1rem;
 }
 </style>
