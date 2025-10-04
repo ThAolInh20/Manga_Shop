@@ -34,9 +34,17 @@ class CartController extends Controller
         $exists = Cart::where('account_id', $userId)
                       ->where('product_id', $productId)
                       ->first();
+        $product = Product::find($productId);
+        if ($product->quantity <= 0) {
+            return response()->json(['message' => 'Sản phẩm đã hết hàng']);
+        }
         
         if ($exists) {
-            $exists->quantity += 1; // tăng số lượng
+            if($exists->quantity + 1 > $product->quantity){
+                return response()->json(['message' => 'Sản phẩm đã quá số lượng']);
+            }
+            $exists->quantity += 1;
+            // tăng số lượng
             $exists->save();
 
             return response()->json([
