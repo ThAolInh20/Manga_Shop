@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Product; // Giả sử model Product đã tồn tại
+use App\Models\Voucher;
+use Illuminate\Support\Facades\Auth;
+
 
 class ChatAIController extends Controller
 {
@@ -31,22 +34,32 @@ class ChatAIController extends Controller
         }
 
         // === 2. Lấy dữ liệu sản phẩm (RAG Data) ===
-        $products = Product::orderBy('quantity_buy', 'desc')->take(10)->get();
+        $products = Product::orderBy('quantity_buy', 'desc')->take(25)->get();
+        $vouchers = Voucher::where('is_active', 1)
+            ->whereDate('date_end', '>=', now())
+            ->get();
         $productText = $this->formatProducts($products);
+       
+        
 
         // === 3. Chuẩn bị System Instruction (Vai trò và Dữ liệu tĩnh) ===
         // Nội dung này sẽ được sử dụng để tạo tin nhắn ngữ cảnh (primer)
         $systemInstructionText = <<<INSTRUCTION
-Bạn là trợ lý thông minh và chuyên nghiệp (KHÔNG sử dụng emoji) cho shop manga. 
-Phong cách giao tiếp: Nhiệt tình, sử dụng từ ngữ tôn trọng (dùng "bạn" / "chúng tôi"), luôn bắt đầu câu trả lời bằng lời chào hoặc xác nhận yêu cầu.
+Bạn là trợ lý thông minh (nữ - 18 tuổi) và chuyên nghiệp (KHÔNG sử dụng emoji) cho MangaShop. 
+Phong cách giao tiếp: Nhiệt tình, sử dụng từ ngữ tự nhiên phù hợp với người đam mê manga tại việt nam, bắt đầu câu trả lời bằng 1 cái gì đó vui tươi ngộ nghĩnh(đừng chào nhiều quá)
 Nhiệm vụ:
-1. Trả lời các câu hỏi về sản phẩm dựa trên Dữ liệu RAG được cung cấp (top 10 sản phẩm bán chạy).
+1. Trả lời các câu hỏi về sản phẩm dựa trên Dữ liệu RAG được cung cấp (top  sản phẩm bán chạy).
 2. Duy trì ngữ cảnh hội thoại dựa trên lịch sử chat.
 3. Tuyệt đối không tiết lộ thông tin nội bộ (như số lượng mua, giá trị sale tuyệt đối).
 4. Luôn gợi ý mua hàng một cách nhẹ nhàng.
 
-Dưới đây là danh sách 10 sản phẩm bán chạy nhất hiện có của shop:
+Dưới đây là danh sách sản phẩm bán chạy nhất hiện có của shop:
 $productText
+Và đây là danh sách voucher(mã giảm giá, mã khuyến mãi) của shop:
+$vouchers
+
+
+
 INSTRUCTION;
         
         // === 4. Gắn System Instruction vào đầu Contents (Primer Message) ===
@@ -106,42 +119,34 @@ INSTRUCTION;
      * Hàm gọi API chính đến Gemini. Đảm bảo cấu trúc JSON đúng.
      */
     protected function callAIGemini($contents)
-    {
-        $apiKey = env('GEMINI_API_KEY');
-        // Sử dụng v1 endpoint mới nhất
-        $url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent";
+{
+    $apiKey = config('services.gemeni.key');
+    // Dùng v1beta và model hỗ trợ
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}";
 
-        $data = [
-            // Đã gỡ bỏ 'systemInstruction' để tránh lỗi 400
-            'contents' => $contents,
-            
-            // generationConfig được dùng thay cho 'config' cũ
-            'generationConfig' => [
-                'maxOutputTokens' => 300, 
-            ],
-        ];
+    $data = [
+        'contents' => $contents,
+        'generationConfig' => [
+            'maxOutputTokens' => 300,
+        ],
+    ];
 
-        try {
-           $response = Http::withHeaders([
-                'Authorization' => "Bearer {$apiKey}",
-                'Content-Type' => 'application/json',
-            ])->timeout(120)->post($url, $data);
-            
-            if ($response->failed()) {
-                Log::error("Gemini API Error: " . $response->body()); 
-                throw new \Exception("Lỗi API Gemini: " . $response->body());
-            }
+    $response = Http::timeout(60)
+        ->withHeaders(['Content-Type' => 'application/json'])
+        ->post($url, $data);
 
-            $jsonResponse = $response->json();
-            $text = $jsonResponse['candidates'][0]['content']['parts'][0]['text'] ?? "⚠️ Không có phản hồi từ AI.";
-
-            return $text;
-
-        } catch (\Throwable $e) {
-            Log::error("ChatAI callAIGemini - Lỗi: ".$e->getMessage());
-            throw new \Exception("Lỗi kết nối hoặc xử lý API.");
-        }
+    if ($response->failed()) {
+        Log::error("Gemini API Error: " . $response->body());
+        throw new \Exception("Lỗi API Gemini: " . $response->body());
     }
+
+    $jsonResponse = $response->json();
+    $text = $jsonResponse['candidates'][0]['content']['parts'][0]['text'] 
+        ?? "⚠️ Không có phản hồi từ AI.";
+
+    return $text;
+}
+
 
     /**
      * Xóa lịch sử chat.
@@ -151,4 +156,58 @@ INSTRUCTION;
         $request->session()->forget('chat_history');
         return response()->json(['message' => "Đã xóa lịch sử trò chuyện."]);
     }
+    protected function formatVouchers($vouchers)
+    {
+        $items = [];
+
+        foreach ($vouchers as $v) {
+            $code = $v->code ?? 'Không có mã';
+            $sale = isset($v->sale) ? $v->sale . '%' : 'Không có giảm giá';
+        
+            $dateEnd = isset($v->date_end) ? date('d/m/Y', strtotime($v->date_end)) : 'Không có ngày hết hạn';
+            $maxDiscount = isset($v->max_discount) ? number_format($v->max_discount, 0, ',', '.') . '₫' : 'Không giới hạn';
+
+            $items[] = "🎟️ Mã: {$code} | Giảm: {$sale} | Tối đa: {$maxDiscount}  | Hạn dùng: {$dateEnd}";
+        }
+
+        return implode("\n", $items);
+    }
+    protected function formatOrders($orders)
+{
+    // Map trạng thái đơn hàng
+    $orderStatuses = [
+        0 => "🕓 Chờ khách xác nhận đơn",
+        1 => "📦 Đang xử lý",
+        2 => "🚚 Đang giao",
+        3 => "✅ Hoàn tất",
+        4 => "🔁 Đổi trả",
+        5 => "❌ Đã hủy",
+        6 => "💸 Hoàn tiền",
+    ];
+
+    // Map phương thức thanh toán
+    $paymentStatuses = [
+        0 => "Thanh toán khi nhận hàng (COD)",
+        1 => "Thanh toán online",
+    ];
+
+    $items = [];
+    foreach ($orders as $o) {
+        $orderDate = isset($o->order_date) ? date('d/m/Y', strtotime($o->order_date)) : 'Không rõ ngày đặt';
+        $deliverDate = isset($o->deliver_date) ? date('d/m/Y', strtotime($o->deliver_date)) : 'Chưa giao';
+
+        $status = $orderStatuses[$o->order_status] ?? 'Không rõ trạng thái';
+        $payment = $paymentStatuses[$o->payment_status] ?? 'Không rõ thanh toán';
+
+        $subtotal = isset($o->subtotal_price) ? number_format($o->subtotal_price, 0, ',', '.') . '₫' : '0₫';
+        $total = isset($o->total_price) ? number_format($o->total_price, 0, ',', '.') . '₫' : '0₫';
+
+        $voucher = $o->voucher_id ? "Có dùng voucher (ID: {$o->voucher_id})" : "Không dùng voucher";
+        $shipping = $o->shipping_id ? "Mã vận chuyển: {$o->shipping_id}" : "Chưa có vận chuyển";
+
+        $items[] = "Mã đơn: $o->id| Ngày đặt: $orderDate  | Trạng thái: $status | Thanh toán: $payment | Tổng: $total | Tạm tính: $subtotal ";
+    }
+
+    return implode("\n", $items);
+}
 }
