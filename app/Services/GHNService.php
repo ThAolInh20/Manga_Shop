@@ -10,12 +10,14 @@ class GHNService
     protected $token;
     protected $shopId;
     protected $baseUrl;
+    protected $myAddressId;
 
     public function __construct()
     {
         $this->token  = config('services.ghn.token');
         $this->shopId = config('services.ghn.shop_id');
         $this->baseUrl = 'https://online-gateway.ghn.vn/shiip/public-api';
+        $this->myAddressId = config('services.ghn.my_address_id');
     }
 
     public function getProvinces()
