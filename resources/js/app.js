@@ -3,7 +3,7 @@ import { createApp } from 'vue';
 
 // Import component
 import SuggestProducts from './components/suggestProducts.vue';
-import Message from './components/message.vue';
+import Message from './components/Message.vue';
 import FilterField from './components/FilterField.vue';
 import AllProducts from './components/AllProducts.vue';
 import CategoriesList from './components/CategoriesList.vue';
