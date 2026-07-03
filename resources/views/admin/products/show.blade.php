@@ -46,7 +46,7 @@
                 <p><strong>Ảnh phụ:</strong></p>
                 @if($product->images_sup)
                     <div class="d-flex flex-wrap">
-                        @foreach(json_decode($product->images_sup, true) as $sup)
+                        @foreach((json_decode($product->images_sup, true) ?: []) as $sup)
                             <img src="{{ asset('storage/'.$sup) }}" width="120" class="me-2 mb-2">
                         @endforeach
                     </div>

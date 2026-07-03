@@ -269,7 +269,7 @@ class ProductController extends Controller
     
 
     // Lấy danh sách ảnh phụ hiện tại từ DB
-$supImages = $product->images_sup ? json_decode($product->images_sup, true) : [];
+$supImages = $product->images_sup ? (json_decode($product->images_sup, true) ?: []) : [];
 
 // === B1: Xóa ảnh cũ nếu có yêu cầu ===
 if ($request->filled('remove_images_sup')) {
@@ -309,7 +309,7 @@ if ($request->filled('remove_images_sup')) {
     {
         if ($product->images) Storage::disk('public')->delete($product->images);
         if ($product->images_sup) {
-            foreach (json_decode($product->images_sup) as $oldFile) {
+            foreach ((json_decode($product->images_sup, true) ?: []) as $oldFile) {
                 Storage::disk('public')->delete($oldFile);
             }
         }

@@ -164,8 +164,11 @@
         <div class="mb-3">
             <label>Ảnh phụ</label><br>
             @if($product->images_sup)
+                @php
+                    $supImages = json_decode($product->images_sup, true) ?: [];
+                @endphp
                 <div class="d-flex flex-wrap mb-2">
-                    @foreach(json_decode($product->images_sup, true) as $sup)
+                    @foreach($supImages as $sup)
                         <div class="position-relative me-2 mb-2" style="width: 80px; height: 80px;">
                             <img src="{{ asset('storage/'.$sup) }}" 
                                  class="rounded border" 
